@@ -8,7 +8,7 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','specs/methodology/workflows.md')
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','specs/methodology/workflows.md','specs/methodology/model-selection.md')
 def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
@@ -41,6 +41,12 @@ def validate(root):
  workflows=read('specs/methodology/workflows.md')
  for token in ('Quick', 'Standard', 'Full', 'confirm', 'Brainstorming', 'Walking skeleton'):
   if token.lower() not in workflows.lower(): fail('orchestration',f'workflow missing {token}')
+ model_selection=read('specs/methodology/model-selection.md')
+ for token in ('efficient', 'balanced', 'advanced', 'reasoning', 'availability', 'user', 'verification'):
+  if token.lower() not in model_selection.lower(): fail('model-selection',f'model policy missing {token}')
+ orchestrator=read('.agents/skills/orchestrate/SKILL.md')
+ if 'specs/methodology/model-selection.md' not in orchestrator: fail('model-selection','orchestrator is not wired to the model policy')
+ if '(specs/methodology/model-selection.md)' not in agents: fail('model-selection','AGENTS.md missing model policy link')
  s=read('.agents/skills/init-project/SKILL.md')
  for token in ('specs/setup-progress.md','### Resume protocol','## Pending decisions','## Confirmed decisions','## Next action','awaiting-approval',*(f'### Stage {i} —' for i in range(1,8))):
   if token not in s: fail('resume',f'init-project missing {token}')
