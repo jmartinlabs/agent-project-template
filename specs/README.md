@@ -1,4 +1,6 @@
 # Document ownership and workflow
+
+For new work, see [adaptive Quick / Standard / Full workflows](methodology/workflows.md). These route the original Full-document lifecycle only when warranted; small changes need no mandatory feature documents.
 This is an uninitialized template. No product, stack or architecture has been approved.
 
 | Document | Owns | Created/updated by |
