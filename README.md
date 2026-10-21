@@ -14,7 +14,7 @@ Start by describing work in Codex Plan mode (such as `/plan` where available), o
 - Standard: `$task` for bounded features, brief plan and acceptance checks.
 - Full: existing `$init-project`, `$bootstrap`, `$roadmap`, `$spec`, `$dev`, using only necessary phases.
 
-[Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is optional and environment-dependent; scripts and CI remain the portable enforcement layer. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
+[Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is optional and environment-dependent; scripts and CI remain the portable enforcement layer. [Manual behavioral acceptance scenarios](specs/methodology/acceptance-scenarios.md) cover Quick, Standard, Full, escalation and resume. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
 
 ## Interactive initialization
 Type `$init-project` in Codex. It reads existing context, asks short rounds of questions
