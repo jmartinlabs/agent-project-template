@@ -20,7 +20,7 @@ with a two-digit number, approved decisions and a local documentation commit.
    history. Use Markdown checkboxes, e.g. `- [x] Recommended option — rationale` and
    `- [ ] Alternative — trade-off`. A checked recommendation is a proposal, not a user
    answer. Separately record confirmed answers and their approval source/date.
-3. Stop and wait for the user after each unanswered round. Do not invent answers.
+3. Stop and wait for the user after each unanswered round. Do not invent answers. Under orchestrated multi-epic work, return the exact unanswered decision to the coordinator, which may schedule other independent preparation or QA.
    Cover functional requirements, screens/interactions, data read/written, APIs/external
    dependencies, validation, errors and edge cases. Ask only unresolved questions.
 4. For visual applications append ASCII wireframes and obtain feedback before finalizing.
@@ -30,8 +30,8 @@ with a two-digit number, approved decisions and a local documentation commit.
    behavior when applicable, validation, exclusions and numbered acceptance checks.
    Every check says what to do and what result to expect; assign stable AC-01 style IDs.
 6. Request approval of the complete specification. Record it, review the diff, and commit
-   approved brainstorming/specification files only. Preserve unrelated user changes.
+   approved brainstorming/specification files only. Preserve unrelated user changes. Return approval evidence and dependency changes to the coordinator, which owns the shared epic board.
 ## Stop conditions
 Pause on unanswered questions, unapproved wireframes/specification or important conflicts.
 Preserve history and next action for resumption. Do not implement the feature. After the
-approved documentation commit, stop and explain how to continue with `$dev` and its ID.
+approved documentation commit, stop and return the spec ID and approval evidence. In an orchestrated run, the coordinator starts `$dev` when dependencies and authorizations allow, without another manual user command.
