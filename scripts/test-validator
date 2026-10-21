@@ -30,6 +30,18 @@ class ValidationTests(unittest.TestCase):
   (self.root/'ADOPT_EXISTING_PROJECT_PROMPT.md').unlink(); self.assertRule('structure')
  def test_adopt_skill_contract(self):
   self.change('.agents/skills/adopt-project/SKILL.md','AGENTS.md','OTHER.md'); self.assertRule('adoption')
+ def test_epic_contract_required(self):
+  (self.root/'specs/methodology/epic-orchestration.md').unlink(); self.assertRule('structure')
+ def test_epic_board_template_required(self):
+  (self.root/'templates/epic-board.md').unlink(); self.assertRule('structure')
+ def test_epic_role_required(self):
+  (self.root/'.agents/roles/implementation.md').unlink(); self.assertRule('structure')
+ def test_epic_coordinator_wiring(self):
+  self.change('.agents/skills/orchestrate/SKILL.md','specs/methodology/epic-orchestration.md','specs/methodology/other.md'); self.assertRule('epic-scheduling')
+ def test_epic_approval_gate(self):
+  self.change('specs/methodology/epic-orchestration.md','awaiting-approval','waiting'); self.assertRule('epic-scheduling')
+ def test_epic_board_deps(self):
+  self.change('templates/epic-board.md','Hard dependencies','Loose connections'); self.assertRule('epic-scheduling')
  def test_model_selection_structure(self):
   (self.root/'specs/methodology/model-selection.md').unlink(); self.assertRule('structure')
  def test_model_selection_policy(self):
