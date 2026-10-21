@@ -30,6 +30,12 @@ class ValidationTests(unittest.TestCase):
   (self.root/'ADOPT_EXISTING_PROJECT_PROMPT.md').unlink(); self.assertRule('structure')
  def test_adopt_skill_contract(self):
   self.change('.agents/skills/adopt-project/SKILL.md','AGENTS.md','OTHER.md'); self.assertRule('adoption')
+ def test_model_selection_structure(self):
+  (self.root/'specs/methodology/model-selection.md').unlink(); self.assertRule('structure')
+ def test_model_selection_policy(self):
+  self.change('specs/methodology/model-selection.md','balanced','neutral'); self.assertRule('model-selection')
+ def test_model_selection_wiring(self):
+  self.change('.agents/skills/orchestrate/SKILL.md','specs/methodology/model-selection.md','specs/methodology/other.md'); self.assertRule('model-selection')
  def test_workflow_contract(self):
   self.change('specs/methodology/workflows.md','Quick','Tiny'); self.assertRule('orchestration')
  def test_links(self):

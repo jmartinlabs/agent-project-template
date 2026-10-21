@@ -17,6 +17,10 @@ Risk matters more than code size. Auth, payments, production configuration, migr
 - Brainstorming is for unresolved requirements; preserve decisions and open questions. Do not force it for straightforward changes.
 - Walking skeleton is a real minimal end-to-end executable slice, not a planning interview. Use bootstrap only when initializing a project or validating a meaningful new architectural path.
 
+## Model and reasoning recommendation
+
+Alongside the initial Quick / Standard / Full proposal, use [Adaptive model selection](model-selection.md) to recommend a capability tier and reasoning effort tailored to the work and user preference. This is advisory, not a new approval step or automatic model switch. Do not assume Desktop and Web expose the same options. A model suggestion never replaces testing, review, or user confirmation of the workflow.
+
 ## Approval gates
 Require user confirmation for initial classification, material product/architecture choices, a new or materially revised roadmap, Full specifications and significant escalation of risk/scope. Ordinary code changes and tests inside the authorized scope do not need approval. Existing approved specs remain authoritative.
 

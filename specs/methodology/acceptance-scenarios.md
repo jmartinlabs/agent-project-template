@@ -24,3 +24,7 @@ Expected: read repository state and decisions, reuse approved specs and tests; d
 
 ## Scorecard
 For each trial record: environment/version; request; proposed class; user confirmed (Y/N); correct phase routing (Y/N); unnecessary docs (Y/N); tests run with commands/results; approval boundary respected (Y/N); bugs and next fixes. All six must be reviewed before declaring behavioral validation complete.
+
+## M1 — Model and reasoning advice
+Prompt: In a Codex client with unknown available models, plan a routine CAP endpoint under an efficiency-first preference, then consider a sensitive authentication change under quality-first preference.
+Expected: coordinator recommends a capability tier and reasoning level with a short rationale and explicitly marks exact model availability unverified. Stronger advice for higher risk, no claim of automatic model switching, no extra model confirmation gate, no reduction of tests. Where a client model menu is known, recommend only supported choices.
