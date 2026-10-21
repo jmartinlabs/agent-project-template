@@ -8,6 +8,7 @@ add its approved install, run and test commands after bootstrap.
 - Read [architecture](specs/guidelines/architecture.md), [UI](specs/guidelines/ui.md),
   [quality](specs/guidelines/quality.md), and [security](specs/guidelines/security.md).
 - For any development request, read [adaptive workflows](specs/methodology/workflows.md) and propose Quick / Standard / Full using `$orchestrate`; confirm the proposed level before implementation. In supported clients `/plan` is a planning mode, not a Skill invocation.
+- Adopt existing projects via [the copyable adoption prompt](ADOPT_EXISTING_PROJECT_PROMPT.md) and `$adopt-project`, preserving their code and prior decisions. Do not run `$init-project` on existing applications.
 - Start or resume project initialization with `$init-project`; persist stage transitions
   in `specs/setup-progress.md`. See [document ownership](specs/README.md).
 - Preserve existing work; stage only your own reviewed changes. Never commit secrets.
