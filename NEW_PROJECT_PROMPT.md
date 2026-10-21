@@ -34,17 +34,19 @@ If a new remote is needed, check available GitHub access, ask for intended owner
 visibility (recommend private), and obtain explicit authorization before creating or
 publishing it. Do not overwrite an existing remote or change its visibility.
 
-Read AGENTS.md and the available repository-local Skills. Start $init-project.
+Read AGENTS.md and the available repository-local Skills. Start $orchestrate in planning mode and propose Full for this new project; wait for my confirmation, then coordinate $init-project and the later phases.
 Guide me through purpose, target users, technology choices, architecture, the smallest
 walking skeleton, project guidelines and initial roadmap. Ask questions in short rounds,
 recommend options and explain important trade-offs without imposing a stack.
 Save progress in specs/setup-progress.md and confirmed decisions in the appropriate
 canonical guidelines, so another session can resume without this chat history.
 Do not invent requirements or implement unapproved features.
-Start by planning: show the initial setup plan and wait for approval of material decisions.
+Start by planning: show the classification and initial setup plan and wait for approval of material decisions.
 Use Codex Plan mode if available; otherwise provide the plan conversationally. Do not
-invent a CLI planning flag. After approvals, verify the walking skeleton and guide me
-to $spec for an epic and $dev for its approved specification.
+invent a CLI planning flag. After approvals, coordinate the walking skeleton and roadmap,
+then $spec and $dev for approved Full features, using only the phases needed.
+Ask for my approval of the roadmap and first Full specification;
+do not make me manually invoke each Skill.
 ```
 
 ## Skill invocation and resume

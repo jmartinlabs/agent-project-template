@@ -4,11 +4,11 @@ from pathlib import Path
 import re
 import sys
 from urllib.parse import unquote, urlsplit
-SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev')
+SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'task', 'tweak')
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator')
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','specs/methodology/workflows.md')
 def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
@@ -38,6 +38,9 @@ def validate(root):
   elif any(c in m[2] for c in (': ',' #','{','}','[',']')): fail('manifest',f'{name}: use plain scalar description')
   for h in ('## Inputs','## Outputs','## Procedure','## Stop conditions'):
    if h not in s: fail('contracts',f'{name}: missing {h}')
+ workflows=read('specs/methodology/workflows.md')
+ for token in ('Quick', 'Standard', 'Full', 'confirm', 'Brainstorming', 'Walking skeleton'):
+  if token.lower() not in workflows.lower(): fail('orchestration',f'workflow missing {token}')
  s=read('.agents/skills/init-project/SKILL.md')
  for token in ('specs/setup-progress.md','### Resume protocol','## Pending decisions','## Confirmed decisions','## Next action','awaiting-approval',*(f'### Stage {i} —' for i in range(1,8))):
   if token not in s: fail('resume',f'init-project missing {token}')
