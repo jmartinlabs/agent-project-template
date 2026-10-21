@@ -12,6 +12,7 @@ This is an uninitialized template. No product, stack or architecture has been ap
 | `guidelines/quality.md` | Commands, checks, review and Definition of Done | bootstrap / dev |
 | `guidelines/security.md` | Threats, safeguards and authorization boundaries | init-project / dev |
 | `roadmap.md` | Approved product outcomes and epic scope | roadmap |
+| `epic-board.md` | Optional multi-epic queue, blockers, dependencies and evidence links; never canonical approvals | orchestrate only |
 | `NN-slug-brainstorming.md` | Append-only questions and confirmed answers | spec |
 | `NN-slug-specification.md` | Approved behavior, contracts and acceptance checks | spec |
 | `NN-slug-progress.md` | Implementation tasks, evidence and next action | dev |

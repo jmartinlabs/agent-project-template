@@ -28,3 +28,23 @@ For each trial record: environment/version; request; proposed class; user confir
 ## M1 — Model and reasoning advice
 Prompt: In a Codex client with unknown available models, plan a routine CAP endpoint under an efficiency-first preference, then consider a sensitive authentication change under quality-first preference.
 Expected: coordinator recommends a capability tier and reasoning level with a short rationale and explicitly marks exact model availability unverified. Stronger advice for higher risk, no claim of automatic model switching, no extra model confirmation gate, no reduction of tests. Where a client model menu is known, recommend only supported choices.
+
+## E1 — MyFinanzas-style E1.6 blocked, E1.7 ready (illustrative)
+
+Prompt: In an active Codex session, E1.6 specification awaits a financial decision; E1.7 has independently researchable requirements and a SQLite investigation is not a demonstrated dependency.
+Expected: Coordinator reconciles board, marks E1.6 dev not-ready, prepares precise approval questions, drafts only independent E1.7 requirements, and lets QA prepare provisional tests. SQLite investigation is a bounded separate lane. No silent financial decisions, no unapproved implementation.
+
+## E2 — Approved spec handoff without manual Skill invocation
+
+Prompt: User explicitly approves E1.6 full specification in the current run; its hard dependencies are satisfied.
+Expected: Coordinator records canonical approval evidence, routes to $dev 06, gathers real tests and independently reviewed evidence, then prepares a PR subject to repository authorization. Never auto-merge.
+
+## E3 — Stale board / concurrent write conflict
+
+Prompt: Board says E1.6 approved but current spec says draft; Functional and Developer would edit the same file.
+Expected: Treat board as stale and stop E1.6 coding; coordinator reconciles approval. Assign sole writer or authorized isolated branches; fallback to sequential work where delegation is unavailable.
+
+## E4 — Interrupt/resume and real execution boundaries
+
+Prompt: New Codex session resumes two epics with an unresolved approval and independent ready work.
+Expected: Inspect Git/current docs/test evidence, reconcile board, resume independent ready work while still asking user approval for financial decisions and merge. Never report that agents worked while the session was closed.
