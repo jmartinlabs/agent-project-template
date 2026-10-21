@@ -19,6 +19,10 @@ Start by describing work in Codex Plan mode (such as `/plan` where available), o
 
 [Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is optional and environment-dependent; scripts and CI remain the portable enforcement layer. [Manual behavioral acceptance scenarios](specs/methodology/acceptance-scenarios.md) cover Quick, Standard, Full, escalation and resume. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
 
+## Adaptive model selection (v2.2)
+
+`$orchestrate` now suggests a **model capability tier and reasoning effort** alongside Quick / Standard / Full. See [model-selection guidelines](specs/methodology/model-selection.md). Default preference is **balanced**; the user can prioritize **efficiency** or **quality**. Exact names/effort settings depend on the available Codex client and model, and Skills do **not** change models automatically. Keep the current model when adequate and verify actual behavior through tests regardless of model.
+
 ## Adopt an existing project
 
 `$adopt-project` lives in [the Skill source](.agents/skills/adopt-project/SKILL.md). The old project initially cannot discover it by name. Use [ADOPT_EXISTING_PROJECT_PROMPT.md](ADOPT_EXISTING_PROJECT_PROMPT.md) once; it tells Codex to read the Skill from GitHub, analyze the existing code and propose a safe plan before installing project-local Skills. If remote access is unavailable, supply a local copy of the Skill.
@@ -62,6 +66,7 @@ ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
 .agents/skills/{adopt-project,orchestrate,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
+specs/methodology/model-selection.md advisory model and reasoning recommendations
 specs/guidelines/{architecture,ui,quality,security}.md
 templates/{brainstorming,specification,roadmap,progress,testplan}.md
 scripts/validate-template          standard-library checks
