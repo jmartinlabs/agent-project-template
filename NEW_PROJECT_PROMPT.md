@@ -43,7 +43,10 @@ canonical guidelines, so another session can resume without this chat history.
 Do not invent requirements or implement unapproved features.
 Start by planning: show the classification and initial setup plan and wait for approval of material decisions.
 Use Codex Plan mode if available; otherwise provide the plan conversationally. Do not
-invent a CLI planning flag. After approvals, coordinate the walking skeleton, roadmap, specification and implementation\nusing only the phases needed. Ask for my approval of the roadmap and first Full specification;\ndo not make me manually invoke each Skill.
+invent a CLI planning flag. After approvals, coordinate the walking skeleton and roadmap,
+then $spec and $dev for approved Full features, using only the phases needed.
+Ask for my approval of the roadmap and first Full specification;
+do not make me manually invoke each Skill.
 ```
 
 ## Skill invocation and resume
