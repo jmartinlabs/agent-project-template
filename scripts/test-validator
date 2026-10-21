@@ -22,6 +22,14 @@ class ValidationTests(unittest.TestCase):
   (self.root/'templates/progress.md').unlink(); self.assertRule('structure')
  def test_orchestrator_structure(self):
   (self.root/'.agents/skills/orchestrate/SKILL.md').unlink(); self.assertRule('structure')
+ def test_adopt_skill_structure(self):
+  (self.root/'.agents/skills/adopt-project/SKILL.md').unlink(); self.assertRule('structure')
+ def test_adopt_prompt_contract(self):
+  self.change('ADOPT_EXISTING_PROJECT_PROMPT.md','BEFORE modifying','AFTER modifying'); self.assertRule('adopt-prompt')
+ def test_adopt_prompt_missing(self):
+  (self.root/'ADOPT_EXISTING_PROJECT_PROMPT.md').unlink(); self.assertRule('structure')
+ def test_adopt_skill_contract(self):
+  self.change('.agents/skills/adopt-project/SKILL.md','AGENTS.md','OTHER.md'); self.assertRule('adoption')
  def test_workflow_contract(self):
   self.change('specs/methodology/workflows.md','Quick','Tiny'); self.assertRule('orchestration')
  def test_links(self):

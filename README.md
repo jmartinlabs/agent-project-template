@@ -2,9 +2,12 @@
 A reusable Codex development methodology for any project stack. This repository contains
 no application and makes no language, database, framework or hosting choice for you.
 
-**Start here: [copy the new project prompt](NEW_PROJECT_PROMPT.md).**
-Create an independent repository with GitHub **Use this template**, open it in Codex,
-and send the prompt. Confirm material decisions as the walkthrough proceeds.
+## Start here
+
+- **New project:** [copy the new-project prompt](NEW_PROJECT_PROMPT.md) and create an independent repository with GitHub **Use this template**.
+- **Existing project:** [copy the adoption prompt](ADOPT_EXISTING_PROJECT_PROMPT.md) into Codex while the old repository is open. The prompt retrieves and follows the `$adopt-project` Skill from this template, because it is **not yet installed** in that repository.
+
+Both paths require approval of important decisions before file changes.
 
 ## Adaptive agentic workflow (v2)
 
@@ -15,6 +18,12 @@ Start by describing work in Codex Plan mode (such as `/plan` where available), o
 - Full: existing `$init-project`, `$bootstrap`, `$roadmap`, `$spec`, `$dev`, using only necessary phases.
 
 [Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is optional and environment-dependent; scripts and CI remain the portable enforcement layer. [Manual behavioral acceptance scenarios](specs/methodology/acceptance-scenarios.md) cover Quick, Standard, Full, escalation and resume. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
+
+## Adopt an existing project
+
+`$adopt-project` lives in [the Skill source](.agents/skills/adopt-project/SKILL.md). The old project initially cannot discover it by name. Use [ADOPT_EXISTING_PROJECT_PROMPT.md](ADOPT_EXISTING_PROJECT_PROMPT.md) once; it tells Codex to read the Skill from GitHub, analyze the existing code and propose a safe plan before installing project-local Skills. If remote access is unavailable, supply a local copy of the Skill.
+
+Adoption preserves existing AGENTS.md, architecture, roadmap, specs, code and CI. It does not run a new-project bootstrap or assume the project is uninitialized. After successful adoption, `$orchestrate` is available in that project's Skills.
 
 ## Interactive initialization
 Type `$init-project` in Codex. It reads existing context, asks short rounds of questions
@@ -31,7 +40,7 @@ No previous chat history is required. Do not initialize an application in this t
 | 1 | Smallest tested end-to-end bootstrap | `$bootstrap` after decisions approved |
 | 2 | Document implemented context | Thin AGENTS and four guidelines |
 | 3 | Enforce checkable rules | Tests, linters, scripts and CI; positive/negative proofs |
-| 4 | Plan independently useful MVP epics | `$roadmap`; four epics unless approved otherwise |
+| 4 | Plan independently useful MVP epics | `$roadmap`; as many epics as justified and approved |
 | 5 | Brainstorm and approve one specification | Append-only questions and acceptance checks |
 | 6 | Reuse the specification process | `$spec 01` or `$spec feature name` |
 | 7 | Build verified increments | Progress, test plan and working commits |
@@ -48,8 +57,9 @@ See [document ownership](specs/README.md) and [Skills invocation](NEW_PROJECT_PR
 ## Repository map
 ```text
 AGENTS.md                         concise agent entry point
-NEW_PROJECT_PROMPT.md              self-contained new project prompt
-.agents/skills/{init-project,bootstrap,roadmap,spec,dev}/SKILL.md
+NEW_PROJECT_PROMPT.md              new-project prompt
+ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
+.agents/skills/{adopt-project,orchestrate,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
 specs/guidelines/{architecture,ui,quality,security}.md
