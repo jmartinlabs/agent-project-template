@@ -11,7 +11,7 @@ Read `AGENTS.md`, `specs/README.md`, existing state and applicable guidelines be
 Working increments, `specs/{nr}-{slug}-progress.md`, `specs/{nr}-{slug}-testplan.md`,
 verified acceptance evidence, relevant documentation updates and local commits.
 ## Procedure
-1. Locate the requested two-digit specification; ask if ambiguous. Read its approval,
+1. Locate the requested two-digit specification; ask if ambiguous. Confirm explicit recorded approval and satisfied hard dependencies before any code changes; never implement a draft spec. Read its approval,
    brainstorming, roadmap and applicable guidelines. Inspect code and Git status.
    Review acceptance checks and identify contradictions; stop on important conflicts.
 2. Start/resume progress and test plan using their templates. Create coherent tasks and
@@ -34,7 +34,7 @@ verified acceptance evidence, relevant documentation updates and local commits.
    deviations. Update progress/test results and documentation. Review own diff and staged
    files for regressions, secrets and unrelated changes, then commit each working increment.
 7. Finish only when every acceptance check passes with current evidence and required
-   regression checks pass. Summarize commands/results, commits, limitations and next action.
+   regression checks pass. Summarize commands/results, commits, limitations and next action. In orchestrated work hand verified candidate evidence to independent QA; the coordinator alone updates the board and proposes authorized PR actions.
 ## Stop conditions
 Never deploy to production, publish or perform destructive operations without explicit
 permission. Stop on important conflicts or missing required authorization. Record blockers;

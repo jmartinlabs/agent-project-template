@@ -8,7 +8,7 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','specs/methodology/workflows.md','specs/methodology/model-selection.md')
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','specs/methodology/workflows.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','templates/epic-board.md',*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review')))
 def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
@@ -47,6 +47,18 @@ def validate(root):
  orchestrator=read('.agents/skills/orchestrate/SKILL.md')
  if 'specs/methodology/model-selection.md' not in orchestrator: fail('model-selection','orchestrator is not wired to the model policy')
  if '(specs/methodology/model-selection.md)' not in agents: fail('model-selection','AGENTS.md missing model policy link')
+ epic=read('specs/methodology/epic-orchestration.md')
+ for token in ('single writer', 'awaiting-approval', 'hard dependencies', 'approved', 'independent', 'merge', 'active'):
+  if token.lower() not in epic.lower(): fail('epic-scheduling',f'epic contract missing {token}')
+ board=read('templates/epic-board.md')
+ for token in ('Hard dependencies', 'Spec status', 'Dev status', 'QA status', 'Next independent action', 'Last reconciled'):
+  if token.lower() not in board.lower(): fail('epic-scheduling',f'board missing {token}')
+ if 'specs/methodology/epic-orchestration.md' not in orchestrator: fail('epic-scheduling','coordinator not linked to epic scheduling')
+ if '(specs/methodology/epic-orchestration.md)' not in agents: fail('epic-scheduling','AGENTS.md missing epic scheduling link')
+ for role, tokens in {'functional':('approval','brainstorming'),'implementation':('approved','dependencies'),'qa-review':('independent','pass/fail')}.items():
+  text=read(f'.agents/roles/{role}.md').lower()
+  for token in tokens:
+   if token not in text: fail('epic-scheduling',f'role {role} missing {token}')
  s=read('.agents/skills/init-project/SKILL.md')
  for token in ('specs/setup-progress.md','### Resume protocol','## Pending decisions','## Confirmed decisions','## Next action','awaiting-approval',*(f'### Stage {i} —' for i in range(1,8))):
   if token not in s: fail('resume',f'init-project missing {token}')

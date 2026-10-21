@@ -23,6 +23,12 @@ Start by describing work in Codex Plan mode (such as `/plan` where available), o
 
 `$orchestrate` now suggests a **model capability tier and reasoning effort** alongside Quick / Standard / Full. See [model-selection guidelines](specs/methodology/model-selection.md). Default preference is **balanced**; the user can prioritize **efficiency** or **quality**. Exact names/effort settings depend on the available Codex client and model, and Skills do **not** change models automatically. Keep the current model when adequate and verify actual behavior through tests regardless of model.
 
+## Epic orchestration (v2.3)
+
+For multiple epics, [epic orchestration](specs/methodology/epic-orchestration.md) adds a dependency-aware scheduler, [epic board template](templates/epic-board.md) and [specialist role contracts](.agents/roles/README.md) for functional, implementation and QA tasks. Roles are task instructions, not guaranteed registered subagents.
+
+While E1.6 awaits a financial decision, the functional lane can draft independent E1.7 requirements and QA can prepare provisional tests. E1.6 implementation remains blocked until explicit approval. After approval, `$orchestrate` can route to `$dev` and QA inside the active run without asking you to invoke those Skills manually. Merges and consequential decisions always need your approval. No background continuation after the session closes.
+
 ## Adopt an existing project
 
 `$adopt-project` lives in [the Skill source](.agents/skills/adopt-project/SKILL.md). The old project initially cannot discover it by name. Use [ADOPT_EXISTING_PROJECT_PROMPT.md](ADOPT_EXISTING_PROJECT_PROMPT.md) once; it tells Codex to read the Skill from GitHub, analyze the existing code and propose a safe plan before installing project-local Skills. If remote access is unavailable, supply a local copy of the Skill.
@@ -67,6 +73,9 @@ ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
 specs/methodology/model-selection.md advisory model and reasoning recommendations
+specs/methodology/epic-orchestration.md dependency-aware epic scheduler
+templates/epic-board.md          optional epic coordination board
+.agents/roles/                   functional, implementation and QA roles
 specs/guidelines/{architecture,ui,quality,security}.md
 templates/{brainstorming,specification,roadmap,progress,testplan}.md
 scripts/validate-template          standard-library checks

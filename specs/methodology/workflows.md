@@ -24,6 +24,10 @@ Alongside the initial Quick / Standard / Full proposal, use [Adaptive model sele
 ## Approval gates
 Require user confirmation for initial classification, material product/architecture choices, a new or materially revised roadmap, Full specifications and significant escalation of risk/scope. Ordinary code changes and tests inside the authorized scope do not need approval. Existing approved specs remain authoritative.
 
+## Multi-epic scheduling
+
+Follow [epic orchestration](epic-orchestration.md) for several overlapping Full features. The coordinator keeps a dependency-aware board and selects the next independent ready work across functional, implementation and QA. One awaiting-approval spec blocks its own dev, not drafting a different independent spec. An approved spec may hand off to dev and then QA within the active authorized run. Do not claim agents continue between sessions or allow merges without explicit approval.
+
 ## Delegation and portability
 Skills are workflow descriptions, not separate agents. Prefer sequential execution when agent delegation is unavailable; multiagent is optional optimization. Scope each independent delegate with file ownership, expected checks and review requirements. No concurrent writes to the same files. Preserve implementation results in a way that supports Desktop and Web. Do not assume availability of local tools, hooks or credentials in cloud tasks.
 
