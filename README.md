@@ -6,6 +6,16 @@ no application and makes no language, database, framework or hosting choice for 
 Create an independent repository with GitHub **Use this template**, open it in Codex,
 and send the prompt. Confirm material decisions as the walkthrough proceeds.
 
+## Adaptive agentic workflow (v2)
+
+Start by describing work in Codex Plan mode (such as `/plan` where available), or invoke `$orchestrate` explicitly. Codex Plan mode does not itself invoke a Skill. The coordinator inspects repository context, proposes Quick / Standard / Full, and **waits for your confirmation** before implementing.
+
+- Quick: `$tweak` for small low-risk modifications, without mandatory spec files.
+- Standard: `$task` for bounded features, brief plan and acceptance checks.
+- Full: existing `$init-project`, `$bootstrap`, `$roadmap`, `$spec`, `$dev`, using only necessary phases.
+
+[Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is optional and environment-dependent; scripts and CI remain the portable enforcement layer. [Manual behavioral acceptance scenarios](specs/methodology/acceptance-scenarios.md) cover Quick, Standard, Full, escalation and resume. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
+
 ## Interactive initialization
 Type `$init-project` in Codex. It reads existing context, asks short rounds of questions
 and saves state in `specs/setup-progress.md`. The seven stages are identity → technology

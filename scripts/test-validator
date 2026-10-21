@@ -20,6 +20,10 @@ class ValidationTests(unittest.TestCase):
  def test_valid(self): self.assertEqual(validate(self.root),[])
  def test_structure(self):
   (self.root/'templates/progress.md').unlink(); self.assertRule('structure')
+ def test_orchestrator_structure(self):
+  (self.root/'.agents/skills/orchestrate/SKILL.md').unlink(); self.assertRule('structure')
+ def test_workflow_contract(self):
+  self.change('specs/methodology/workflows.md','Quick','Tiny'); self.assertRule('orchestration')
  def test_links(self):
   self.change('README.md','## Skills','[Broken](missing.md)\n## Skills'); self.assertRule('links')
  def test_agents(self):
