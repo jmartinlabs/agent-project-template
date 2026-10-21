@@ -13,7 +13,7 @@ Approved `specs/roadmap.md` based on `templates/roadmap.md`, committed locally.
 Read product context, architecture, applicable UI/quality guidelines and existing roadmap.
 Identify the main user experience. Interview in short rounds with recommendations; aim
 for no more than two rounds where practical. Preserve prior approved scope.
-Default to exactly four MVP epics unless the user explicitly approves a different count.
+Propose a small number of independently useful MVP epics based on actual scope (four may be a useful starting point, not a fixed requirement). Obtain user approval for the proposed number and boundaries.
 Epic 1 delivers the smallest functional version of the main user experience. Each epic
 must be independently useful and verifiable, not just an infrastructure layer.
 For each numbered epic document user capability, visible/otherwise observable outcome,
