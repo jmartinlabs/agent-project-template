@@ -47,7 +47,7 @@ def validate(root):
  s=read('NEW_PROJECT_PROMPT.md'); m=re.search(r'```text\n(.*?)\n```',s,re.S)
  tokens=('[PROJECT_NAME]','[SHORT_DESCRIPTION]','https://github.com/','independent','AGENTS.md','$init-project','specs/setup-progress.md','owner','visibility','authorization','planning','$spec','$dev')
  if not m or any(t.lower() not in m[1].lower() for t in tokens): fail('prompt','incomplete copyable prompt')
- adoption=read('ADOPT_EXISTING_PROJECT_PROMPT.md'); block=re.search(r'```text\\n(.*?)\\n```',adoption,re.S)
+ adoption=read('ADOPT_EXISTING_PROJECT_PROMPT.md'); block=re.search(r'```text\n(.*?)\n```',adoption,re.S)
  required_adoption=('github.com/josemartin2000/agent-project-template','adopt-project/SKILL.md','before modifying','approval','existing','do not','orchestrate')
  if not block or any(x.lower() not in block[1].lower() for x in required_adoption): fail('adopt-prompt','existing-project prompt incomplete')
  adopted=read('.agents/skills/adopt-project/SKILL.md')
