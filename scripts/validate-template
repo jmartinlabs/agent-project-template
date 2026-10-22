@@ -5,7 +5,7 @@ import json
 import re
 import sys
 from urllib.parse import unquote, urlsplit
-SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'task', 'tweak', 'adopt-project')
+SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'handoff', 'task', 'tweak', 'adopt-project')
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
@@ -57,6 +57,9 @@ def validate(root):
     fail('agent-evals',f'{filename}: invalid or incomplete evaluation fixture')
   except (ValueError,AttributeError,TypeError):
    fail('agent-evals',f'{filename}: invalid JSON')
+ handoff=read('.agents/skills/handoff/SKILL.md').lower()
+ for token in ('stop issuing new development', 'not controlled', 'unconfirmed', 'no auto-resume', 'git status', 'pass/fail/unrun', 'next session', 'quota exhaustion', 'never merge'):
+  if token not in handoff: fail('handoff',f'handoff missing {token}')
  if 'eval-agent-behavior' not in read('.github/workflows/validate.yml'):
   fail('agent-evals','CI must run agent eval scorer self-test')
  workflows=read('specs/methodology/workflows.md')

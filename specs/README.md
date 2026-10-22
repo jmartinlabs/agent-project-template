@@ -17,6 +17,7 @@ This is an uninitialized template. No product, stack or architecture has been ap
 | `NN-slug-specification.md` | Approved behavior, contracts and acceptance checks | spec |
 | `NN-slug-progress.md` | Implementation tasks, evidence and next action | dev |
 | `NN-slug-testplan.md` | Acceptance-to-verification mapping and current results | dev |
+| `session-handoff.md` | Optional latest shutdown checkpoint when no existing progress/board file fits; no automatic resume authority | handoff only |
 
 Use two-digit identifiers (01–99) and lowercase hyphenated slugs. Allocate the next
 unused number; never overwrite a document belonging to another feature. Beyond 99,
