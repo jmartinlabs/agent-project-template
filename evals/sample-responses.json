@@ -85,6 +85,26 @@
       "id": "approval-17",
       "decision": "continue",
       "target": "independent QA research"
+    },
+    {
+      "id": "efficiency-01",
+      "decision": "continue",
+      "target": "single implementation packet and QA handoff"
+    },
+    {
+      "id": "efficiency-02",
+      "decision": "block",
+      "target": "repeat unchanged investigation"
+    },
+    {
+      "id": "efficiency-03",
+      "decision": "block",
+      "target": "skip failing regression gate"
+    },
+    {
+      "id": "efficiency-04",
+      "decision": "continue",
+      "target": "incremental reconciliation"
     }
   ]
 }
