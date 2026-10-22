@@ -52,6 +52,10 @@ class ValidationTests(unittest.TestCase):
   (self.root/'docs/GUIA_VISUAL_ORQUESTACION.md').unlink(); self.assertRule('structure')
  def test_orchestrator_dynamic_wiring(self):
   self.change('.agents/skills/orchestrate/SKILL.md','specs/methodology/dynamic-agents.md','specs/methodology/other.md'); self.assertRule('dynamic-agents')
+ def test_mermaid_validator_script_required(self):
+  (self.root/'scripts/check-mermaid.mjs').unlink(); self.assertRule('structure')
+ def test_mermaid_ci_wiring(self):
+  self.change('.github/workflows/validate.yml','node scripts/check-mermaid.mjs','echo skipping-mermaid'); self.assertRule('ci')
  def test_visual_diagram_count(self):
   self.change('docs/GUIA_VISUAL_ORQUESTACION.md','```mermaid','```text'); self.assertRule('visual-guide')
  def test_work_packet_ownership(self):
