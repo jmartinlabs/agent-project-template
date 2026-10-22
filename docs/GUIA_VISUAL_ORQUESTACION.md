@@ -15,12 +15,12 @@ flowchart TB
     O --> F["Agente funcional #1: Spec E1.7"]
     O --> D["Agente developer #2: Dev E1.6 aprobada"]
     O --> I["Agente infraestructura #3: Docker / SQLite"]
-    O -. "si queda trabajo listo" .-> Q["Agente QA #4: revisión independiente"]
+    O -.->|si queda trabajo listo| Q["Agente QA #4: revisión independiente"]
     F --> O
     D --> O
     I --> O
     Q --> O
-    O -->|"solicita aprobación" U
+    O -->|solicita aprobación| U
 ```
 
 El gráfico muestra **cuatro ejemplos de tareas**, no cuatro agentes permanentemente ejecutándose. La recomendación inicial es uno a tres agentes activos y aumentar solo cuando compense y el entorno lo permita.
@@ -32,12 +32,12 @@ No se trata de tener tres agentes y buscarles trabajo, sino de encontrar trabajo
 ```mermaid
 flowchart TD
     A["Reconciliar roadmap, specs, Git, QA y tablero"] --> B{"¿Hay tareas listas y autorizadas?"}
-    B -- "No" --> Z["Registrar bloqueo y pedir decisión concreta"]
-    B -- "Sí" --> C{"¿Se pueden ejecutar independientemente?"}
-    C -- "No" --> S["Ejecutar secuencialmente"]
-    C -- "Sí" --> D{"¿Codex permite subagentes?"}
-    D -- "No / desconocido" --> S
-    D -- "Sí" --> E["Estimar beneficio, coste, colisiones y límite real"]
+    B -->|No| Z["Registrar bloqueo y pedir decisión concreta"]
+    B -->|Sí| C{"¿Se pueden ejecutar independientemente?"}
+    C -->|No| S["Ejecutar secuencialmente"]
+    C -->|Sí| D{"¿Codex permite subagentes?"}
+    D -->|No / desconocido| S
+    D -->|Sí| E["Estimar beneficio, coste, colisiones y límite real"]
     E --> F["Crear solo tareas delimitadas útiles"]
     F --> G["Recoger resultados, revisar pruebas y cerrar agentes"]
     S --> G
@@ -53,8 +53,8 @@ Ejemplo **ilustrativo**, no el estado verificado del repositorio MyFinanzas. E1.
 ```mermaid
 flowchart LR
     E16["E1.6: spec pendiente"] --> AP{"Aprobación del usuario"}
-    AP -- "pendiente" --> STOP["Dev E1.6 bloqueado"]
-    AP -- "aprobada" --> DEV["Dev E1.6"]
+    AP -->|pendiente| STOP["Dev E1.6 bloqueado"]
+    AP -->|aprobada| DEV["Dev E1.6"]
     DEV --> QA["QA y review E1.6"]
     E17["E1.7: requisitos independientes"] --> DRAFT["Brainstorming y borrador Spec 07"]
     DRAFT --> AP7{"Aprobación Spec 07"}
@@ -91,15 +91,15 @@ Cada paquete debe indicar **qué quiere conseguir, qué archivos puede escribir,
 flowchart TD
     A["Functional: brainstorming"] --> B["Spec propuesta"]
     B --> C{"Usuario aprueba spec"}
-    C -- "No / pendiente" --> D["Solo documentación y trabajo independiente"]
-    C -- "Sí" --> E["Developer: implementación"]
+    C -->|No / pendiente| D["Solo documentación y trabajo independiente"]
+    C -->|Sí| E["Developer: implementación"]
     E --> F["QA: pruebas reales y review"]
     F --> G{"¿Checks superados?"}
-    G -- "No" --> E
-    G -- "Sí" --> H["PR preparada con permiso"]
+    G -->|No| E
+    G -->|Sí| H["PR preparada con permiso"]
     H --> I{"Usuario aprueba merge"}
-    I -- "No" --> J["Mantener PR abierta"]
-    I -- "Sí" --> K["Merge autorizado"]
+    I -->|No| J["Mantener PR abierta"]
+    I -->|Sí| K["Merge autorizado"]
 ```
 
 Se requiere tu autorización para decisiones financieras y contables, contratos importantes, migraciones destructivas, producción y merges. La aprobación de una spec **no autoriza** operaciones destructivas o despliegues.
@@ -135,8 +135,8 @@ flowchart TD
     CI --> R
     R --> B["Reconcilia Epic Board y dependencias"]
     B --> X{"¿Subagentes disponibles?"}
-    X -- "Sí" --> N["Crea nuevas tareas funcional, dev, infra y QA según necesidad"]
-    X -- "No" --> S["Usa el mismo backlog en ejecución secuencial"]
+    X -->|Sí| N["Crea nuevas tareas funcional, dev, infra y QA según necesidad"]
+    X -->|No| S["Usa el mismo backlog en ejecución secuencial"]
     N --> H["Handoff con evidencias y control de aprobaciones"]
     S --> H
 ```
@@ -154,10 +154,10 @@ flowchart TD
 ```mermaid
 flowchart TD
     T["Tarea lista"] --> R{"¿Riesgo o ambigüedad altos?"}
-    R -- "Sí" --> A["Capacidad avanzada; razonamiento alto"]
-    R -- "No" --> C{"¿Trabajo rutinario y acotado?"}
-    C -- "Sí" --> E["Capacidad eficiente; razonamiento bajo o medio"]
-    C -- "No" --> M["Capacidad equilibrada; razonamiento medio"]
+    R -->|Sí| A["Capacidad avanzada; razonamiento alto"]
+    R -->|No| C{"¿Trabajo rutinario y acotado?"}
+    C -->|Sí| E["Capacidad eficiente; razonamiento bajo o medio"]
+    C -->|No| M["Capacidad equilibrada; razonamiento medio"]
     A --> V["Validación real y code review"]
     E --> V
     M --> V
