@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Portable structural validation, not a complete security or semantic audit."""
 from pathlib import Path
+import json
 import re
 import sys
 from urllib.parse import unquote, urlsplit
@@ -8,7 +9,7 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/check-mermaid.mjs','specs/methodology/workflows.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md',*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/check-mermaid.mjs','specs/methodology/workflows.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
 def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
@@ -18,7 +19,7 @@ def validate(root):
  for name in REQUIRED:
   if not (root/name).is_file() or not (root/name).stat().st_size: fail('structure',f'missing or empty {name}')
  docs=[root/n for n in ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md') if (root/n).is_file()]
- for folder in ('specs','templates','.agents/skills'):
+ for folder in ('specs','templates','.agents/skills','.claude/skills','.claude/agents'):
   docs.extend((root/folder).rglob('*.md'))
  for p in docs:
   s=p.read_text(encoding='utf-8')
@@ -38,6 +39,26 @@ def validate(root):
   elif any(c in m[2] for c in (': ',' #','{','}','[',']')): fail('manifest',f'{name}: use plain scalar description')
   for h in ('## Inputs','## Outputs','## Procedure','## Stop conditions'):
    if h not in s: fail('contracts',f'{name}: missing {h}')
+ # Claude adapters are wrappers, never copies that silently drift from canonical Skills.
+ claude=read('CLAUDE.md')
+ if '@AGENTS.md' not in claude: fail('claude','CLAUDE.md must load canonical AGENTS.md')
+ for name in SKILLS:
+  s=read(f'.claude/skills/{name}/SKILL.md')
+  if f'.agents/skills/{name}/SKILL.md' not in s or f'name: {name}' not in s:
+   fail('claude',f'{name}: missing canonical Skill reference or manifest name')
+ for name in ('functional','implementation','qa-review','infrastructure'):
+  s=read(f'.claude/agents/{name}.md')
+  if f'.agents/roles/{name}.md' not in s or f'name: {name}' not in s:
+   fail('claude',f'{name}: missing canonical role reference or manifest name')
+ for filename, key in [('evals/scenarios.json','cases'),('evals/sample-responses.json','responses')]:
+  try:
+   payload=json.loads(read(filename))
+   if payload.get('version')!='1.0' or not isinstance(payload.get(key),list) or len(payload[key])<10:
+    fail('agent-evals',f'{filename}: invalid or incomplete evaluation fixture')
+  except (ValueError,AttributeError,TypeError):
+   fail('agent-evals',f'{filename}: invalid JSON')
+ if 'eval-agent-behavior' not in read('.github/workflows/validate.yml'):
+  fail('agent-evals','CI must run agent eval scorer self-test')
  workflows=read('specs/methodology/workflows.md')
  for token in ('Quick', 'Standard', 'Full', 'confirm', 'Brainstorming', 'Walking skeleton'):
   if token.lower() not in workflows.lower(): fail('orchestration',f'workflow missing {token}')
