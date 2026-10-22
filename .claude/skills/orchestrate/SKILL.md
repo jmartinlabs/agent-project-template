@@ -1,0 +1,10 @@
+---
+name: orchestrate
+description: Coordinate approved work using Quick Standard Full risk levels and approval gates.
+---
+
+# Claude Code adapter for orchestrate
+
+Read and follow the canonical workflow at `.agents/skills/orchestrate/SKILL.md` **from the repository root**. Read `AGENTS.md` and `specs/methodology/approvals.md` first, and follow any stricter project-local restrictions.
+
+This is only a discovery adapter. It must not reinterpret approvals, import a second implementation, or claim that subagents/hooks are active. If the canonical skill is absent, stop and report the mismatch.
