@@ -12,6 +12,7 @@ add its approved install, run and test commands after bootstrap.
 - Start or resume project initialization with `$init-project`; persist stage transitions
   in `specs/setup-progress.md`. See [document ownership](specs/README.md).
 - Preserve existing work; stage only your own reviewed changes. Never commit secrets.
+- Read [portable harness boundaries](docs/HARNESS.md) and [explicit approvals](specs/methodology/approvals.md). Hooks and eval fixtures are defense in depth; they do not prove user approval or replace GitHub branch protections.
 - Ask before material product/architecture decisions, destructive actions, security-sensitive
   changes, remote creation/publication, production deployment or visibility changes.
 - Stop on conflicting approved requirements or missing permissions. Report blocked checks;
