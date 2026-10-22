@@ -8,7 +8,7 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','specs/methodology/workflows.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md',*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/check-mermaid.mjs','specs/methodology/workflows.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md',*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
 def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
@@ -97,7 +97,7 @@ def validate(root):
  for p in [root/'AGENTS.md',*(root/'.agents/skills').rglob('SKILL.md')]:
   if p.is_file() and re.search(r'(?i)(?:all projects|every project|all applications) must (?:use|install|run)\b',p.read_text()): fail('neutrality',f'universal stack mandate in {p.relative_to(root)}')
  s=read('.github/workflows/validate.yml')
- for token in ('pull_request','contents: read','./scripts/validate-template','./scripts/test-validator'):
+ for token in ('pull_request','contents: read','./scripts/validate-template','./scripts/test-validator','node scripts/check-mermaid.mjs','mermaid@11.12.1'):
   if token not in s: fail('ci',f'missing {token}')
  return errors
 if __name__=='__main__':
