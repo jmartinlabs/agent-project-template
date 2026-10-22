@@ -111,3 +111,39 @@ For reproducible Quick / Standard / Full client measurements, see the
   lead to the same safe behavior (proceed on the branch; no push, publish or merge).
 - One run per model and revision; variance unknown. The scenarios were written by the same
   author as the rules. No Codex run; the execution benchmark is still UNRUN.
+
+### 2026-10-23 — execution benchmark (reduced)
+
+Reduced run of the [benchmark protocol](archive/V2_4_2_BENCHMARK.md): Claude Code only,
+Quick and Standard tasks, 3 paired repetitions, alternating revision order.
+
+- **Client:** Claude Code CLI 2.1.301, `claude -p --model sonnet`, `--permission-mode acceptEdits`,
+  tools limited to read/edit plus `python3` and read-only `git`; `--max-budget-usd` 2 (Quick)
+  and 1 per turn (Standard). Signed in with a Claude subscription, so `cost_usd` is the
+  client's estimate, not a bill.
+- **Fixture:** the protocol's Python fixture, with each revision's `AGENTS.md`, `CLAUDE.md`,
+  `.agents/`, `.claude/`, `specs/` and `templates/` copied in; the first paragraph of
+  `AGENTS.md` replaced by the fixture's commands in both arms.
+- **Revisions:** *before* = `49fd83b` (template before PRs #13–#18); *after* = `643c59a`.
+- **Standard:** the agent proposed Standard and stopped; one explicit confirmation
+  of the scope was sent with `--resume`.
+- **Success** was checked by a script (README diff only; CLI default 10, bounds 1/100 accepted,
+  0/101/`x` rejected with nonzero exit, tests updated and passing).
+- **Raw rows:** [evals/results/2026-10-23-benchmark.csv](../evals/results/2026-10-23-benchmark.csv).
+
+Median [range] over 3 runs; tokens = input + cache read + cache write as reported by the client.
+
+| Task | Revision | Pass | Tokens in | Tokens out | Est. cost USD | Seconds | Agent turns | Confirmations |
+|---|---|---|---|---|---|---|---|---|
+| Quick | before | 3/3 | 121,798 [121,383–121,804] | 355 [350–356] | 0.121 [0.121–0.123] | 5.1 [4.9–5.2] | 3 | 0 |
+| Quick | after | 3/3 | 121,310 [121,310–121,317] | 352 [352–354] | 0.120 [0.120–0.120] | 4.5 [4.0–5.4] | 3 | 0 |
+| Standard | before | 3/3 | 254,215 [210,807–307,476] | 3,218 [3,212–3,301] | 0.311 [0.308–0.330] | 28.4 [25.7–28.6] | 9 [8–11] | 1 |
+| Standard | after | 3/3 | 253,933 [168,191–255,298] | 3,146 [2,877–3,211] | 0.296 [0.293–0.309] | 26.4 [24.8–28.7] | 8 [7–9] | 1 |
+
+- **Both revisions passed every run** and behaved the same way: Quick edited directly;
+  Standard proposed the workflow and waited for confirmation before editing.
+- **Differences are within run-to-run noise** (about 0.4 % fewer input tokens and ~5 % lower
+  median cost for Standard). Neither run opened the orchestrate Skill or the long policies; the
+  agents worked from the auto-loaded `AGENTS.md`. The savings measured statically in PRs #15–#18
+  apply when Skills, policies or subagents are loaded, which these small tasks did not exercise.
+- Not covered: the Full task, subagent delegation, Codex, and more than 3 repetitions.
