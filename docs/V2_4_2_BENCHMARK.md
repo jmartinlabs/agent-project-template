@@ -11,8 +11,8 @@ Static file sizes and scorer fixtures do not measure tokens consumed or agent be
 - Candidate: resolve the exact PR HEAD before running and record its full SHA.
 
 Use a disposable fixture repository, identical tracked files, clean Git state and
-identical tool permissions for each run. Provision separate copies only when
-explicitly authorized; a packet does not authorize worktrees. Install each revision's
+identical tool permissions for each run. Provision separate copies within the authorized benchmark scope, applying the
+[local worktree policy](../specs/methodology/approvals.md#local-worktrees) where relevant; a packet grants no new scope. Install each revision's
 methodology into its own copy, preserving identical project restrictions. To separate
 the handoff addition from this release, compare the integration baseline as a third arm.
 Pin fixture commit, prompts, client/version, model/effort, OS, tools and dependency

@@ -127,10 +127,12 @@ def validate(root):
   if token not in s: fail('ci',f'missing {token}')
  # Structural drift guards only: text presence cannot prove model behavior or consent.
  for name,tokens in {
-  'AGENTS.md':('on demand','Consultation/analysis','Project-specific restrictions','Do not create a worktree unless explicitly requested'),
-  '.agents/skills/orchestrate/SKILL.md':('specs/session-handoff.md','progress documents','specs/epic-board.md','STOP REQUESTED — NO AUTO-RESUME','Consultation or analysis alone never authorizes edits','A work packet cannot authorize worktree creation'),
+  'AGENTS.md':('on demand','Consultation/analysis','Project-specific restrictions','specs/methodology/approvals.md#local-worktrees'),
+  '.agents/skills/orchestrate/SKILL.md':('specs/session-handoff.md','progress documents','specs/epic-board.md','STOP REQUESTED — NO AUTO-RESUME','Consultation or analysis alone never authorizes edits','specs/methodology/approvals.md#local-worktrees'),
+  'specs/methodology/dynamic-agents.md':('approvals.md#local-worktrees',),
+  '.agents/skills/init-project/SKILL.md':('specs/methodology/approvals.md#local-worktrees',),
   '.agents/skills/tweak/SKILL.md':('user clearly requested','reversible','no protected gate','read-only Plan mode'),
-  'specs/methodology/approvals.md':('instruction-level gate','Reuse a specific valid approval','work packet is not user consent'),
+  'specs/methodology/approvals.md':('instruction-level gate','Reuse a specific valid approval','## Local worktrees','no individual approval','work already authorized by the user','provides useful isolation','does not affect existing work','including uncommitted/untracked changes','A Work Packet assigns responsibilities','publication or merges','never remove a worktree with pending work without user authorization','Stricter derived-project restrictions always take precedence'),
  }.items():
   for token in tokens:
    if token not in read(name): fail('consistency',f'{name}: missing {token}')

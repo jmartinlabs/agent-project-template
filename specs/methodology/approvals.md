@@ -25,6 +25,12 @@ A green CI, completed QA, pre-approved plan, previous scope authorization, or fi
 
 ## Scope and limitations
 
-Ordinary technical implementation, use of subagents, routine tests, branch/push/PR preparation, and other steps **within a previously approved scope** need no new per-step approval unless local policy requires one. Ownership and checkout isolation are separate from authorization. A work packet is not user consent to create a worktree; AGENTS.md requires an explicit user request. Project-specific restrictions remain authoritative.
+Ordinary technical implementation, use of subagents, routine tests, branch/push/PR preparation, and other steps **within a previously approved scope** need no new per-step approval unless local policy requires one. Project-specific restrictions remain authoritative.
+
+## Local worktrees
+
+A local worktree needs no individual approval when it supports work already authorized by the user, provides useful isolation, and does not affect existing work. Before creating it, verify the authorized scope, Git status (including uncommitted/untracked changes), existing worktrees, branch and destination; use a new, non-conflicting location without overwriting, moving or discarding existing changes. If those conditions cannot be verified, keep the current checkout or stop the affected step.
+
+A Work Packet assigns responsibilities and file ownership; a worktree provides isolation; authorization comes from the user's granted scope. Neither the packet nor creating a worktree grants new tasks, protected actions, publication or merges. Those actions retain their own approval gates. Preserve uncommitted changes and never remove a worktree with pending work without user authorization. Stricter derived-project restrictions always take precedence, including any requirement for individual worktree approval.
 
 This policy does not install a tool hook or GitHub ruleset; stronger independent enforcement needs separate configuration and an authorization source agents cannot forge or edit.
