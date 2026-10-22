@@ -25,4 +25,6 @@ A green CI, completed QA, pre-approved plan, previous scope authorization, or fi
 
 ## Scope and limitations
 
-Ordinary technical implementation, use of subagents, worktrees, routine tests, branch/push/PR preparation, and other steps **within a previously approved scope** need no new per-step approval unless local policy requires one. This policy does not install a tool hook or GitHub ruleset; stronger independent enforcement needs separate configuration and an authorization source agents cannot forge or edit.
+Ordinary technical implementation, use of subagents, routine tests, branch/push/PR preparation, and other steps **within a previously approved scope** need no new per-step approval unless local policy requires one. Ownership and checkout isolation are separate from authorization. A work packet is not user consent to create a worktree; AGENTS.md requires an explicit user request. Project-specific restrictions remain authoritative.
+
+This policy does not install a tool hook or GitHub ruleset; stronger independent enforcement needs separate configuration and an authorization source agents cannot forge or edit.

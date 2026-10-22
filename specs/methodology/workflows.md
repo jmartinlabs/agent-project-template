@@ -1,6 +1,6 @@
 # Adaptive workflow contract
 
-The entry point is a natural-language request, optionally in Codex Plan mode (/plan where supported). AGENTS.md recommends orchestrate; /plan does not invoke any Skill automatically. The user can explicitly invoke $orchestrate. Start with inspection and a **proposed classification**, then **ask the user to confirm Quick / Standard / Full before implementation**.
+The entry point is a natural-language request, optionally in Codex Plan mode (/plan where supported). AGENTS.md recommends orchestrate; /plan does not invoke any Skill automatically. The user can explicitly invoke $orchestrate. Start with inspection and a **proposed classification**. Quick may proceed after a one-line plan only for a clearly requested, reversible, low-risk change without protected gates or stricter project restrictions. Consultation/analysis and read-only Plan mode never authorize edits. Confirm Standard / Full before implementation unless the same workflow and scope are already explicitly authorized; reuse valid authorization.
 
 | Workflow | Typical scope | Required preparation | Verification |
 | --- | --- | --- | --- |
@@ -19,10 +19,10 @@ Risk matters more than code size. Auth, payments, production configuration, migr
 
 ## Model and reasoning recommendation
 
-Alongside the initial Quick / Standard / Full proposal, use [Adaptive model selection](model-selection.md) to recommend a capability tier and reasoning effort tailored to the work and user preference. This is advisory, not a new approval step or automatic model switch. Do not assume Desktop and Web expose the same options. A model suggestion never replaces testing, review, or user confirmation of the workflow.
+Alongside the initial Quick / Standard / Full proposal, use [Adaptive model selection](model-selection.md) to recommend a capability tier and reasoning effort tailored to the work and user preference. This is advisory, not a new approval step or automatic model switch. Do not assume Desktop and Web expose the same options. A model suggestion never replaces testing, review, or required workflow confirmation. Omit model advice for straightforward Quick work when it adds no value.
 
 ## Approval gates
-Require user confirmation for initial classification, material product/architecture choices, a new or materially revised roadmap, Full specifications and significant escalation of risk/scope. Ordinary code changes and tests inside the authorized scope do not need approval. Existing approved specs remain authoritative.
+Require user confirmation for initial classification except the authorized Quick case or existing explicit workflow authorization above, material product/architecture choices, a new or materially revised roadmap, Full specifications and significant escalation of risk/scope. Ordinary code changes and tests inside the authorized scope do not need approval. Existing approved specs remain authoritative.
 
 ## Multi-epic scheduling
 

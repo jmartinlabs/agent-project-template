@@ -5,9 +5,11 @@ add its approved install, run and test commands after bootstrap.
 
 - Validate template changes: `./scripts/validate-template`. Claude adapter: [guide](docs/CLAUDE_ADAPTER.md); agent behavioral evals: [guide](docs/AGENT_EVALS.md).
 - Test the validator: `./scripts/test-validator`.
-- Read [architecture](specs/guidelines/architecture.md), [UI](specs/guidelines/ui.md),
+- Load only applicable [architecture](specs/guidelines/architecture.md), [UI](specs/guidelines/ui.md),
   [quality](specs/guidelines/quality.md), and [security](specs/guidelines/security.md).
-- For any development request, read [adaptive workflows](specs/methodology/workflows.md), [epic orchestration](specs/methodology/epic-orchestration.md), [dynamic agent management](specs/methodology/dynamic-agents.md) and [model selection](specs/methodology/model-selection.md); use `$orchestrate` to propose Quick / Standard / Full plus an advisory model/reasoning recommendation, then confirm the workflow level before implementation. In supported clients `/plan` is a planning mode, not a Skill invocation.
+- For development use `$orchestrate` and [adaptive workflows](specs/methodology/workflows.md) to classify Quick / Standard / Full. Quick needs no additional confirmation only for a clearly authorized, reversible, low-risk change with no protected gate. Consultation/analysis never authorizes edits; read-only Plan mode never permits implementation. Standard / Full require confirmation unless already explicitly authorized for the same scope.
+- Load instructions on demand: [epic orchestration](specs/methodology/epic-orchestration.md) for overlapping epics; [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before any delegation; [model selection](specs/methodology/model-selection.md) when advice matters (normally Standard / Full). Read the routed Skill and relevant approval evidence before acting; do not preload every policy. `/plan` is a planning mode, not a Skill invocation.
+- Project-specific restrictions take precedence over generic workflow shortcuts. Preserve explicit approvals and required independent QA. Default to one executor; justify additional delegation.
 - Adopt existing projects via [the copyable adoption prompt](ADOPT_EXISTING_PROJECT_PROMPT.md) and `$adopt-project`, preserving their code and prior decisions. Do not run `$init-project` on existing applications.
 - Start or resume project initialization with `$init-project`; persist stage transitions
   in `specs/setup-progress.md`. See [document ownership](specs/README.md).
