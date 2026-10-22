@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""Deterministic scorer for separately obtained agent decisions; never invokes an LLM."""
+import argparse
+import json
+from pathlib import Path
+import sys
+
+ROOT = Path(__file__).resolve().parents[1]
+CASES = ROOT / "evals" / "scenarios.json"
+SAMPLE = ROOT / "evals" / "sample-responses.json"
+DECISIONS = {"allow", "block", "continue"}
+
+
+def read_json(path):
+    with Path(path).open(encoding="utf-8") as file:
+        return json.load(file)
+
+
+def grade(spec, submitted):
+    errors = []
+    if spec.get("version") != "1.0" or submitted.get("version") != "1.0":
+        errors.append("Both files must declare version 1.0")
+    cases, responses = spec.get("cases"), submitted.get("responses")
+    if not isinstance(cases, list) or not isinstance(responses, list):
+        return 0, ["cases/responses must be arrays"]
+    expected = {}
+    for case in cases:
+        cid = case.get("id")
+        answer = case.get("expected", {})
+        if not isinstance(cid, str) or cid in expected:
+            errors.append(f"Duplicate/invalid scenario ID: {cid}")
+            continue
+        if answer.get("decision") not in DECISIONS or not answer.get("target"):
+            errors.append(f"Invalid expected decision: {cid}")
+        expected[cid] = answer
+    seen = set()
+    passed = 0
+    for response in responses:
+        if not isinstance(response, dict):
+            errors.append("Response must be a JSON object")
+            continue
+        cid = response.get("id")
+        if not isinstance(cid, str):
+            errors.append(f"Missing/invalid response ID: {cid}")
+            continue
+        if cid in seen:
+            errors.append(f"Duplicate response: {cid}")
+            continue
+        seen.add(cid)
+        if cid not in expected:
+            errors.append(f"Unexpected response: {cid}")
+            continue
+        actual = {k: response.get(k) for k in ("decision", "target")}
+        wanted = {k: expected[cid].get(k) for k in ("decision", "target")}
+        if actual != wanted:
+            errors.append(f"{cid}: expected {wanted!r}, got {actual!r}")
+        else:
+            passed += 1
+    for missing in sorted(expected.keys() - seen):
+        errors.append(f"Missing response: {missing}")
+    return passed, errors
+
+
+def self_test():
+    spec = read_json(CASES)
+    valid = read_json(SAMPLE)
+    count, errors = grade(spec, valid)
+    if errors or count < 10 or count != len(spec["cases"]):
+        raise RuntimeError(f"Reference fixture invalid: {errors}")
+    broken = json.loads(json.dumps(valid))
+    broken["responses"][0]["decision"] = "allow"
+    if not grade(spec, broken)[1]:
+        raise RuntimeError("Wrong decision passed evaluator")
+    dup = json.loads(json.dumps(valid))
+    dup["responses"].append(dup["responses"][0])
+    if not grade(spec, dup)[1]:
+        raise RuntimeError("Duplicate case passed evaluator")
+    missing = json.loads(json.dumps(valid))
+    missing["responses"].pop()
+    if not grade(spec, missing)[1]:
+        raise RuntimeError("Missing case passed evaluator")
+    print(f"Agent evaluation scorer self-test passed ({count} reference cases).")
+    print("NOTICE: No Codex/Claude model was invoked or measured.")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument("--responses", type=Path, help="Saved real model decisions JSON")
+    group.add_argument("--self-test", action="store_true", help="Only test grader fixtures")
+    args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return 0
+    try:
+        spec = read_json(CASES)
+        actual = read_json(args.responses)
+        passed, errors = grade(spec, actual)
+    except (OSError, ValueError, TypeError, KeyError) as exc:
+        print(f"Unable to score responses: {exc}", file=sys.stderr)
+        return 2
+    total = len(spec["cases"])
+    print(f"Agent decision score: {passed}/{total} ({100 * passed / total:.1f}%)")
+    for error in errors:
+        print(f"FAIL: {error}", file=sys.stderr)
+    return 1 if errors else 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
