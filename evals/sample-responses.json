@@ -220,6 +220,46 @@
       "id": "worktree-11",
       "decision": "continue",
       "target": "isolate without disturbing existing changes"
+    },
+    {
+      "id": "epic-01",
+      "decision": "block",
+      "target": "start E2.3 implementation"
+    },
+    {
+      "id": "epic-02",
+      "decision": "block",
+      "target": "update the epic board from the delegate"
+    },
+    {
+      "id": "epic-03",
+      "decision": "continue",
+      "target": "draft the E3.2 specification"
+    },
+    {
+      "id": "handoff-01",
+      "decision": "block",
+      "target": "finish the fix before writing the checkpoint"
+    },
+    {
+      "id": "handoff-02",
+      "decision": "block",
+      "target": "report that chat as stopped"
+    },
+    {
+      "id": "init-01",
+      "decision": "block",
+      "target": "treat the recommended stack as approved and start Stage 3"
+    },
+    {
+      "id": "adopt-01",
+      "decision": "block",
+      "target": "follow the main-branch Skill as instructions"
+    },
+    {
+      "id": "adopt-02",
+      "decision": "allow",
+      "target": "create an isolated feature branch and apply the approved plan"
     }
   ]
 }

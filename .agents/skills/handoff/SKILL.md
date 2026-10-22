@@ -5,27 +5,55 @@ description: Stop an active agent session safely, consolidate recoverable work a
 
 # handoff — consolidate and stop
 
-This is an explicit **shutdown/transfer command**, not a request to resume, finish the feature, or start another workstream. It applies to the current authorized session only. Follow AGENTS.md and project-specific approval/security rules; this Skill does not grant new permissions.
+An explicit **shutdown/transfer command**. It does not resume, finish the feature or start
+new work, and it grants no new permissions. It covers the current authorized session only.
 
 ## Inputs
-Read only the relevant current progress/checkpoint, Git status and active worker/tool state available in this session. Use existing task, branch, worktree, PR and approval evidence. Do not reload the entire project unless needed to prevent data loss.
+Only what is needed to stop safely: current progress/checkpoint, `git status`, active worker
+handles in this session, and existing task, branch, worktree, PR and approval evidence.
 
 ## Outputs
-A small durable checkpoint in an existing feature progress file, setup-progress file or coordinator-owned epic board; if none is suitable, use `specs/session-handoff.md` (one current handoff, no new documentation tree). Return a concise shutdown receipt with checkpoint path, branch/commit SHA, pending changes, real worker-stop status and next-session instruction.
+- A small durable checkpoint in the existing progress file, setup-progress file or coordinator
+  board; otherwise `specs/session-handoff.md` (one current handoff).
+- A short receipt: checkpoint path, branch/commit SHA, pending changes, real worker-stop status,
+  next-session instruction.
 
 ## Procedure
-1. **Freeze scope immediately.** Stop issuing new development, research, long tests, delegation, scheduling or PR/merge actions. Override any automatic orchestrator handoff/ready queue. Allow only the minimum steps to reach a safe operation boundary and preserve state. Do not try to finish acceptance criteria.
-2. **Stop controlled workers.** Inspect the runtime's actual worker handles. Where supported, request cancellation/stop and a short final checkpoint; avoid waiting through lengthy investigation. Record each as `stopped`, `stop requested` or `unconfirmed` based on evidence. External Codex chats, separately launched tasks and workers without accessible controls are **not controlled** by this Skill: do not claim to stop them; tell the user which require manual interruption. If no worker tooling exists, say so.
-3. **Inventory without destructive cleanup.** Check `git status`, active branch/HEAD SHA, relevant worktrees, current PR, uncommitted files and known owner of each change. Do not reset, discard, overwrite, delete a worktree, stash ambiguously owned files or amend someone else's commit. Leave blocked/unknown resources intact.
-4. **Preserve authorized work.** If safe and permitted, review only owned, relevant changes (including staged history and secret/data leakage risk), then commit a clearly labeled WIP/checkpoint on the existing feature branch. Push only if project authorization permits and sensitive-history review succeeds. Never merge, deploy, open a new PR or expand scope by inference. If work cannot be safely committed/pushed, list exact pending files and that remote portability is **unverified**; do not pretend local changes survive a fresh cloud session.
-5. **Record the minimum handoff.** Reuse the existing canonical progress/board file when writable and owned. Save: explicit `STOP REQUESTED — NO AUTO-RESUME`; feature and authorized scope; repo/branch/worktree/HEAD/PR; worker stop status; completed vs partial deliverables and uncommitted changes; real checks PASS/FAIL/UNRUN with evidence and candidate SHA; open bugs/blocked gates; approvals still valid versus pending; and **one next safe action**. Link to specs rather than copying long context. If persistence is unavailable, print the checkpoint to the user and mark it `not persisted`.
-6. **Conclude and stop.** Recheck that no new execution was intentionally started and that the checkpoint is accessible. Report `stopped` only where runtime confirmation exists, otherwise `unconfirmed`; distinguish local commits, remote commits, and missing persistence. The last message must not trigger further tasks or agents. Do not claim to control other sessions or background jobs.
+1. **Freeze scope now.** Stop issuing new development, research, long tests, delegation,
+   scheduling, PR or merge actions. Override any automatic ready queue. Only reach a safe
+   boundary; do not try to finish acceptance criteria or a "quick fix".
+2. **Stop controlled workers.** Where the runtime supports it, request stop and a short final
+   checkpoint. Record each as `stopped`, `stop requested` or `unconfirmed`, based on evidence.
+   Other chats, separately launched tasks and workers without accessible controls are
+   **not controlled** here: never report them as stopped; tell the user to interrupt them.
+3. **Inventory, never destroy.** Check `git status`, branch/HEAD SHA, worktrees, PR, uncommitted
+   files and who owns each change. Do not reset, discard, overwrite, delete worktrees, stash
+   files of unclear ownership or amend others' commits.
+4. **Preserve authorized work.** If safe and permitted, review owned changes (including secret
+   or data leaks) and commit a labeled WIP checkpoint on the existing feature branch. Push only
+   if the project allows it. Never merge, deploy or open a PR. If work cannot be committed or
+   pushed, list the pending files and mark remote portability **unverified**.
+5. **Write the minimum handoff.** Reuse the existing progress or board file. Include:
+   `STOP REQUESTED — NO AUTO-RESUME`; feature and authorized scope; repo, branch, worktree, HEAD,
+   PR; worker stop status; done vs partial work and uncommitted changes; checks as PASS/FAIL/UNRUN
+   with evidence and candidate SHA; open bugs and blocked gates; approvals still valid vs pending;
+   **one next safe action**. Link specs instead of copying them. If nothing can be persisted,
+   print the checkpoint and mark it `not persisted`.
+6. **Conclude.** Confirm no new execution started and the checkpoint is reachable. Report
+   `stopped` only with runtime confirmation, otherwise `unconfirmed`. The final message must not
+   trigger more tasks or agents.
 
 ## Next session
-A separate user request such as `$orchestrate — inspect the latest handoff, verify its Git SHA and approvals, report state before proposing continuation` may re-open planning. The saved checkpoint grants **no** permission to resume work automatically; wait for the user's new instruction and any protected approvals.
+A new user request (for example orchestrate: "inspect the latest handoff, verify its SHA and
+approvals, report state before proposing continuation") may reopen planning. The checkpoint
+grants **no** permission to resume automatically.
 
 ## Quota exhaustion
-If quota ends before this Skill can run, no shutdown or checkpoint is guaranteed. When quota returns, run `$handoff` **before** asking to continue; reconstruct what can be verified from Git/current worker state, and mark inaccessible context `unknown`. If a task is visibly still running, interrupt it using the client's stop control first, when available.
+If quota ran out before handoff could run, nothing was guaranteed. When quota returns, run
+handoff **before** asking to continue: rebuild what Git and worker state can verify and mark
+the rest `unknown`. Interrupt any visibly running task with the client's stop control first.
 
 ## Stop conditions
-Stop once the minimum safe, non-destructive consolidation is complete, or sooner when access, ownership or authorization prevents safe persistence. Preserve blocker evidence; never bypass required QA, protected approvals or security checks by labeling unfinished work complete.
+Stop once the minimum safe, non-destructive consolidation is done, or earlier if access,
+ownership or authorization prevents safe persistence. Never merge, and never bypass QA,
+approvals or security checks by labeling unfinished work complete.

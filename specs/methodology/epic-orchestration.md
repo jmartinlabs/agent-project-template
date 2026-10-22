@@ -1,59 +1,54 @@
-# Epic orchestration: lightweight delivery without bypassing approvals (v2.4.1)
+# Epic orchestration
 
-This policy applies to complex **Full** work and to Standard work with several independent workstreams. It extends [adaptive workflows](workflows.md) rather than replacing `$roadmap`, `$spec` or `$dev`. Quick remains single-stream by default.
+For Full work, or Standard work with several independent workstreams. It extends
+[adaptive workflows](workflows.md); roadmap, spec and dev still apply. Quick stays single-stream.
 
-## Persistent board and single writer
+## Board and single writer
 
-Keep `specs/epic-board.md` only when multiple live epics or independent workstreams need scheduling; use existing progress/testplan for a single bounded feature. Reconcile the board at session start and major gates with approved spec, checkpoints, Git and tests. Mark unavailable evidence `unknown`/`unverified`, never infer approval.
+- Keep `specs/epic-board.md` only when several live epics or workstreams need scheduling. A single bounded feature uses its own progress and testplan.
+- The coordinator is the **single writer** of the board. Delegates return outcomes, SHA and test evidence; they never edit the board.
+- Reconcile the board at session start and at major gates against approved specs, checkpoints, Git and tests. Mark missing evidence `unknown` or `unverified`; never infer approval.
+- Update only fields that materially change (ownership, authorization, candidate, QA verdict, blocker, PR state), not on every worker message.
+- Each row: unique feature ID, stage, scope and hard dependencies, approval, assigned role, isolated branch/checkout, blockers, evidence link, next action, last verification.
+- A ready task is not an approved spec. An open PR is not a merge.
 
-The coordinator is the **only writer** of the shared board. Delegates return concise outcomes, SHA and test evidence. Update changed fields only when ownership, authorization, candidate, QA verdict, blocker or PR state materially changes; not on every intermediate worker message.
+## Stages and gates
 
-Each row has a unique feature ID and tracks stage, scope/dependencies, approval, assigned role, isolated branch/checkout (if applicable), blockers, evidence link, next action and last verification. A ready task is not the same as an approved spec. A PR opened is not a merge.
+- **spec:** planned → drafting → awaiting-approval → approved. Drafts and brainstorming may be prepared autonomously; **only the user approves** functional or financial decisions and the final spec.
+- **dev:** not-ready → ready → implementing → testing/review → verified. Ready only with a recorded **approved** spec, satisfied hard dependencies and authorization for the scope. Without an approved spec, implementation cannot start; QA may still draft test cases.
+- **QA:** planned → test-design → awaiting-implementation → verifying → passed/failed/blocked. Never report a pass before running against the actual candidate.
+- **merge:** proposed PR → ready-for-user-review → user-approved → merged. Never auto-merge. Merging is a separate approval gate per [approvals](approvals.md).
 
-## Stage/gate rules
+## Scheduler (at milestones, not every message)
 
-- `spec`: planned → drafting → awaiting-approval → approved. Drafts and brainstorming may be prepared autonomously, but **only the user approves functional/financial decisions and the final spec**. A prepared next epic remains draft until approved.
-- `dev`: not-ready → ready → implementing → testing/review → verified. `dev` is ready only with a recorded **approved** spec, satisfied hard dependencies and authorization for its scope. If there is no approved spec, the implementation lane cannot start. QA may still draft test cases without altering production code.
-- `QA`: planned → test-design → awaiting-implementation → verifying → passed/failed/blocked. Independent test design and investigation can overlap another feature's spec or dev. Never claim tests passed before execution against the actual candidate.
-- `merge`: proposed PR → ready-for-user-review → user-approved → merged. Never auto-merge or push/create remote PR without required repository authorization. PR readiness requires current tests/review evidence; branch merge is a separate approval gate.
+1. On resume, check Git/PR/approval changes since the last trusted checkpoint; read only what the next gate needs. Reload full sources when stale, conflicting or needed for safety.
+2. Mark work blocked only for a real hard dependency; name the prerequisite and its owner. Separate "waiting on user" from technical blockers.
+3. Recompute **ready** work when gates change: approved and authorized implementation; candidate QA; independent spec drafting up to approval; bounded investigations.
+4. Follow user priorities and the critical path. When something is blocked, pick the next independent ready item.
+5. Prefer one complete development packet per feature, then independent QA on the candidate. Parallelize only distinct ready work worth the overhead; concurrent edits need disjoint ownership and authorized isolated checkouts.
+6. At milestones (approved spec, candidate, QA verdict, PR) update only changed state. Approved spec + dev authorization → dev; candidate → independent QA; checks and QA green → PR for approval.
+7. End an active run with a short board summary: done, underway, waiting on user, blocked, newly ready, next action. Nothing runs between sessions.
 
-## Scheduler: reconcile at meaningful milestones
+Delegation sizing follows [dynamic agent management](dynamic-agents.md): default to one executor plus required independent QA.
 
-1. On resume, verify Git/PR/approval deltas since the last trusted checkpoint and read only the documents needed for the next gate. Reload full sources when stale, conflicting or needed for safety.
-2. Identify gates and hard dependencies. Mark blocked only where there is a real dependency; cite the specific prerequisite and owner. Distinguish user decision needed from environment/technical blocker.
-3. Recompute **ready** work only when prerequisites or gates change: (a) approved/authorized implementation, (b) candidate QA, (c) independent spec drafting up to approval, (d) bounded investigation with an explicit hypothesis and exit condition.
-4. Prefer user priorities and critical-path work, but do not starve next-feature preparation because an unrelated investigation is running. When any work is blocked, promptly pick the next independent ready item.
-5. Prefer one complete development packet per feature and a required independent QA handoff when a candidate exists. Parallelize only distinct ready work with benefits greater than coordination/context cost. For concurrent edits use authorized isolated checkouts and disjoint ownership, otherwise serialize.
-6. At the approved-spec, completed-candidate, QA-verdict and PR/approval milestones, update only changed state and hand off a concise evidence summary. Approved spec plus dev authorization → dev; candidate → required independent QA; checks and QA green → PR for approval. Never re-plan or re-approve unchanged work.
-7. End an active run with a concise board summary: completed, underway, waiting on user, blocked, newly ready, and exact next action. No claim of background processing between sessions; rescan on next invocation.
+## Bounded investigations
+Start with a falsifiable hypothesis, one discriminating probe and expected evidence. After two comparable attempts without new findings, keep logs and state, and escalate for a new hypothesis or scope decision. This never waives QA, regression checks or urgent safety containment.
 
-Use [dynamic agent management](dynamic-agents.md) to size useful delegation. **Default to one executor**, plus required independent QA/review at the appropriate handoff; add parallel specialists only if tasks are genuinely independent and benefit exceeds overhead. This is not a platform cap; retain sequential fallback and protected gates.
-
-## Bounded technical investigations
-Start with a falsifiable hypothesis, one discriminating probe and expected evidence. After two comparable attempts without new findings, preserve logs, candidate state and failing gates, and escalate to a new hypothesis or scope decision; do not repeat blindly. This never waives QA, regression checks or urgent safety containment.
-
-## Independent specialist work packets
-
-The coordinator gives each delegate: feature ID, role, source spec and approval state, concrete deliverables, read/write files, dependencies, prohibited actions, validation checks, and a result format (outcome, evidence, blockers, proposed next work). See [role contracts](../../.agents/roles/README.md) and the [work packet template](../../templates/agent-work-packet.md). Specialists cannot promote draft to approved, merge a PR or update the shared board themselves.
+## Work packets
+Each delegate gets a [work packet](../../templates/agent-work-packet.md) and a [role contract](../../.agents/roles/README.md). Specialists never promote a draft to approved, merge a PR or update the board.
 
 ## Financial and security decisions
+Never infer approval from a checked option, silence, an earlier related approval or a PR review. Accounting semantics, financial calculations, migrations, security, published contracts, material scope, production changes and merges need explicit user approval. Research, test planning and drafts that commit none of these may continue.
 
-Never infer approval from a checked proposed option, chatbot silence, previous related approval, or a PR review. Require explicit user approval for changes to accounting semantics, financial calculations, migrations, security, published contracts, material scope, production changes and merges. Research, test planning and drafting that do not commit those decisions may continue.
+## Example: MyFinanzas (illustrative only)
+- E1.6 `spec=awaiting-approval`: the functional agent prepares decision questions; **dev E1.6 is blocked**.
+- E1.7 `spec=drafting`: independent requirements are analysed; contracts that depend on E1.6 are marked `pending`.
+- QA maps E1.6 draft acceptance checks to provisional tests.
+- A SQLite investigation is its own lane; it blocks E1.6 only if a documented hard dependency exists.
+- Once E1.6 is explicitly approved, the coordinator starts dev for E1.6 within that scope; E1.7 drafting may continue if write isolation is safe.
 
-## Worked example: MyFinanzas (illustrative only)
-
-- E1.6 `spec=awaiting-approval`: Functional agent prepares concrete decision questions; **dev E1.6 is blocked**.
-- E1.7 `spec=drafting`: Preparation agent analyzes requirements not dependent on E1.6, marks any dependent contract `pending`, and prepares brainstorming without approving anything.
-- QA can independently map E1.6 draft acceptance checks to prospective tests, clearly labeling them provisional.
-- SQLite investigation is a separate technical lane with a bounded objective; it blocks E1.6 only if a documented hard dependency exists.
-- As soon as E1.6 spec is explicitly approved, the coordinator starts `$dev 06` (or its equivalent) within the approved scope, while the E1.7 draft may continue in parallel if write isolation is safe.
-
-The sample is **not** a real status report for MyFinanzas. Always inspect its actual repository before populating the board.
-
-## Illustrated guide
-
-The [Spanish visual guide](../../docs/GUIA_VISUAL_ORQUESTACION.md) includes eight editable Mermaid diagrams of scheduling, delegation, approvals, write isolation and migration from existing chats.
+This is not a real status report; always inspect the actual repository before filling the board.
+The [Spanish visual guide](../../docs/GUIA_VISUAL_ORQUESTACION.md) has eight Mermaid diagrams of this flow.
 
 ## Resume and verification
-
-Resuming a session: use AGENTS.md and the last verified checkpoint, reconcile relevant Git/approval/test deltas, and load full board/spec/roadmap only when necessary. Record blocked, failed, unrun and passed checks accurately. Template CI does not prove live Codex/Claude behavior or efficiency.
+Resume from AGENTS.md and the last verified checkpoint; reconcile Git, approval and test changes; load the full board, spec or roadmap only when needed. Report passed, failed, blocked and unrun checks accurately. Template CI does not prove live agent behavior.
