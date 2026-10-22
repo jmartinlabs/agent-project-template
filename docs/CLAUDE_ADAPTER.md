@@ -45,18 +45,24 @@ For official mechanics see:
 - [Claude Code subagents](https://code.claude.com/docs/en/sub-agents)
 - [Claude Code project instructions](https://code.claude.com/docs/en/memory)
 
-## Permission audit for v2.4.2
+## Permission prompts
 
-The repository supplies no `.claude/settings.json` permission rules. Existing wrappers
-and profiles remain intact. The QA profile offers `Read, Glob, Grep, Bash`: its
-read-only instruction is a role contract, while Bash remains able to write. Text
-controls and Bash command filters are not independent security boundaries.
+`.claude/settings.json` adds **`ask` rules only** (no `deny`) for protected Git/GitHub
+operations: PR merge, force push, `git reset --hard`, repository create/edit/delete
+and release creation. Claude Code then asks the user before running a matching Bash
+command, so an approval comes from the user at execution time rather than from the
+model's memory of "ok/dale". `ask` never blocks an approved action, which is why the
+v2.4.2 objection to blanket `deny` rules does not apply.
 
-Do not install blanket deny rules from a reference archive: Claude deny rules can
-block even an explicitly approved action, and matching a command does not cover
-other Git/API execution paths. Inspect effective permissions in the actual Claude
-client (for example `/permissions` where supported), including user/managed settings
-and tool access; none were observed in a live Claude session for this change.
-If an approved action is blocked, report the restriction and resolve it through the
-authorized client configuration; do not silently bypass it or claim approval overrides
-a deny. Keep project-specific restrictions and the canonical approval policy.
+Limits: matching is textual and covers only the Bash tool. Other paths (GitHub MCP or
+API tools, scripts, aliases, `bypassPermissions` mode, user or managed settings with
+broader `allow` rules) are not covered. These rules are defense in depth, not a
+security boundary; the [approval policy](../specs/methodology/approvals.md) still
+applies. Derived projects should add their own deployment commands to `ask` once
+the stack is chosen. No live Claude session has verified these prompts for this change;
+check effective permissions in the actual client (for example `/permissions`).
+
+The QA profile offers `Read, Glob, Grep, Bash`: its read-only instruction is a role
+contract, while Bash remains able to write. If an approved action is blocked, report
+the restriction and resolve it through the authorized client configuration; do not
+silently bypass it. Keep project-specific restrictions and the canonical approval policy.

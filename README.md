@@ -109,8 +109,8 @@ specs/guidelines/{architecture,ui,quality,security}.md
 templates/{brainstorming,specification,roadmap,progress,testplan}.md
 scripts/validate-template          standard-library checks
 scripts/test-validator            positive/negative regression fixtures
-PROMPT_BACKUP.md                   original incomplete user prompt
-PROMPT_BACKUP_COMPLETE.md          complete user requirements, verbatim
+docs/archive/                      history: prompt backups, v2.4.2 audit/benchmark (not methodology)
+.claude/settings.json              ask-before-run rules for merge, force push and repo changes
 ```
 Project-specific files are created by the Skills in a derived repository, not prefilled
 with fictional approved decisions. UNDECIDED placeholders are intentional initialization
