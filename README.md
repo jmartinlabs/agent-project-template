@@ -9,6 +9,10 @@ no application and makes no language, database, framework or hosting choice for 
 
 Both paths require approval of important decisions before file changes.
 
+## Portable harness · Codex + Claude Code (first increment)
+
+This template now includes [portable harness guidance](docs/HARNESS.md), a thin `CLAUDE.md` bridge, Claude skill adapters for the shared `.agents/skills` workflows, a small optional tool-call guard for supported local hooks, and deterministic tests in CI. **Hooks are not human authorization or production security boundaries.** Client execution and true model-behavior evals remain to be verified separately.
+
 ## Adaptive agentic workflow (v2)
 
 Start by describing work in Codex Plan mode (such as `/plan` where available), or invoke `$orchestrate` explicitly. Codex Plan mode does not itself invoke a Skill. The coordinator inspects repository context, proposes Quick / Standard / Full, and **waits for your confirmation** before implementing.
