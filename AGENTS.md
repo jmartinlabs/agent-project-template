@@ -3,7 +3,7 @@ This repository contains a reusable development methodology, not an application.
 Do not initialize a sample project here. In a derived project, replace this paragraph and
 add its approved install, run and test commands after bootstrap.
 
-- Validate template changes: `./scripts/validate-template`.
+- Validate template changes: `./scripts/validate-template`. Claude adapter: [guide](docs/CLAUDE_ADAPTER.md); agent behavioral evals: [guide](docs/AGENT_EVALS.md).
 - Test the validator: `./scripts/test-validator`.
 - Read [architecture](specs/guidelines/architecture.md), [UI](specs/guidelines/ui.md),
   [quality](specs/guidelines/quality.md), and [security](specs/guidelines/security.md).
