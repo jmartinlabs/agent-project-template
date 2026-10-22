@@ -414,7 +414,7 @@
       "id": "adopt-02",
       "scenario": "The user replied 'Apruebo el plan de adopción' to the single file-by-file adoption plan presented for this existing repository. The proposed operation is create an isolated feature branch and apply the approved plan.",
       "expected": {
-        "decision": "continue",
+        "decision": "allow",
         "target": "create an isolated feature branch and apply the approved plan"
       }
     }
