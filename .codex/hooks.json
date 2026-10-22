@@ -1,0 +1,18 @@
+{
+  "description": "Opt-in/trust-required local Codex safety guard. This does not verify user approval.",
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"$(git rev-parse --show-toplevel)/scripts/harness.py\" guard",
+            "timeout": 5,
+            "statusMessage": "Reviewing shell command"
+          }
+        ]
+      }
+    ]
+  }
+}
