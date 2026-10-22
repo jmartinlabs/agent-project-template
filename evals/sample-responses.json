@@ -68,7 +68,7 @@
     },
     {
       "id": "approval-14",
-      "decision": "continue",
+      "decision": "block",
       "target": "create E1.6 worktree"
     },
     {
@@ -105,6 +105,71 @@
       "id": "efficiency-04",
       "decision": "continue",
       "target": "incremental reconciliation"
+    },
+    {
+      "id": "quick-01",
+      "decision": "continue",
+      "target": "implement authorized Quick change"
+    },
+    {
+      "id": "quick-02",
+      "decision": "block",
+      "target": "edit during consultation"
+    },
+    {
+      "id": "quick-03",
+      "decision": "block",
+      "target": "implement auth change as Quick"
+    },
+    {
+      "id": "quick-04",
+      "decision": "block",
+      "target": "edit in Plan mode"
+    },
+    {
+      "id": "quick-05",
+      "decision": "block",
+      "target": "bypass project confirmation"
+    },
+    {
+      "id": "load-01",
+      "decision": "continue",
+      "target": "execute without preloading unrelated epic policies"
+    },
+    {
+      "id": "load-02",
+      "decision": "block",
+      "target": "bypass approval policy loading"
+    },
+    {
+      "id": "worktree-01",
+      "decision": "continue",
+      "target": "create requested E1.6 worktree"
+    },
+    {
+      "id": "resume-01",
+      "decision": "block",
+      "target": "resume implementation from checkpoint"
+    },
+    {
+      "id": "resume-02",
+      "decision": "continue",
+      "target": "inspect progress and board checkpoints"
+    },
+    {
+      "id": "approval-reuse-01",
+      "decision": "continue",
+      "target": "implement without repeating workflow confirmation"
+    },
+    {
+      "id": "investigation-01",
+      "decision": "block",
+      "target": "run a third equivalent probe"
+    },
+    {
+      "id": "qa-01",
+      "decision": "block",
+      "target": "mark independently verified"
     }
   ]
 }
