@@ -30,14 +30,14 @@ retained from main. These are all differing or omitted files:
 
 | ZIP path | Decision and rationale |
 | --- | --- |
-| `AGENTS.md` | Adapt demand loading and conditional Quick; preserve app prohibition, gates, project precedence and explicit worktree request. |
+| `AGENTS.md` | Adapt demand loading and conditional Quick; preserve app prohibition, gates, project precedence and the canonical local-worktree policy. |
 | `.agents/skills/orchestrate/SKILL.md` | Adapt conditional Quick, relevant checkpoint lookup, proportional model advice; preserve full routing, bounded investigation and independent QA. |
 | `.agents/skills/tweak/SKILL.md` | Adapt Quick only with clear change intent, reversibility, low risk, outside Plan and no stricter gate. |
 | `.agents/skills/handoff/SKILL.md` | Discard rewrite: existing shutdown and persistence contract already correct; unchanged. |
 | `specs/methodology/workflows.md` | Adapt confirmation and demand-loading consistency; retain existing Full routing and protected gates. |
 | `specs/methodology/approvals.md` | Discard replacement; preserve primary policy with a localized ownership/isolation/authorization clarification. |
 | `specs/methodology/model-selection.md` | Adapt simplification using durable tiers, actual availability and telemetry limits; no model family names. |
-| `specs/methodology/dynamic-agents.md` | Discard rewrite; clarify that work packets cannot authorize worktrees. Existing one-executor and independent-QA rules retained. |
+| `specs/methodology/dynamic-agents.md` | Discard rewrite; link local isolation to the canonical policy without treating packets as new consent. Existing one-executor and independent-QA rules retained. |
 | `specs/methodology/epic-orchestration.md` | Discard cosmetic rewrite; current approvals, dependencies and scheduling are correct. |
 | `specs/methodology/acceptance-scenarios.md` | Adapt Q1 to preserve Plan as read-only; clarify that E4 requires a resume request. ZIP Q1 incorrectly permitted Plan edits. |
 | `README.md` | Adapt workflow and one-executor statements; retain existing detailed functionality and instructions. |
@@ -45,7 +45,7 @@ retained from main. These are all differing or omitted files:
 | `scripts/validate-template` | Adapt affected consistency checks, require primary approvals file; discard mandatory deny settings and arbitrary byte caps. |
 | `scripts/test-validator` | Adapt isolated negative/positive checks for new structural guards; discard deny/budget fixtures. |
 | `templates/epic-board.md` | Discard cosmetic example edits; contract unchanged. |
-| `evals/scenarios.json` | Adapt/add intent, risk, Plan, project precedence, demand-loading, worktree, resume, approval reuse, QA and investigation cases. Correct approval-14: development or packet is insufficient worktree consent. |
+| `evals/scenarios.json` | Adapt/add intent, risk, Plan, project precedence, demand-loading, worktree, resume, approval reuse, QA and investigation cases. Update approval-14 to permit useful, non-disruptive local isolation within authorized work; a packet alone grants no scope. |
 | `evals/sample-responses.json` | Adapt to corrected and added fixture expectations; never treat as observed model decisions. |
 | `docs/AGENT_EVALS.md` | Discard cosmetic replacement; retain explicit structural/live distinction and add benchmark link. |
 | `docs/GUIA_VISUAL_ORQUESTACION.md` | Adapt only confirmation and executor consistency; preserve eight diagrams and examples. |
@@ -85,12 +85,25 @@ Structural validator/scorer results do not certify real client behavior. Indepen
 client QA and performance runs remain pending; this candidate can be reviewed as a
 conservative methodology change, without claiming merge readiness or behavioral proof.
 
+## Worktree review adjustment
+
+The user subsequently authorized a policy adjustment before merge: local worktrees
+may support existing authorized scope without individual approval when isolation is
+useful and existing work is unaffected. The conditions and preservation rules live
+only in approvals.md; entry points link to that policy. Work packets remain records
+of responsibilities, not an authorization source. Protected actions and stricter
+derived-project restrictions remain gated. The init-project entry point and benchmark
+also link to the policy to remove the previous individual-request requirement.
+Ten additional decision scenarios cover permitted isolation and blocked scope,
+publication, merge, protected decisions, conflicts and unsafe removal. No worktree
+was needed for this update.
+
 ## Local validation evidence
 
 - `./scripts/validate-template`: PASS, including required structure, file references,
   Skill contracts, portable paths and existing heuristic secret checks.
-- `./scripts/test-validator`: PASS, 57 tests including isolated negative cases.
-- `python3 scripts/eval-agent-behavior --self-test`: PASS, 34 reference cases; no LLM.
+- `./scripts/test-validator`: PASS, 59 tests including isolated negative cases.
+- `python3 scripts/eval-agent-behavior --self-test`: PASS, 44 reference cases; no LLM.
 - `node scripts/check-mermaid.mjs docs/GUIA_VISUAL_ORQUESTACION.md`: PASS, eight
   diagrams using the existing pinned mermaid/jsdom prerequisites. Initial install
   failed under restricted execution; the network-enabled retry succeeded.

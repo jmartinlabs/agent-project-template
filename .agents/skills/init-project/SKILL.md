@@ -13,8 +13,8 @@ and approved `specs/roadmap.md`. Do not generate an application in the original 
 ## Procedure
 Inspect existing code, references and documents first. If this is the template itself,
 help create/open an independent derived repository, with publication authorization.
-Do not clone again when already in a derived project. Use the current checkout; do not
-create a Git worktree unless explicitly requested.
+Do not clone again when already in a derived project. Prefer the current checkout; apply the
+[local worktree policy](../../../specs/methodology/approvals.md#local-worktrees) if isolation is useful.
 
 ### Resume protocol
 If `specs/setup-progress.md` exists, read it and follow its next action. Verify linked
