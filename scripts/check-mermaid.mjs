@@ -2,7 +2,18 @@
 // Validate Mermaid diagram syntax with the actual Mermaid parser, not a regex heuristic.
 // CI installs a pinned mermaid version as a validation-only dependency.
 import { readFile } from 'node:fs/promises';
-import mermaid from 'mermaid';
+import { JSDOM } from 'jsdom';
+
+// Mermaid's label sanitizer needs a DOM even for syntax-only parsing.
+// Install one BEFORE importing Mermaid so DOMPurify initializes correctly.
+const dom = new JSDOM('<!doctype html><html><body></body></html>');
+globalThis.window = dom.window;
+globalThis.document = dom.window.document;
+globalThis.Node = dom.window.Node;
+globalThis.Element = dom.window.Element;
+globalThis.HTMLElement = dom.window.HTMLElement;
+globalThis.SVGElement = dom.window.SVGElement;
+const { default: mermaid } = await import('mermaid');
 
 const paths = process.argv.slice(2);
 if (!paths.length) paths.push('docs/GUIA_VISUAL_ORQUESTACION.md');
