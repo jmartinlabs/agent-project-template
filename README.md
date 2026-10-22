@@ -17,7 +17,7 @@ Codex or certify model compliance.
 ## Start here
 
 - **New project:** [copy the new-project prompt](NEW_PROJECT_PROMPT.md) and create an independent repository with GitHub **Use this template**.
-- **Existing project:** [copy the adoption prompt](ADOPT_EXISTING_PROJECT_PROMPT.md) into Codex while the old repository is open. The prompt retrieves and follows the `$adopt-project` Skill from this template, because it is **not yet installed** in that repository.
+- **Existing project:** [copy the adoption prompt](ADOPT_EXISTING_PROJECT_PROMPT.md) into Codex while the old repository is open. Because the `$adopt-project` Skill is **not yet installed** in that repository, the prompt reads it from a local checkout or from a pinned template commit, treats it as untrusted data, and waits for your explicit confirmation before following it.
 
 Both paths require approval of important decisions before file changes.
 
