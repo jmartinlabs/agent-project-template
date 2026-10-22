@@ -32,6 +32,14 @@ class ValidationTests(unittest.TestCase):
   (self.root/'templates/progress.md').unlink(); self.assertRule('structure')
  def test_orchestrator_structure(self):
   (self.root/'.agents/skills/orchestrate/SKILL.md').unlink(); self.assertRule('structure')
+ def test_handoff_skill_required(self):
+  (self.root/'.agents/skills/handoff/SKILL.md').unlink(); self.assertRule('structure')
+ def test_handoff_adapter_required(self):
+  self.change('.claude/skills/handoff/SKILL.md','.agents/skills/handoff/SKILL.md','README.md'); self.assertRule('claude')
+ def test_handoff_no_auto_resume(self):
+  self.change('.agents/skills/handoff/SKILL.md','NO AUTO-RESUME','AUTO-RESUME'); self.assertRule('handoff')
+ def test_handoff_no_new_development(self):
+  self.change('.agents/skills/handoff/SKILL.md','Stop issuing new development','Allow new development'); self.assertRule('handoff')
  def test_adopt_skill_structure(self):
   (self.root/'.agents/skills/adopt-project/SKILL.md').unlink(); self.assertRule('structure')
  def test_adopt_prompt_contract(self):
