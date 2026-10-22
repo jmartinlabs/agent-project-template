@@ -21,6 +21,21 @@ they do not replace canonical rules.
   or Full according to the already agreed scope. Native Claude Plan mode is
   separate from a Skill. Command names do not give approval or change models.
 
+## Model per profile
+
+All `.claude/agents/` profiles keep `model: inherit` on purpose:
+
+| Profile | Model | Why |
+|---|---|---|
+| implementation | inherit | routine approved work is fine on the session model (balanced tier) |
+| qa-review | inherit | independent critical review is the **advanced** tier in [model selection](../specs/methodology/model-selection.md); a cheaper fixed model would weaken QA |
+| functional | inherit | specs carry ambiguity and approval questions |
+| infrastructure | inherit | operational risk; keep the user's chosen model |
+
+For cheap read-only searches, use Claude Code's built-in **Explore** subagent instead
+of a custom profile. A derived project may pin a model (for example `model: sonnet`)
+in its own profiles when its risk and quota justify it; record that decision there.
+
 ## Manual smoke test (required before claiming live Claude compatibility)
 
 1. Open an authorized checkout in Claude Code and check `/skills` discovers
