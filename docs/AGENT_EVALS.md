@@ -51,4 +51,4 @@ For implementation smoke tests and Skills discovery see
 [Claude adapter](CLAUDE_ADAPTER.md).
 
 For reproducible Quick / Standard / Full client measurements, see the
-[v2.4.2 benchmark protocol](V2_4_2_BENCHMARK.md). No performance results are implied.
+[v2.4.2 benchmark protocol](archive/V2_4_2_BENCHMARK.md). No performance results are implied.

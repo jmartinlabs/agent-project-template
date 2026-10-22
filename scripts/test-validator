@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Positive and isolated negative fixtures for every validation category."""
 from pathlib import Path
+import re
 import runpy
 import shutil
 import subprocess
@@ -44,6 +45,17 @@ class ValidationTests(unittest.TestCase):
   (self.root/'.agents/skills/adopt-project/SKILL.md').unlink(); self.assertRule('structure')
  def test_adopt_prompt_contract(self):
   self.change('ADOPT_EXISTING_PROJECT_PROMPT.md','BEFORE modifying','AFTER modifying'); self.assertRule('adopt-prompt')
+ def test_adopt_prompt_moving_branch(self):
+  p=self.root/'ADOPT_EXISTING_PROJECT_PROMPT.md'
+  p.write_text(re.sub(r'(agent-project-template/)[0-9a-f]{40}/',r'\1main/',p.read_text())); self.assertRule('adopt-prompt')
+ def test_adopt_prompt_untrusted_review(self):
+  self.change('ADOPT_EXISTING_PROJECT_PROMPT.md','explicit confirmation','go-ahead'); self.assertRule('adopt-prompt')
+ def test_permissions_ask_merge(self):
+  self.change('.claude/settings.json','"Bash(gh pr merge *)",',''); self.assertRule('permissions')
+ def test_permissions_invalid_json(self):
+  self.change('.claude/settings.json','"ask"','ask'); self.assertRule('permissions')
+ def test_permissions_settings_required(self):
+  (self.root/'.claude/settings.json').unlink(); self.assertRule('structure')
  def test_adopt_prompt_missing(self):
   (self.root/'ADOPT_EXISTING_PROJECT_PROMPT.md').unlink(); self.assertRule('structure')
  def test_adopt_skill_contract(self):
