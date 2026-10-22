@@ -11,8 +11,5 @@ This repository's canonical methodology remains in `AGENTS.md`, `specs/methodolo
 - The `.claude/agents/` files provide optional specialist **profiles**, not
   four permanent running agents. Delegate only after checking readiness, real
   client capabilities, permissions, ownership, cost and checkout isolation.
-- Preserve [protected approvals](specs/methodology/approvals.md): `dale`,
-  `ok`, `continúa` never authorize a merge, specification acceptance,
-  new development scope, financial decision, or deployment.
 - Follow [adapter usage](docs/CLAUDE_ADAPTER.md). Never claim a Codex-specific
   action, Claude hook, GitHub safeguard or model evaluation ran without evidence.
