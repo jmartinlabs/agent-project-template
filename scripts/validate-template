@@ -70,7 +70,13 @@ def validate(root):
  for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Verification', 'Return schema'):
   if token.lower() not in packet.lower(): fail('dynamic-agents',f'agent work packet missing {token}')
  guide=read('docs/GUIA_VISUAL_ORQUESTACION.md')
- diagrams=re.findall(r'(?m)^```mermaid\\n(.*?)^```\\s*
+ diagrams=re.findall(r'(?ms)^\x60{3}mermaid\r?\n(.*?)^\x60{3}[ \t]*$',guide)
+ if len(diagrams)<6: fail('visual-guide','need at least six Mermaid diagrams')
+ for i,diagram in enumerate(diagrams,1):
+  if not re.match(r'(flowchart|stateDiagram|sequenceDiagram|graph)\b',diagram.strip()): fail('visual-guide',f'diagram {i} has unsupported header')
+ for token in ('MyFinanzas', 'aprobación', 'Infraestructura', 'subagentes', 'migrar', 'Git', 'checkpoint'):
+  if token.casefold() not in guide.casefold(): fail('visual-guide',f'visual guide missing {token}')
+ s=read('.agents/skills/init-project/SKILL.md')
  for token in ('specs/setup-progress.md','### Resume protocol','## Pending decisions','## Confirmed decisions','## Next action','awaiting-approval',*(f'### Stage {i} —' for i in range(1,8))):
   if token not in s: fail('resume',f'init-project missing {token}')
  s=read('NEW_PROJECT_PROMPT.md'); m=re.search(r'```text\n(.*?)\n```',s,re.S)
