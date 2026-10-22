@@ -18,4 +18,5 @@ add its approved install, run and test commands after bootstrap.
   do not mark a feature done while acceptance checks fail or remain unverified.
 - Follow [explicit protected approvals](specs/methodology/approvals.md): `ok`, `dale`, `continue`, or generic go-ahead messages never approve protected actions. Request identifiable approval for each protected decision; never infer PR merge permission from QA/CI or development approval.
 - In multi-epic work, only the coordinator updates specs/epic-board.md. Assign bounded agents dynamically using role contracts, the work packet template and real client capability; never invent running agents. Prepare independent tasks while specs await approval. Do not code unapproved specs or auto-merge PRs.
+- To consolidate and stop without continuing work, use [$handoff](.agents/skills/handoff/SKILL.md) (Claude Code: `/handoff`): checkpoint current state, request cancellation of controllable workers, and do not auto-resume. Never claim to stop unrelated sessions or discard uncommitted work.
 - Use the current isolated checkout. Do not create a worktree unless explicitly requested.
