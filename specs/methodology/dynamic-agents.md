@@ -1,4 +1,4 @@
-# Dynamic agent management (v2.3.1)
+# Dynamic agent management (v2.4.1)
 
 This document defines how `$orchestrate` chooses **how many specialist tasks to delegate**, creates work packets, supervises them, and closes them. Read with [epic orchestration](epic-orchestration.md), [model selection](model-selection.md) and the [visual operating guide](../../docs/GUIA_VISUAL_ORQUESTACION.md).
 
@@ -10,13 +10,18 @@ The coordinator is the only scheduler and shared board writer. Subagents must no
 
 ## Dynamic selection algorithm
 
-1. **Inventory** the ready queue using the board, authoritative approvals, dependencies and current source/test evidence. Classify work as read-only research, document draft, code edit, QA, or infrastructure; identify required skill/profile and affected files.
-2. **Check necessity**: Delegate only bounded independent work that can progress without blocked prerequisites or additional user decision. Simple, dependent or short tasks should stay with the coordinator.
-3. **Size the pool** according to independent ready work, risk, coordination overhead, file contention and estimated usage. Usually start with **one to three active specialists**; add a fourth or more only if a clear benefit outweighs overhead and the actual environment permits it. This is a **methodology recommendation**, not a universal technical Codex limit. Respect any runtime concurrency cap, quotas and limits. Do not require permission for each ordinary subagent within a confirmed scope, but do request approval for additional unapproved scope, expense/operations with impact, or destructive actions.
-4. **Pick a role dynamically** from reusable profiles or a temporary narrowly bounded specialization. Same profile can be used more than once for independent tasks. For each delegate, issue a [work-packet contract](../../templates/agent-work-packet.md): unique ID, source/approval evidence, objective, file ownership, read/write permissions, isolation, dependencies, deliverable, checks, prohibitions and return schema.
+1. **Inventory relevant ready work** from trusted checkpoint, approvals, dependencies and test/code evidence; avoid rebuilding full queue after every action.
+2. **Check necessity**: Default to one executor for bounded tasks; assign a complete deliverable, not every microstep. Bring a separate reviewer for independent QA when the candidate reaches its gate.
+3. **Size the pool**: Start with one executor; parallelize only disjoint ready work with a clear benefit above context/coordination overhead. Follow actual client limits and quotas. This is a heuristic, not a fixed Codex cap; consequential scope or destructive actions still need explicit approval.
+4. **Pick a role dynamically** and issue a compact [work packet](../../templates/agent-work-packet.md): approved scope, objective, ownership and isolation, expected deliverable, acceptance checks, prohibited actions, and stop/gate conditions. Link existing source docs rather than copying large contexts.
 5. **Start only if supported**: Check actual available subagent tools/capabilities in this Codex session before claiming a worker exists. If unavailable, use sequential execution following the same ready queue; never pretend the delegate ran. External chats opened manually are **not** attached workers. They can only contribute via recorded checkpoints/branches/PRs.
-6. **Supervise**: Track assigned, running, awaiting-result, blocked, completed or cancelled; inspect results and actual diffs/tests; update the shared board after each event. Do not spawn duplicates for the same scope or let two workers write the same files. Parallel read-only tasks can share one checkout; separate code writers need non-overlapping file ownership and permitted isolated checkouts/branches, otherwise serialize writes.
-7. **Close or reassign** when deliverables are complete, blocked, duplicated or no longer useful. A completed agent's task is done; launch a **new bounded work packet** for another need rather than treating a role as a permanent always-on worker. Do not claim terminated sessions kept working or that agent cleanup was executed unless the runtime confirms it.
+6. **Supervise by milestone/exception**: Check candidate diff and test evidence at handoff or material blocker; do not reconcile after every worker message. Prevent duplicates/overlapping edits. Concurrent code writers need disjoint ownership and authorized isolated checkouts, otherwise serialize.
+7. **Close or reassign** when a deliverable completes, blocks or becomes redundant. Require concise SHA, actual PASS/FAIL/UNRUN evidence, blockers and next safe action. Do not automatically create replacement workers or claim background operation.
+
+## Resource discipline
+- Measure observable completed work and verified outcomes, not agent/message counts. Do not invent per-agent token costs without real runtime telemetry.
+- Investigations need a discriminating probe; after two comparable no-progress attempts, checkpoint and escalate rather than repeat automatically.
+- On quota warnings, preserve safe state and prioritize; never skip required tests, independent QA or approval gates to save tokens.
 
 ## Prioritization and approvals
 
