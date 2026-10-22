@@ -13,7 +13,7 @@ Risk matters more than code size. Auth, payments, production configuration, migr
 ## Full workflow routing
 - New project: init-project discovery + project brainstorming if needed, architecture decision, bootstrap walking skeleton, roadmap approval, feature spec approval, dev and verification. Roadmap can be drafted provisionally earlier to select a useful vertical slice.
 - Existing project, one complex feature: reuse context; run spec and dev. No redundant project init or roadmap.
-- Multiple new epics: propose/update roadmap, confirm it, then spec and dev one epic at a time.
+- Multiple new epics: propose/update roadmap and confirm it; each epic still has its own spec and dev gates, but independent brainstorming, implementation, QA and infrastructure lanes may overlap under epic orchestration.
 - Brainstorming is for unresolved requirements; preserve decisions and open questions. Do not force it for straightforward changes.
 - Walking skeleton is a real minimal end-to-end executable slice, not a planning interview. Use bootstrap only when initializing a project or validating a meaningful new architectural path.
 
