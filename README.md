@@ -49,6 +49,12 @@ The coordinator follows [dynamic agent management](specs/methodology/dynamic-age
 
 The template documents orchestration; it **does not itself register or launch workers**. Check actual subagent tools and isolation in Codex. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
 
+## Explicit session shutdown and handoff
+
+Use [`$handoff`](.agents/skills/handoff/SKILL.md) in Codex (or `/handoff` in Claude Code) when you want to **consolidate and stop**, rather than continue development. It freezes new work, requests stop of controllable workers, protects WIP, and writes a minimal checkpoint to existing progress/board files (or `specs/session-handoff.md` as a fallback). It never merges, deploys or creates a PR from a generic stop request.
+
+If Codex ran out of quota, interrupt any visibly running task using the client controls first. Once quota is available, invoke `$handoff` before `$orchestrate`; no Skill can save unseen state while it cannot execute. A new session may inspect the checkpoint but **must not resume automatically** or presume that other chats were stopped.
+
 ## Adopt an existing project
 
 `$adopt-project` lives in [the Skill source](.agents/skills/adopt-project/SKILL.md). The old project initially cannot discover it by name. Use [ADOPT_EXISTING_PROJECT_PROMPT.md](ADOPT_EXISTING_PROJECT_PROMPT.md) once; it tells Codex to read the Skill from GitHub, analyze the existing code and propose a safe plan before installing project-local Skills. If remote access is unavailable, supply a local copy of the Skill.
@@ -89,7 +95,7 @@ See [document ownership](specs/README.md) and [Skills invocation](NEW_PROJECT_PR
 AGENTS.md                         concise agent entry point
 NEW_PROJECT_PROMPT.md              new-project prompt
 ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
-.agents/skills/{adopt-project,orchestrate,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
+.agents/skills/{adopt-project,orchestrate,handoff,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
 specs/methodology/model-selection.md advisory model and reasoning recommendations
