@@ -1,0 +1,105 @@
+{
+  "description": "Synthetic deterministic tests of hook invocation and tiny blocked-command policy. Not model behavior evals.",
+  "cases": [
+    {
+      "id": "allow-status",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "git status --short"
+        }
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "allow-branch",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "git switch -c docs/example"
+        }
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "allow-tests",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "python3 scripts/harness.py validate"
+        }
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "deny-merge",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "gh pr merge 9 --squash"
+        }
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "deny-force",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "git push -f origin feature-branch"
+        }
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "deny-lease",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "git push --force-with-lease origin main"
+        }
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "deny-main",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "git push origin main"
+        }
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "deny-rm",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "rm -rf ./something"
+        }
+      },
+      "expected": "deny"
+    },
+    {
+      "id": "allow-non-shell",
+      "event": {
+        "tool_name": "Read",
+        "tool_input": {
+          "file_path": "AGENTS.md"
+        }
+      },
+      "expected": "allow"
+    },
+    {
+      "id": "allow-normal-push",
+      "event": {
+        "tool_name": "Bash",
+        "tool_input": {
+          "command": "git push origin feat/safe-change"
+        }
+      },
+      "expected": "allow"
+    }
+  ]
+}
