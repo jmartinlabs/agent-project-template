@@ -1,12 +1,12 @@
-# Epic orchestration: concurrent progress without bypassing approvals (v2.3.1)
+# Epic orchestration: lightweight delivery without bypassing approvals (v2.4.1)
 
 This policy applies to complex **Full** work and to Standard work with several independent workstreams. It extends [adaptive workflows](workflows.md) rather than replacing `$roadmap`, `$spec` or `$dev`. Quick remains single-stream by default.
 
 ## Persistent board and single writer
 
-When a roadmap has more than one active, blocked, or upcoming item, keep `specs/epic-board.md` using [the board template](../../templates/epic-board.md). Reconstruct from existing approved roadmap, specifications, progress files, test plans, and Git state. If some evidence is unavailable, record `unknown` or `unverified`; never manufacture an approval or completion.
+Keep `specs/epic-board.md` only when multiple live epics or independent workstreams need scheduling; use existing progress/testplan for a single bounded feature. Reconcile the board at session start and major gates with approved spec, checkpoints, Git and tests. Mark unavailable evidence `unknown`/`unverified`, never infer approval.
 
-The coordinator is the **only writer** of the shared board. Delegates return concise status/evidence; the coordinator reconciles it after verifying authoritative files and check results. Canonical approved decisions remain in specs/guidelines, not duplicated into the board.
+The coordinator is the **only writer** of the shared board. Delegates return concise outcomes, SHA and test evidence. Update changed fields only when ownership, authorization, candidate, QA verdict, blocker or PR state materially changes; not on every intermediate worker message.
 
 Each row has a unique feature ID and tracks stage, scope/dependencies, approval, assigned role, isolated branch/checkout (if applicable), blockers, evidence link, next action and last verification. A ready task is not the same as an approved spec. A PR opened is not a merge.
 
@@ -17,17 +17,20 @@ Each row has a unique feature ID and tracks stage, scope/dependencies, approval,
 - `QA`: planned → test-design → awaiting-implementation → verifying → passed/failed/blocked. Independent test design and investigation can overlap another feature's spec or dev. Never claim tests passed before execution against the actual candidate.
 - `merge`: proposed PR → ready-for-user-review → user-approved → merged. Never auto-merge or push/create remote PR without required repository authorization. PR readiness requires current tests/review evidence; branch merge is a separate approval gate.
 
-## Scheduler: check after each event
+## Scheduler: reconcile at meaningful milestones
 
-1. Read board and canonical files; reconcile Git/PR/test status before treating any recorded state as current.
+1. On resume, verify Git/PR/approval deltas since the last trusted checkpoint and read only the documents needed for the next gate. Reload full sources when stale, conflicting or needed for safety.
 2. Identify gates and hard dependencies. Mark blocked only where there is a real dependency; cite the specific prerequisite and owner. Distinguish user decision needed from environment/technical blocker.
-3. Compute independent **ready** work across lanes: (a) implement already approved specifications; (b) verify completed increments or prepare independent QA test designs; (c) draft the next specification up to its approval boundary; (d) investigate a bounded technical risk with a stated question and exit condition.
+3. Recompute **ready** work only when prerequisites or gates change: (a) approved/authorized implementation, (b) candidate QA, (c) independent spec drafting up to approval, (d) bounded investigation with an explicit hypothesis and exit condition.
 4. Prefer user priorities and critical-path work, but do not starve next-feature preparation because an unrelated investigation is running. When any work is blocked, promptly pick the next independent ready item.
-5. Assign roles to bounded work packets; isolate overlapping writes. A single checkout can support **parallel read-only research**, not uncontrolled simultaneous edits. For independent code edits use distinct branches/checkouts or worktrees **only when authorized and supported**; otherwise serialize writes. One role owns each editable file range.
-6. After work completes or approval arrives, update the board, re-evaluate dependencies and autonomously hand off to the next authorized step in the **same active execution**. Spec approved → dev ready; dev verified → QA/review; QA passed → prepare PR for approval. The user does not have to type `$dev` manually.
+5. Prefer one complete development packet per feature and a required independent QA handoff when a candidate exists. Parallelize only distinct ready work with benefits greater than coordination/context cost. For concurrent edits use authorized isolated checkouts and disjoint ownership, otherwise serialize.
+6. At the approved-spec, completed-candidate, QA-verdict and PR/approval milestones, update only changed state and hand off a concise evidence summary. Approved spec plus dev authorization → dev; candidate → required independent QA; checks and QA green → PR for approval. Never re-plan or re-approve unchanged work.
 7. End an active run with a concise board summary: completed, underway, waiting on user, blocked, newly ready, and exact next action. No claim of background processing between sessions; rescan on next invocation.
 
-Use [dynamic agent management](dynamic-agents.md) to size and supervise specialist work. Start with one to three concurrent specialist work packets by default; four or more is possible **only** when a real client/runtime permits it and independent work justifies its overhead, risk and usage. These are advisory limits, not universal Codex caps. Roles are templates, not fixed agents, and the same role can serve multiple independent tasks. Do not invent agent tools or assume Desktop/Web concurrency support; use a sequential fallback with the **same dependency logic**.
+Use [dynamic agent management](dynamic-agents.md) to size useful delegation. **Default to one executor**, plus required independent QA/review at the appropriate handoff; add parallel specialists only if tasks are genuinely independent and benefit exceeds overhead. This is not a platform cap; retain sequential fallback and protected gates.
+
+## Bounded technical investigations
+Start with a falsifiable hypothesis, one discriminating probe and expected evidence. After two comparable attempts without new findings, preserve logs, candidate state and failing gates, and escalate to a new hypothesis or scope decision; do not repeat blindly. This never waives QA, regression checks or urgent safety containment.
 
 ## Independent specialist work packets
 
@@ -53,4 +56,4 @@ The [Spanish visual guide](../../docs/GUIA_VISUAL_ORQUESTACION.md) includes eigh
 
 ## Resume and verification
 
-Resuming a session: read `AGENTS.md`, board, approved specs, roadmap, latest progress/test evidence and Git state; reconcile stale pointers; keep approval gates. Record blocked, failed, unrun and passed checks distinctly. A CI success for the methodology template does not prove these behaviors work in an actual Codex session.
+Resuming a session: use AGENTS.md and the last verified checkpoint, reconcile relevant Git/approval/test deltas, and load full board/spec/roadmap only when necessary. Record blocked, failed, unrun and passed checks accurately. Template CI does not prove live Codex/Claude behavior or efficiency.

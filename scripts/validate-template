@@ -70,6 +70,8 @@ def validate(root):
   if token.lower() not in model_selection.lower(): fail('model-selection',f'model policy missing {token}')
  orchestrator=read('.agents/skills/orchestrate/SKILL.md')
  if 'specs/methodology/model-selection.md' not in orchestrator: fail('model-selection','orchestrator is not wired to the model policy')
+ for token in ('one executor', 'checkpoint', 'independent qa', 'two comparable'):
+  if token not in orchestrator.lower(): fail('orchestration-efficiency',f'orchestrator missing {token}')
  if '(specs/methodology/model-selection.md)' not in agents: fail('model-selection','AGENTS.md missing model policy link')
  epic=read('specs/methodology/epic-orchestration.md')
  for token in ('single writer', 'awaiting-approval', 'hard dependencies', 'approved', 'independent', 'merge', 'active'):
@@ -84,7 +86,7 @@ def validate(root):
   for token in tokens:
    if token not in text: fail('epic-scheduling',f'role {role} missing {token}')
  dynamic=read('specs/methodology/dynamic-agents.md')
- for token in ('profiles', 'one to three', 'fourth', 'supported', 'sequential', 'financial', 'close', 'work-packet'):
+ for token in ('profiles', 'one executor', 'parallel', 'quota', 'supported', 'sequential', 'financial', 'close', 'work-packet', 'independent qa'):
   if token.lower() not in dynamic.lower(): fail('dynamic-agents',f'dynamic policy missing {token}')
  if 'specs/methodology/dynamic-agents.md' not in orchestrator: fail('dynamic-agents','orchestrator not wired to dynamic management')
  if '(specs/methodology/dynamic-agents.md)' not in agents: fail('dynamic-agents','AGENTS.md missing dynamic management link')
