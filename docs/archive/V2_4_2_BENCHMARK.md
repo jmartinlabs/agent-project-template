@@ -12,7 +12,7 @@ Static file sizes and scorer fixtures do not measure tokens consumed or agent be
 
 Use a disposable fixture repository, identical tracked files, clean Git state and
 identical tool permissions for each run. Provision separate copies within the authorized benchmark scope, applying the
-[local worktree policy](../specs/methodology/approvals.md#local-worktrees) where relevant; a packet grants no new scope. Install each revision's
+[local worktree policy](../../specs/methodology/approvals.md#local-worktrees) where relevant; a packet grants no new scope. Install each revision's
 methodology into its own copy, preserving identical project restrictions. To separate
 the handoff addition from this release, compare the integration baseline as a third arm.
 Pin fixture commit, prompts, client/version, model/effort, OS, tools and dependency
@@ -60,7 +60,7 @@ PASS/FAIL/BLOCKED/UNRUN against the observable criteria, checks and candidate SH
 
 Report paired per-task medians and ranges with raw rows, sample count, missing
 metrics and failures. Do not infer token/latency savings from instruction length.
-Run the decision scenarios using the procedure in [agent evals](AGENT_EVALS.md) in
+Run the decision scenarios using the procedure in [agent evals](../AGENT_EVALS.md) in
 both clients as a separate experiment. A decision-only trial is not an execution
 benchmark, and the scorer self-test invokes no model.
 
