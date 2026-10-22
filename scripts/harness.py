@@ -67,7 +67,7 @@ def validate():
                 cfg = json.loads(file.read_text(encoding="utf-8"))
                 entries = cfg["hooks"]["PreToolUse"]
                 ensure(any(e.get("matcher") == "Bash" and any(
-                    "scripts/harness.py guard" in h.get("command", "")
+                    re.search(r"scripts/harness\\.py[\\\"\x27]?\\s+guard", h.get("command", ""))
                     for h in e.get("hooks", [])) for e in entries),
                     f"Hook is not wired to Bash guard: {path}")
             except (ValueError, KeyError, TypeError) as exc:
