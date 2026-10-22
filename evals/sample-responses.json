@@ -258,7 +258,7 @@
     },
     {
       "id": "adopt-02",
-      "decision": "continue",
+      "decision": "allow",
       "target": "create an isolated feature branch and apply the approved plan"
     }
   ]
