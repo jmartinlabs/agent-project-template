@@ -1,6 +1,6 @@
 # Document ownership and workflow
 
-For new work, see [adaptive Quick / Standard / Full workflows](methodology/workflows.md). These route the original Full-document lifecycle only when warranted; small changes need no mandatory feature documents. See [manual acceptance scenarios](methodology/acceptance-scenarios.md).
+For new work, see [adaptive Quick / Standard / Full workflows](methodology/workflows.md), [epic scheduling](methodology/epic-orchestration.md) and [dynamic agent management](methodology/dynamic-agents.md). These route the original Full-document lifecycle only when warranted; small changes need no mandatory feature documents. See [manual acceptance scenarios](methodology/acceptance-scenarios.md).
 This is an uninitialized template. No product, stack or architecture has been approved.
 
 | Document | Owns | Created/updated by |
