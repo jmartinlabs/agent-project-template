@@ -1,6 +1,18 @@
 # Universal AI development template
-A reusable Codex development methodology for any project stack. This repository contains
+A reusable Codex and Claude Code agent development methodology for any project stack. This repository contains
 no application and makes no language, database, framework or hosting choice for you.
+
+## Codex / Claude Code portability (v2.4 candidate)
+
+The same canonical `AGENTS.md`, Skills, approval policy and role contracts are
+reused on both platforms. Codex uses `$orchestrate`; Claude Code loads
+`CLAUDE.md` and offers `/orchestrate` through thin wrappers in
+`.claude/skills/`. Optional Claude agent profiles are under `.claude/agents/`.
+See the [Claude setup and smoke test](docs/CLAUDE_ADAPTER.md).
+
+[Behavioral evals](docs/AGENT_EVALS.md) provide portable decision scenarios
+and a scorer. CI runs scorer **self-tests only**; it does not call Claude or
+Codex or certify model compliance.
 
 ## Start here
 
