@@ -42,6 +42,20 @@ class ValidationTests(unittest.TestCase):
   self.change('specs/methodology/epic-orchestration.md','awaiting-approval','waiting'); self.assertRule('epic-scheduling')
  def test_epic_board_deps(self):
   self.change('templates/epic-board.md','Hard dependencies','Loose connections'); self.assertRule('epic-scheduling')
+ def test_dynamic_policy_required(self):
+  (self.root/'specs/methodology/dynamic-agents.md').unlink(); self.assertRule('structure')
+ def test_infrastructure_role_required(self):
+  (self.root/'.agents/roles/infrastructure.md').unlink(); self.assertRule('structure')
+ def test_work_packet_required(self):
+  (self.root/'templates/agent-work-packet.md').unlink(); self.assertRule('structure')
+ def test_visual_guide_required(self):
+  (self.root/'docs/GUIA_VISUAL_ORQUESTACION.md').unlink(); self.assertRule('structure')
+ def test_orchestrator_dynamic_wiring(self):
+  self.change('.agents/skills/orchestrate/SKILL.md','specs/methodology/dynamic-agents.md','specs/methodology/other.md'); self.assertRule('dynamic-agents')
+ def test_visual_diagram_count(self):
+  self.change('docs/GUIA_VISUAL_ORQUESTACION.md','```mermaid','```text'); self.assertRule('visual-guide')
+ def test_work_packet_ownership(self):
+  self.change('templates/agent-work-packet.md','Write files','Editable stuff'); self.assertRule('dynamic-agents')
  def test_model_selection_structure(self):
   (self.root/'specs/methodology/model-selection.md').unlink(); self.assertRule('structure')
  def test_model_selection_policy(self):
