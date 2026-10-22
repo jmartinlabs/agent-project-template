@@ -44,3 +44,19 @@ For official mechanics see:
 - [Claude Code Skills](https://code.claude.com/docs/en/skills)
 - [Claude Code subagents](https://code.claude.com/docs/en/sub-agents)
 - [Claude Code project instructions](https://code.claude.com/docs/en/memory)
+
+## Permission audit for v2.4.2
+
+The repository supplies no `.claude/settings.json` permission rules. Existing wrappers
+and profiles remain intact. The QA profile offers `Read, Glob, Grep, Bash`: its
+read-only instruction is a role contract, while Bash remains able to write. Text
+controls and Bash command filters are not independent security boundaries.
+
+Do not install blanket deny rules from a reference archive: Claude deny rules can
+block even an explicitly approved action, and matching a command does not cover
+other Git/API execution paths. Inspect effective permissions in the actual Claude
+client (for example `/permissions` where supported), including user/managed settings
+and tool access; none were observed in a live Claude session for this change.
+If an approved action is blocked, report the restriction and resolve it through the
+authorized client configuration; do not silently bypass it or claim approval overrides
+a deny. Keep project-specific restrictions and the canonical approval policy.

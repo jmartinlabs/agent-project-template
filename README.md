@@ -23,7 +23,7 @@ Both paths require approval of important decisions before file changes.
 
 ## Adaptive agentic workflow (v2)
 
-Start by describing work in Codex Plan mode (such as `/plan` where available), or invoke `$orchestrate` explicitly. Codex Plan mode does not itself invoke a Skill. The coordinator inspects repository context, proposes Quick / Standard / Full, and **waits for your confirmation** before implementing.
+Start by describing work in Codex Plan mode (such as `/plan` where available), or invoke `$orchestrate` explicitly. Codex Plan mode does not itself invoke a Skill. The coordinator inspects repository context, proposes Quick / Standard / Full, and confirms Standard / Full unless already explicitly authorized. Clearly requested, reversible, low-risk Quick changes without protected or stricter project gates may proceed after a one-line plan. Analysis-only requests and read-only Plan mode never authorize edits.
 
 - Quick: `$tweak` for small low-risk modifications, without mandatory spec files.
 - Standard: `$task` for bounded features, brief plan and acceptance checks.
@@ -33,7 +33,7 @@ Start by describing work in Codex Plan mode (such as `/plan` where available), o
 
 ## Adaptive model selection (v2.2)
 
-`$orchestrate` now suggests a **model capability tier and reasoning effort** alongside Quick / Standard / Full. See [model-selection guidelines](specs/methodology/model-selection.md). Default preference is **balanced**; the user can prioritize **efficiency** or **quality**. Exact names/effort settings depend on the available Codex client and model, and Skills do **not** change models automatically. Keep the current model when adequate and verify actual behavior through tests regardless of model.
+`$orchestrate` optionally suggests a **model capability tier and reasoning effort** alongside workflow classification when useful, normally Standard / Full. See [model-selection guidelines](specs/methodology/model-selection.md). Default preference is **balanced**; the user can prioritize **efficiency** or **quality**. Exact names/effort settings depend on the available Codex client and model, and Skills do **not** change models automatically. Keep the current model when adequate and verify actual behavior through tests regardless of model.
 
 ## Epic orchestration (v2.3)
 
@@ -45,7 +45,7 @@ While E1.6 awaits a financial decision, the functional lane can draft independen
 
 **Start with the [visual orchestration guide](docs/GUIA_VISUAL_ORQUESTACION.md)** (Spanish): eight editable Mermaid diagrams illustrate agent roles, dynamic pool selection, parallel epics, worker lifecycle, approval gates, branch isolation, migration from two chats and model selection.
 
-The coordinator follows [dynamic agent management](specs/methodology/dynamic-agents.md) to **find independent ready work first, then choose agent count**. [Functional, Developer, QA and Infrastructure profiles](.agents/roles/README.md) are reusable role instructions, not permanent agents. Multiple distinct tasks can use the same role. Start with 1–3 specialists by default; more only when a supported runtime and the workload justify it. Use [agent work packets](templates/agent-work-packet.md) for scope, ownership and verifiable outcomes.
+The coordinator follows [dynamic agent management](specs/methodology/dynamic-agents.md) to **find independent ready work first, then choose agent count**. [Functional, Developer, QA and Infrastructure profiles](.agents/roles/README.md) are reusable role instructions, not permanent agents. Multiple distinct tasks can use the same role. Default to one executor; add specialists only when a supported runtime and independently useful work justify the overhead, preserving required independent QA. Use [agent work packets](templates/agent-work-packet.md) for scope, ownership and verifiable outcomes.
 
 The template documents orchestration; it **does not itself register or launch workers**. Check actual subagent tools and isolation in Codex. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
 

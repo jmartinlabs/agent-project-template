@@ -125,4 +125,24 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(subprocess.run(command,capture_output=True).returncode,1)
  def test_nonvisual(self):
   (self.root/'specs/guidelines/ui.md').write_text('# UI\nNot applicable: CLI project.\n'); self.assertEqual(validate(self.root),[])
+ def test_approval_policy_required(self):
+  (self.root/'specs/methodology/approvals.md').unlink(); self.assertRule('structure')
+ def test_consistency_quick_intent(self):
+  self.change('.agents/skills/tweak/SKILL.md','user clearly requested','agent proposed'); self.assertRule('consistency')
+ def test_consistency_checkpoint_lookup(self):
+  self.change('.agents/skills/orchestrate/SKILL.md','specs/session-handoff.md','specs/other.md'); self.assertRule('consistency')
+ def test_consistency_worktree_consent(self):
+  self.change('specs/methodology/approvals.md','A Work Packet assigns responsibilities','A Work Packet grants scope'); self.assertRule('consistency')
+ def test_consistency_project_precedence(self):
+  self.change('AGENTS.md','Project-specific restrictions','Generic suggestions'); self.assertRule('consistency')
+ def test_worktree_policy_conditions(self):
+  for token in ('work already authorized by the user', 'provides useful isolation', 'does not affect existing work', 'including uncommitted/untracked changes', 'publication or merges', 'never remove a worktree with pending work without user authorization', 'Stricter derived-project restrictions always take precedence'):
+   with self.subTest(token=token):
+    p=self.root/'specs/methodology/approvals.md'; original=p.read_text()
+    p.write_text(original.replace(token,'REMOVED')); self.assertRule('consistency'); p.write_text(original)
+ def test_worktree_policy_references(self):
+  for name in ('AGENTS.md', '.agents/skills/orchestrate/SKILL.md', '.agents/skills/init-project/SKILL.md', 'specs/methodology/dynamic-agents.md'):
+   with self.subTest(name=name):
+    p=self.root/name; original=p.read_text()
+    p.write_text(original.replace('approvals.md#local-worktrees','approvals.md')); self.assertRule('consistency'); p.write_text(original)
 if __name__=='__main__': unittest.main(verbosity=2)
