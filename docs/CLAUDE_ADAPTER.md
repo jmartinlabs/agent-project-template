@@ -12,7 +12,7 @@ they do not replace canonical rules.
   Do not maintain separate, conflicting policies in these files.
 - `.claude/skills/NAME/SKILL.md` enables `/orchestrate`, `/spec`, `/dev`,
   `/task`, `/tweak`, `/init-project`, `/bootstrap`, `/roadmap`, and
-  `/adopt-project`. Each wrapper **reads the corresponding canonical** file
+  `/adopt-project`, and `/handoff`. Each wrapper **reads the corresponding canonical** file
   under `.agents/skills/NAME/SKILL.md`; none automatically copies its contents.
 - `.claude/agents/` exposes optional task-limited profiles for
   functional, implementation, QA/review and infrastructure work. A profile
