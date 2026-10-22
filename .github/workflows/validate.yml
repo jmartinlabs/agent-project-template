@@ -14,6 +14,10 @@ jobs:
           python-version: '3.12'
       - run: ./scripts/validate-template
       - run: ./scripts/test-validator
+      - name: Validate portable harness and deterministic policy evals
+        run: |
+          python3 scripts/harness.py validate
+          python3 scripts/harness.py eval
       # Parser-level validation: structural Python checks alone cannot catch malformed Mermaid edges.
       - uses: actions/setup-node@v4
         with:
