@@ -29,6 +29,14 @@ For multiple epics, [epic orchestration](specs/methodology/epic-orchestration.md
 
 While E1.6 awaits a financial decision, the functional lane can draft independent E1.7 requirements and QA can prepare provisional tests. E1.6 implementation remains blocked until explicit approval. After approval, `$orchestrate` can route to `$dev` and QA inside the active run without asking you to invoke those Skills manually. Merges and consequential decisions always need your approval. No background continuation after the session closes.
 
+## Dynamic agent management (v2.3.1)
+
+**Start with the [visual orchestration guide](docs/GUIA_VISUAL_ORQUESTACION.md)** (Spanish): eight editable Mermaid diagrams illustrate agent roles, dynamic pool selection, parallel epics, worker lifecycle, approval gates, branch isolation, migration from two chats and model selection.
+
+The coordinator follows [dynamic agent management](specs/methodology/dynamic-agents.md) to **find independent ready work first, then choose agent count**. [Functional, Developer, QA and Infrastructure profiles](.agents/roles/README.md) are reusable role instructions, not permanent agents. Multiple distinct tasks can use the same role. Start with 1–3 specialists by default; more only when a supported runtime and the workload justify it. Use [agent work packets](templates/agent-work-packet.md) for scope, ownership and verifiable outcomes.
+
+The template documents orchestration; it **does not itself register or launch workers**. Check actual subagent tools and isolation in Codex. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
+
 ## Adopt an existing project
 
 `$adopt-project` lives in [the Skill source](.agents/skills/adopt-project/SKILL.md). The old project initially cannot discover it by name. Use [ADOPT_EXISTING_PROJECT_PROMPT.md](ADOPT_EXISTING_PROJECT_PROMPT.md) once; it tells Codex to read the Skill from GitHub, analyze the existing code and propose a safe plan before installing project-local Skills. If remote access is unavailable, supply a local copy of the Skill.
@@ -74,6 +82,9 @@ ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
 specs/README.md                    document ownership and naming
 specs/methodology/model-selection.md advisory model and reasoning recommendations
 specs/methodology/epic-orchestration.md dependency-aware epic scheduler
+specs/methodology/dynamic-agents.md dynamic specialist lifecycle
+docs/GUIA_VISUAL_ORQUESTACION.md   eight editable Mermaid diagrams
+templates/agent-work-packet.md    delegate work packet contract
 templates/epic-board.md          optional epic coordination board
 .agents/roles/                   functional, implementation and QA roles
 specs/guidelines/{architecture,ui,quality,security}.md
