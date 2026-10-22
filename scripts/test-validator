@@ -76,6 +76,8 @@ class ValidationTests(unittest.TestCase):
   self.change('specs/methodology/model-selection.md','balanced','neutral'); self.assertRule('model-selection')
  def test_model_selection_wiring(self):
   self.change('.agents/skills/orchestrate/SKILL.md','specs/methodology/model-selection.md','specs/methodology/other.md'); self.assertRule('model-selection')
+ def test_efficiency_investigation_guard(self):
+  self.change('.agents/skills/orchestrate/SKILL.md','After two comparable attempts','After unlimited attempts'); self.assertRule('orchestration-efficiency')
  def test_workflow_contract(self):
   self.change('specs/methodology/workflows.md','Quick','Tiny'); self.assertRule('orchestration')
  def test_links(self):
