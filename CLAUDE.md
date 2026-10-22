@@ -7,6 +7,7 @@ This repository's canonical methodology remains in `AGENTS.md`, `specs/methodolo
 
 - For Claude Code, invoke `/orchestrate` (rather than Codex `$orchestrate`).
   Use the `.claude/skills/` wrappers to read the canonical Skill.
+- To stop and transfer a session, invoke `/handoff`; it loads the canonical `$handoff` Skill. It does not resume or approve new work.
 - The `.claude/agents/` files provide optional specialist **profiles**, not
   four permanent running agents. Delegate only after checking readiness, real
   client capabilities, permissions, ownership, cost and checkout isolation.
