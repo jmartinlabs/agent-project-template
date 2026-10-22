@@ -18,6 +18,16 @@ class ValidationTests(unittest.TestCase):
   p=self.root/name; p.write_text(p.read_text().replace(old,new))
  def assertRule(self,rule): self.assertTrue(any(e.startswith(rule+':') for e in validate(self.root)),rule)
  def test_valid(self): self.assertEqual(validate(self.root),[])
+ def test_claude_adapter_required(self):
+  (self.root/'.claude/skills/orchestrate/SKILL.md').unlink(); self.assertRule('structure')
+ def test_claude_canonical_bridge(self):
+  self.change('CLAUDE.md','@AGENTS.md','@README.md'); self.assertRule('claude')
+ def test_claude_skill_canonical_path(self):
+  self.change('.claude/skills/orchestrate/SKILL.md','.agents/skills/orchestrate/SKILL.md','README.md'); self.assertRule('claude')
+ def test_agent_eval_fixtures_required(self):
+  (self.root/'evals/scenarios.json').unlink(); self.assertRule('structure')
+ def test_agent_eval_ci_wiring(self):
+  self.change('.github/workflows/validate.yml','scripts/eval-agent-behavior','scripts/skip-agent-evals'); self.assertRule('agent-evals')
  def test_structure(self):
   (self.root/'templates/progress.md').unlink(); self.assertRule('structure')
  def test_orchestrator_structure(self):

@@ -14,6 +14,7 @@ jobs:
           python-version: '3.12'
       - run: ./scripts/validate-template
       - run: ./scripts/test-validator
+      - run: python3 scripts/eval-agent-behavior --self-test
       # Parser-level validation: structural Python checks alone cannot catch malformed Mermaid edges.
       - uses: actions/setup-node@v4
         with:
