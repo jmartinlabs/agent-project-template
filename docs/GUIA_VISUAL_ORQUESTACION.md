@@ -44,7 +44,7 @@ flowchart TD
     G --> A
 ```
 
-**Reglas:** Quick suele usar uno; Standard puede usar varios; Full puede coordinar varias líneas. Un máximo inicial de **tres** es una heurística de control, **no** un límite técnico universal. Más de tres solo si hay beneficio real, capacidad de ejecución y aislamiento seguro.
+**Reglas:** un ejecutor por defecto; delegación adicional solo con beneficio concreto, capacidad real y aislamiento autorizado. Conserva QA independiente cuando sea exigible. La cantidad depende del trabajo y del cliente, no de un límite universal.
 
 ## 3. Varias épicas sin bloqueo en serie
 
@@ -146,7 +146,7 @@ flowchart TD
 1. Solicita a ambos chats un checkpoint; no los cierres hasta salvar cambios no confirmados en Git.
 2. Actualiza la metodología del proyecto usando [$adopt-project](../.agents/skills/adopt-project/SKILL.md) y copia solo las partes necesarias, sin sobreescribir reglas existentes.
 3. Abre un nuevo chat, escribe `$orchestrate` y solicita reconciliar ramas, roadmap, aprobaciones y checkpoints.
-4. Valida la primera propuesta de Quick / Standard / Full. El coordinador administra el tablero y selecciona tareas ya autorizadas.
+4. Confirma Standard / Full salvo autorización explícita ya válida. Quick solo procede sin confirmación adicional si el cambio está claramente solicitado, es reversible, de bajo riesgo y sin gates protegidos ni restricciones más estrictas. Consultar o estar en Plan no autoriza editar. El coordinador administra el tablero y selecciona tareas ya autorizadas.
 5. Cuando el traspaso esté verificado, deja los dos chats antiguos solo como histórico. **El coordinador no puede tomar control, cerrar o enviar mensajes a esos chats automáticamente.**
 
 ## 8. Asignación de modelo por dificultad, no por rol fijo
