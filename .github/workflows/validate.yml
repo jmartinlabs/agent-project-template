@@ -18,7 +18,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-save --no-package-lock --ignore-scripts mermaid@11.12.1
+      - run: npm install --no-save --no-package-lock --ignore-scripts mermaid@11.12.1 jsdom@26.1.0
       - run: node scripts/check-mermaid.mjs docs/GUIA_VISUAL_ORQUESTACION.md
       - name: Prove malformed Mermaid is rejected
         run: |
