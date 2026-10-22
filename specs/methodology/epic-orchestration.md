@@ -1,4 +1,4 @@
-# Epic orchestration: concurrent progress without bypassing approvals (v2.3)
+# Epic orchestration: concurrent progress without bypassing approvals (v2.3.1)
 
 This policy applies to complex **Full** work and to Standard work with several independent workstreams. It extends [adaptive workflows](workflows.md) rather than replacing `$roadmap`, `$spec` or `$dev`. Quick remains single-stream by default.
 
@@ -27,11 +27,11 @@ Each row has a unique feature ID and tracks stage, scope/dependencies, approval,
 6. After work completes or approval arrives, update the board, re-evaluate dependencies and autonomously hand off to the next authorized step in the **same active execution**. Spec approved → dev ready; dev verified → QA/review; QA passed → prepare PR for approval. The user does not have to type `$dev` manually.
 7. End an active run with a concise board summary: completed, underway, waiting on user, blocked, newly ready, and exact next action. No claim of background processing between sessions; rescan on next invocation.
 
-Default to no more than three concurrent specialist workstreams when subagent capability is present. Prefer fewer if collaboration cost, file contention or quotas outweigh the benefit. Do not invent agent tools or assume Desktop/Web concurrency support; use a sequential fallback with the **same dependency logic**.
+Use [dynamic agent management](dynamic-agents.md) to size and supervise specialist work. Start with one to three concurrent specialist work packets by default; four or more is possible **only** when a real client/runtime permits it and independent work justifies its overhead, risk and usage. These are advisory limits, not universal Codex caps. Roles are templates, not fixed agents, and the same role can serve multiple independent tasks. Do not invent agent tools or assume Desktop/Web concurrency support; use a sequential fallback with the **same dependency logic**.
 
 ## Independent specialist work packets
 
-The coordinator gives each delegate: feature ID, role, source spec and approval state, concrete deliverables, read/write files, dependencies, prohibited actions, validation checks, and a result format (outcome, evidence, blockers, proposed next work). See [role contracts](../../.agents/roles/README.md). Specialists cannot promote draft to approved, merge a PR or update the shared board themselves.
+The coordinator gives each delegate: feature ID, role, source spec and approval state, concrete deliverables, read/write files, dependencies, prohibited actions, validation checks, and a result format (outcome, evidence, blockers, proposed next work). See [role contracts](../../.agents/roles/README.md) and the [work packet template](../../templates/agent-work-packet.md). Specialists cannot promote draft to approved, merge a PR or update the shared board themselves.
 
 ## Financial and security decisions
 
@@ -46,6 +46,10 @@ Never infer approval from a checked proposed option, chatbot silence, previous r
 - As soon as E1.6 spec is explicitly approved, the coordinator starts `$dev 06` (or its equivalent) within the approved scope, while the E1.7 draft may continue in parallel if write isolation is safe.
 
 The sample is **not** a real status report for MyFinanzas. Always inspect its actual repository before populating the board.
+
+## Illustrated guide
+
+The [Spanish visual guide](../../docs/GUIA_VISUAL_ORQUESTACION.md) includes eight editable Mermaid diagrams of scheduling, delegation, approvals, write isolation and migration from existing chats.
 
 ## Resume and verification
 
