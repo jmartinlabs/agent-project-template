@@ -50,6 +50,10 @@ def validate(root):
   s=read(f'.claude/agents/{name}.md')
   if f'.agents/roles/{name}.md' not in s or f'name: {name}' not in s:
    fail('claude',f'{name}: missing canonical role reference or manifest name')
+  if 'Applicable rules' not in s: fail('claude',f'{name}: profile must rely on the packet Applicable rules')
+ # Approval wording lives in approvals.md; adapters link to it instead of restating it.
+ for name in ('CLAUDE.md',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS)):
+  if re.search(r'`(?:ok|dale|continúa)`',read(name)): fail('claude',f'{name}: restates approval wording; link approvals.md instead')
  for filename, key in [('evals/scenarios.json','cases'),('evals/sample-responses.json','responses')]:
   try:
    payload=json.loads(read(filename))
@@ -86,14 +90,14 @@ def validate(root):
   for token in tokens:
    if token not in text: fail('epic-scheduling',f'role {role} missing {token}')
  dynamic=read('specs/methodology/dynamic-agents.md')
- for token in ('profiles', 'one executor', 'parallel', 'quota', 'supported', 'sequential', 'financial', 'close', 'work-packet', 'independent qa'):
+ for token in ('profiles', 'one executor', 'parallel', 'quota', 'supported', 'sequential', 'financial', 'close', 'work-packet', 'independent qa', 'applicable rules'):
   if token.lower() not in dynamic.lower(): fail('dynamic-agents',f'dynamic policy missing {token}')
  if 'specs/methodology/dynamic-agents.md' not in orchestrator: fail('dynamic-agents','orchestrator not wired to dynamic management')
  if '(specs/methodology/dynamic-agents.md)' not in agents: fail('dynamic-agents','AGENTS.md missing dynamic management link')
  if '(dynamic-agents.md)' not in workflows: fail('dynamic-agents','workflows missing dynamic management link')
  if '(infrastructure.md)' not in read('.agents/roles/README.md'): fail('dynamic-agents','infrastructure specialist not linked')
  packet=read('templates/agent-work-packet.md')
- for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Verification', 'Return schema'):
+ for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema'):
   if token.lower() not in packet.lower(): fail('dynamic-agents',f'agent work packet missing {token}')
  guide=read('docs/GUIA_VISUAL_ORQUESTACION.md')
  diagrams=re.findall(r'(?ms)^\x60{3}mermaid\r?\n(.*?)^\x60{3}[ \t]*$',guide)

@@ -56,6 +56,14 @@ class ValidationTests(unittest.TestCase):
   self.change('.claude/settings.json','"ask"','ask'); self.assertRule('permissions')
  def test_permissions_settings_required(self):
   (self.root/'.claude/settings.json').unlink(); self.assertRule('structure')
+ def test_profile_packet_rules(self):
+  self.change('.claude/agents/implementation.md','Applicable rules','policy list'); self.assertRule('claude')
+ def test_packet_applicable_rules(self):
+  self.change('templates/agent-work-packet.md','Applicable rules','Extra notes'); self.assertRule('dynamic-agents')
+ def test_wrapper_no_restated_approvals(self):
+  self.change('.claude/skills/tweak/SKILL.md','adds no rules.','adds no rules. Never treat `dale` as approval.'); self.assertRule('claude')
+ def test_claude_md_no_restated_approvals(self):
+  self.change('CLAUDE.md','# Claude Code adapter','# Claude Code adapter\n`ok` is not approval.'); self.assertRule('claude')
  def test_adopt_prompt_missing(self):
   (self.root/'ADOPT_EXISTING_PROJECT_PROMPT.md').unlink(); self.assertRule('structure')
  def test_adopt_skill_contract(self):
