@@ -8,7 +8,7 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','specs/methodology/workflows.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','templates/epic-board.md',*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review')))
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','specs/methodology/workflows.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md',*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
 def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
@@ -59,6 +59,23 @@ def validate(root):
   text=read(f'.agents/roles/{role}.md').lower()
   for token in tokens:
    if token not in text: fail('epic-scheduling',f'role {role} missing {token}')
+ dynamic=read('specs/methodology/dynamic-agents.md')
+ for token in ('profiles', 'one to three', 'fourth', 'supported', 'sequential', 'financial', 'close', 'work-packet'):
+  if token.lower() not in dynamic.lower(): fail('dynamic-agents',f'dynamic policy missing {token}')
+ if 'specs/methodology/dynamic-agents.md' not in orchestrator: fail('dynamic-agents','orchestrator not wired to dynamic management')
+ if '(specs/methodology/dynamic-agents.md)' not in agents: fail('dynamic-agents','AGENTS.md missing dynamic management link')
+ if '(dynamic-agents.md)' not in workflows: fail('dynamic-agents','workflows missing dynamic management link')
+ if '(infrastructure.md)' not in read('.agents/roles/README.md'): fail('dynamic-agents','infrastructure specialist not linked')
+ packet=read('templates/agent-work-packet.md')
+ for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Verification', 'Return schema'):
+  if token.lower() not in packet.lower(): fail('dynamic-agents',f'agent work packet missing {token}')
+ guide=read('docs/GUIA_VISUAL_ORQUESTACION.md')
+ diagrams=re.findall(r'(?ms)^\x60{3}mermaid\r?\n(.*?)^\x60{3}[ \t]*$',guide)
+ if len(diagrams)<6: fail('visual-guide','need at least six Mermaid diagrams')
+ for i,diagram in enumerate(diagrams,1):
+  if not re.match(r'(flowchart|stateDiagram|sequenceDiagram|graph)\b',diagram.strip()): fail('visual-guide',f'diagram {i} has unsupported header')
+ for token in ('MyFinanzas', 'aprobación', 'Infraestructura', 'subagentes', 'migrar', 'Git', 'checkpoint'):
+  if token.casefold() not in guide.casefold(): fail('visual-guide',f'visual guide missing {token}')
  s=read('.agents/skills/init-project/SKILL.md')
  for token in ('specs/setup-progress.md','### Resume protocol','## Pending decisions','## Confirmed decisions','## Next action','awaiting-approval',*(f'### Stage {i} —' for i in range(1,8))):
   if token not in s: fail('resume',f'init-project missing {token}')
