@@ -123,10 +123,19 @@ def validate(root):
    if x not in block[1].lower(): fail('adopt-prompt',f'remote Skill must be reviewed as data: missing {x}')
  # Ask-before-run prompts are defense in depth; deny rules would block approved actions.
  try:
-  ask=json.loads(read('.claude/settings.json')).get('permissions',{}).get('ask',[])
+  settings=json.loads(read('.claude/settings.json'))
+  ask=settings.get('permissions',{}).get('ask',[])
   for x in ('Bash(gh pr merge *)','Bash(git push --force*)'):
    if x not in ask: fail('permissions',f'.claude/settings.json ask rules missing {x}')
- except (ValueError,AttributeError):
+  # Hooks may only print a file from this repository; never execute code or decide approvals.
+  safe=re.compile(r'cat "\$CLAUDE_PROJECT_DIR/((?:[\w.-]+/)*[\w.-]+\.md)"(?: 2>/dev/null \|\| true)?')
+  commands=[(event,h.get('type'),h.get('command','')) for event,groups in settings.get('hooks',{}).items() for g in groups for h in g.get('hooks',[])]
+  for event,kind,cmd in commands:
+   m=safe.fullmatch(cmd)
+   if kind!='command' or not m or '..' in Path(m[1]).parts or not (root/m[1]).is_file(): fail('hooks',f'{event} hook is not a read-only print of a repository file: {cmd!r}')
+  if not any(e=='SessionStart' and '.agents/skills/orchestrate/SKILL.md' in c for e,_,c in commands):
+   fail('hooks','SessionStart hook must load the orchestrate Skill')
+ except (ValueError,AttributeError,TypeError):
   fail('permissions','.claude/settings.json invalid JSON')
  adopted=read('.agents/skills/adopt-project/SKILL.md')
  for token in ('existing', 'approved', 'stop', 'AGENTS.md', 'CI', 'orchestrate'):

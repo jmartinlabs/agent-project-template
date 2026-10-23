@@ -50,9 +50,35 @@ in its own profiles when its risk and quota justify it; record that decision the
    checks not executed. Do not claim native subagents, hooks or model evals have
    been tested just because files exist.
 
-No hooks, auto-merge, cloud automations, or model API credentials are installed.
-A hook cannot independently prove approval without a trusted external record;
-the [approval policy](../specs/methodology/approvals.md) remains instructional.
+No auto-merge, cloud automations or model API credentials are installed. The only hook
+is the read-only `SessionStart` hook described below. A hook cannot prove an approval
+without a trusted external record; the [approval policy](../specs/methodology/approvals.md)
+remains instructional.
+
+## SessionStart hook: load the orchestrate contract
+
+`.claude/settings.json` runs one `SessionStart` hook that prints
+`.agents/skills/orchestrate/SKILL.md` into the session context (on start, resume, clear
+and after compaction). Without it, agents tend to work from the `AGENTS.md` summary and
+never open the full contract unless the user types `/orchestrate`; the 2026-10-23
+benchmark saw this in all 12 runs.
+
+- **Cost:** about 1,300 tokens once per session, not per request.
+- **Why it is allowed** although v2.4.2 installed no hooks: it executes no project code,
+  calls no network, changes nothing and makes no approval decision. It only prints a
+  tracked Markdown file.
+- **Limits, enforced by `scripts/validate-template`:** every hook must be
+  `cat "$CLAUDE_PROJECT_DIR/<path>.md"` for an existing file inside the repository
+  (no `..`). Hooks that run code, fetch content, gate approvals or write files are not
+  accepted in this template. Derived projects that need more must decide and document it.
+- **Codex** has no equivalent; there, start with `$orchestrate`.
+- Typing `/orchestrate` is still fine; it just reloads the same contract.
+
+**Live check (2026-10-23, Claude Code CLI 2.1.301, Sonnet, `claude -p`, file and shell tools
+disabled):** asked for the exact label of orchestrate step 9, a session with this hook answered
+`**Gates.**` in 2/2 runs; a session on the previous `main` (no hook) answered `NOT LOADED` in 2/2.
+The client's input-token totals did not show a clear difference between the two (about 36k
+both ways), so the per-session cost above is an estimate from file size, not a measurement.
 The repository's existing Codex workflow remains unchanged.
 
 For official mechanics see:
