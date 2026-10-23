@@ -138,6 +138,23 @@ class ValidationTests(unittest.TestCase):
   self.change('README.md','# Universal','# Universal\n'+'/'+'home/example/project'); self.assertRule('portability')
  def test_neutrality(self):
   self.change('AGENTS.md','# Agent','# Agent\nAll projects must use ExampleStack.'); self.assertRule('neutrality')
+ def test_ci_policy_required(self):
+  (self.root/'specs/methodology/ci-policy.md').unlink(); self.assertRule('structure')
+ def test_ci_policy_contract(self):
+  for token in ('explicitly allowlisted', 'classification errors default to `full`',
+                'Documentation and security controls are mandatory',
+                'structure and execution conditions', 'unexpected skipped checks',
+                'continue-on-error', 'Preserve approved security controls'):
+   with self.subTest(token=token):
+    p=self.root/'specs/methodology/ci-policy.md'; original=p.read_text()
+    p.write_text(original.replace(token, 'REMOVED'))
+    self.assertRule('ci-policy'); p.write_text(original)
+ def test_bootstrap_ci_policy(self):
+  self.change('.agents/skills/bootstrap/SKILL.md','Prove the contract locally','Skip contract verification')
+  self.assertRule('ci-policy')
+ def test_quality_ci_policy(self):
+  self.change('specs/guidelines/quality.md','actual classifier and workflow behavior','command presence')
+  self.assertRule('ci-policy')
  def test_ci(self):
   self.change('.github/workflows/validate.yml','./scripts/test-validator','echo skip'); self.assertRule('ci')
  def test_legitimate_project(self):
