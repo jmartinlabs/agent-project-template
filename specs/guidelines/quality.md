@@ -25,3 +25,11 @@ Review regressions, errors, accessibility and security in proportion to the chan
 Definition of Done: approved scope implemented; every acceptance check passes with evidence;
 required automated checks pass; documentation and progress updated; reviewed changes committed.
 Blocked/skipped/unrun is not passed. No zero-test readiness claim.
+
+## Derived-project CI
+
+Bootstrap must implement the [change-aware CI contract](../methodology/ci-policy.md).
+Use a shared conservative `docs`/`full` classifier and test workflow execution
+conditions, including mandatory documentation/security controls and failure fallbacks.
+The template validator checks preservation of these instructions structurally;
+derived-project harness tests must prove the actual classifier and workflow behavior.

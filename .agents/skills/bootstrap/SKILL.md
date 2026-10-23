@@ -20,6 +20,11 @@ updates, evidence in setup progress and a working local commit.
    Avoid unrelated business functionality and unnecessary packages.
 4. Add basic automated tests that would fail if the essential flow broke. Run actual
    build/type checks required by the chosen tooling, then tests; record commands/results.
+   Implement the [change-aware CI contract](../../../specs/methodology/ci-policy.md):
+   a shared conservative `docs`/`full` classifier, mandatory baseline controls,
+   applicable full checks and behavioral harness/workflow regression fixtures.
+   Prove the contract locally before changing Actions execution; record commands
+   and justified inapplicable checks in project quality guidelines.
 5. Start and inspect the application/service and exercise representative behavior.
    For a library, invoke its public API; for CLI, assert output/exit status; for web,
    send actual requests and inspect responses. Diagnose failures and retry corrections.
