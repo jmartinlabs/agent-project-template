@@ -110,7 +110,7 @@ templates/{brainstorming,specification,roadmap,progress,testplan}.md
 scripts/validate-template          standard-library checks
 scripts/test-validator            positive/negative regression fixtures
 docs/archive/                      history: prompt backups, v2.4.2 audit/benchmark (not methodology)
-.claude/settings.json              ask-before-run rules for merge, force push and repo changes
+.claude/settings.json              ask-before-run rules and the read-only SessionStart hook
 ```
 Project-specific files are created by the Skills in a derived repository, not prefilled
 with fictional approved decisions. UNDECIDED placeholders are intentional initialization
@@ -140,7 +140,7 @@ to existing projects; selectively port reviewed methodology changes yourself.
 Edit reusable methodology only, keep history in `docs/archive/` and avoid adding a demo application.
 Run both checks and review Skills manually, especially approval and resume behavior.
 Codex conventions: [AGENTS](https://developers.openai.com/codex/guides/agents-md) and
-[Skills](https://developers.openai.com/codex/skills). No agent-specific hooks are assumed.
+[Skills](https://developers.openai.com/codex/skills). Claude Code adds one read-only `SessionStart` hook that loads the orchestrate contract; see [Claude adapter](docs/CLAUDE_ADAPTER.md).
 The local environment reports Codex CLI 0.163.0; the official Skills page was inaccessible
 (HTTP 403) during creation. Recheck client discovery on your installed version; explicit
 file-reading instructions remain available. No unsupported slash commands are required.

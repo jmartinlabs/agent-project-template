@@ -15,5 +15,17 @@
       "Bash(gh repo delete *)",
       "Bash(gh release create *)"
     ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat \"$CLAUDE_PROJECT_DIR/.agents/skills/orchestrate/SKILL.md\" 2>/dev/null || true"
+          }
+        ]
+      }
+    ]
   }
 }
