@@ -149,9 +149,9 @@ def validate(root):
  for p in [root/'AGENTS.md',*(root/'.agents/skills').rglob('SKILL.md')]:
   if p.is_file() and re.search(r'(?i)(?:all projects|every project|all applications) must (?:use|install|run)\b',p.read_text()): fail('neutrality',f'universal stack mandate in {p.relative_to(root)}')
  for name,tokens in {
-  'specs/methodology/ci-policy.md':('exactly `docs` and `full`','explicitly allowlisted','classification errors default to `full`','both sides','Documentation and security controls are mandatory','structure and execution conditions','unexpected skipped checks','continue-on-error','Local regression evidence','Only allowlisted backlog','Documentation plus code','Missing classifier','Preserve approved security controls'),
+  'specs/methodology/ci-policy.md':('exactly `docs` and `full`','explicitly allowlisted','classification errors default to `full`','both sides','Documentation and security controls are mandatory','structure and execution conditions','unexpected skipped checks','continue-on-error','Local regression evidence','Only allowlisted backlog','Adaptable product-document allowlist','brainstorming|specification|progress|testplan','Protected exclusions take precedence','Changes to the allowlist or classifier themselves require `full`','additions, modifications and deletions','both rename directions checked','alone and mixed with allowed product documentation','valid alternate product paths','without init-project','Documentation plus code','Missing classifier','Preserve approved security controls'),
   '.agents/skills/bootstrap/SKILL.md':('specs/methodology/ci-policy.md','shared conservative `docs`/`full` classifier','Prove the contract locally'),
-  'specs/guidelines/quality.md':('../methodology/ci-policy.md','actual classifier and workflow behavior'),
+  'specs/guidelines/quality.md':('../methodology/ci-policy.md','actual classifier and workflow behavior','backlog\nalone is insufficient','protected\nexclusions taking precedence'),
  }.items():
   for token in tokens:
    if token not in read(name): fail('ci-policy',f'{name}: missing {token}')
