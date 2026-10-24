@@ -155,6 +155,21 @@ def validate(root):
  }.items():
   for token in tokens:
    if token not in read(name): fail('ci-policy',f'{name}: missing {token}')
+ # Structural preservation only; derived harnesses must test real execution.
+ for name,tokens in {
+  'specs/methodology/ci-policy.md':('## Canonical verification entry point',
+   'Reuse an existing command', 'a way to force', 'same check selection',
+   'each required suite once', 'nonzero exit status', 'missing prerequisite',
+   'invalid mode', 'unexpectedly zero discovered tests', 'intentionally omitted',
+   'must not install dependencies', 'invoke the real entry point',
+   'local/CI selection parity', 'without a second'),
+  '.agents/skills/bootstrap/SKILL.md':('one canonical verification command',
+   'Reuse an adequate existing command'),
+  'specs/guidelines/quality.md':('one canonical verification command',
+   'reusing an adequate existing', 'forced full mode'),
+ }.items():
+  for token in tokens:
+   if token not in read(name): fail('verification-entry',f'{name}: missing {token}')
  s=read('.github/workflows/validate.yml')
  for token in ('pull_request','contents: read','./scripts/validate-template','./scripts/test-validator','node scripts/check-mermaid.mjs','mermaid@11.12.1'):
   if token not in s: fail('ci',f'missing {token}')

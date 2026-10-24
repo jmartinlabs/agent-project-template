@@ -63,6 +63,39 @@ commands, `continue-on-error` on required checks and event/path filters that omi
 validation. Preserve approved security controls, including permissions, action pins,
 checkout credentials and history requirements; classification never relaxes them.
 
+## Canonical verification entry point
+Bootstrap establishes one canonical verification command for local use and CI.
+Reuse an existing command when it already covers this contract; do not add a wrapper
+or rename commands merely for uniformity. The command name and implementation belong
+to the approved project stack (for example a script, task runner or package command).
+Record its working directory, prerequisites, comparison inputs and a way to force
+`full` verification in AGENTS.md and project quality guidelines.
+
+The entry point coordinates the shared classifier and required checks; keep their
+logic in existing tools rather than copying it. Apply the same check selection and
+failure semantics locally and in CI for equivalent inputs. Environment preparation
+may differ and must be documented. CI may split work across jobs through explicit
+modes of the same entry point; the required final result must still verify coverage.
+Within one verification run, execute each required suite once unless a documented
+repeat is needed for an acceptance criterion or flakiness investigation. This does
+not remove independent QA or require reusing stale evidence between candidates.
+
+Propagate a nonzero exit status for any required failure or missing prerequisite.
+An invalid mode must fail visibly. Report passed, failed, intentionally skipped and
+unrun checks separately; unexpected skips and unexpectedly zero discovered tests
+must not count as success. Classification uncertainty retains the conservative
+`full` or visible failure behavior specified above. Successful `docs` verification
+must say that application checks were intentionally omitted, not claim they passed.
+Verification must not install dependencies, change task state, commit, deploy or
+reinitialize a project implicitly; provision the documented environment separately.
+
+Derived-project regression tests must invoke the real entry point and demonstrate:
+valid docs/full paths, forced full mode, each required check failing, missing tooling,
+invalid modes, unexpected zero tests/skips, local/CI selection parity, and each suite
+executing once per run. Prove reuse of an adequate existing command without a second
+verification layer. These are generated-harness behavioral tests; this template's
+validator only protects preservation of the contract.
+
 ## Local regression evidence
 The harness regression suite (for example `scripts/test-checks`) must exercise the
 same classifier used by CI and valid/invalid workflow fixtures. Cover at least:
