@@ -117,11 +117,17 @@ with fictional approved decisions. UNDECIDED placeholders are intentional initia
 instructions. Projects may retain this methodology and add their own code and tooling.
 
 ## Verify and commit
+Optional local token accounting: [Codex usage reports](docs/USAGE_REPORTS.md).
+Reports can be generated on demand or through reviewed local Codex lifecycle hooks,
+outside the repository and without model calls. Hook activation requires client trust.
+
 Python 3.10+ is needed only for template tooling; no package manager/install is needed.
 From the repository root:
 ```sh
 ./scripts/validate-template
 ./scripts/test-validator
+python3 scripts/test-agent-usage
+python3 scripts/test-auto-agent-usage
 git diff --check
 git status --short
 ```

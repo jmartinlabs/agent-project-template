@@ -9,7 +9,7 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/check-mermaid.mjs','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
 def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
@@ -171,8 +171,17 @@ def validate(root):
   for token in tokens:
    if token not in read(name): fail('verification-entry',f'{name}: missing {token}')
  s=read('.github/workflows/validate.yml')
- for token in ('pull_request','contents: read','./scripts/validate-template','./scripts/test-validator','node scripts/check-mermaid.mjs','mermaid@11.12.1'):
+ for token in ('pull_request','contents: read','./scripts/validate-template','./scripts/test-validator','node scripts/check-mermaid.mjs','mermaid@11.12.1','python3 scripts/test-agent-usage','python3 scripts/test-auto-agent-usage'):
   if token not in s: fail('ci',f'missing {token}')
+ # Limit automatic reporting to advisory local lifecycle commands.
+ try:
+  usage_hooks=json.loads(read('.codex/hooks.json')).get('hooks',{})
+  expected_command='python3 "$(git rev-parse --show-toplevel)/scripts/auto-agent-usage"'
+  expected_hook={'type':'command','command':expected_command,'timeout':3}
+  if usage_hooks!={event:[{'hooks':[expected_hook]}] for event in ('Stop','SubagentStop','SessionEnd')}:
+   fail('usage-hooks','unexpected usage-report hook events or commands')
+ except (ValueError,AttributeError):
+  fail('usage-hooks','invalid usage-report hooks JSON')
  # Structural drift guards only: text presence cannot prove model behavior or consent.
  for name,tokens in {
   'AGENTS.md':('on demand','Consultation/analysis','Project-specific restrictions','specs/methodology/approvals.md#local-worktrees'),
