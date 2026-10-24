@@ -179,6 +179,32 @@ class ValidationTests(unittest.TestCase):
  def test_quality_ci_policy(self):
   self.change('specs/guidelines/quality.md','actual classifier and workflow behavior','command presence')
   self.assertRule('ci-policy')
+ def test_verification_entry_contract(self):
+  # Each guard protects an obligation, not generated command behavior.
+  cases = {
+   'specs/methodology/ci-policy.md': (
+    '## Canonical verification entry point', 'Reuse an existing command',
+    'a way to force', 'same check selection', 'each required suite once',
+    'nonzero exit status', 'missing prerequisite', 'invalid mode',
+    'unexpectedly zero discovered tests', 'intentionally omitted',
+    'must not install dependencies', 'invoke the real entry point',
+    'local/CI selection parity', 'without a second'),
+   '.agents/skills/bootstrap/SKILL.md': (
+    'one canonical verification command', 'Reuse an adequate existing command'),
+   'specs/guidelines/quality.md': (
+    'one canonical verification command', 'reusing an adequate existing',
+    'forced full mode'),
+  }
+  for name, tokens in cases.items():
+   p=self.root/name; original=p.read_text()
+   for token in tokens:
+    with self.subTest(name=name, token=token):
+     self.assertIn(token, original)
+     try:
+      p.write_text(original.replace(token, 'REMOVED'))
+      self.assertRule('verification-entry')
+     finally:
+      p.write_text(original)
  def test_ci(self):
   self.change('.github/workflows/validate.yml','./scripts/test-validator','echo skip'); self.assertRule('ci')
  def test_legitimate_project(self):

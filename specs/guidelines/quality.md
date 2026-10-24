@@ -37,3 +37,8 @@ Product documentation includes explicitly bounded brainstorming, specification,
 progress and testplan families plus reviewed exact context/tracking paths; backlog
 alone is insufficient. Adapt the allowlist to existing project naming, with protected
 exclusions taking precedence and real Git add/modify/delete/rename regressions.
+
+Use one canonical verification command locally and in CI, reusing an adequate existing
+command. Bootstrap records its prerequisites, working directory, comparison inputs
+and forced full mode in AGENTS.md and these guidelines. Follow the entry point's
+failure, coverage and regression requirements in the CI contract.
