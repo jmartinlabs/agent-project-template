@@ -205,6 +205,39 @@ class ValidationTests(unittest.TestCase):
       self.assertRule('verification-entry')
      finally:
       p.write_text(original)
+ def test_usage_report_files_required(self):
+  for name in ('scripts/report-agent-usage', 'scripts/test-agent-usage', 'docs/USAGE_REPORTS.md'):
+   with self.subTest(name=name):
+    p=self.root/name; original=p.read_bytes()
+    p.unlink()
+    try:
+     self.assertRule('structure')
+    finally:
+     p.write_bytes(original)
+ def test_usage_report_ci_wiring(self):
+  self.change('.github/workflows/validate.yml','python3 scripts/test-agent-usage','echo skip-usage-tests')
+  self.assertRule('ci')
+ def test_auto_usage_report_files_required(self):
+  for name in ('scripts/auto-agent-usage', 'scripts/test-auto-agent-usage', '.codex/hooks.json'):
+   with self.subTest(name=name):
+    p=self.root/name; original=p.read_bytes()
+    p.unlink()
+    try:
+     self.assertRule('structure')
+    finally:
+     p.write_bytes(original)
+ def test_auto_usage_report_ci_wiring(self):
+  self.change('.github/workflows/validate.yml','python3 scripts/test-auto-agent-usage','echo skip-auto-tests')
+  self.assertRule('ci')
+ def test_auto_usage_hook_scope_and_command(self):
+  for old,new in (('SubagentStop','PreToolUse'), ('auto-agent-usage','other-command'), ('"timeout": 3','"timeout": 600')):
+   with self.subTest(old=old):
+    p=self.root/'.codex/hooks.json'; original=p.read_text()
+    try:
+     self.change('.codex/hooks.json',old,new)
+     self.assertRule('usage-hooks')
+    finally:
+     p.write_text(original)
  def test_ci(self):
   self.change('.github/workflows/validate.yml','./scripts/test-validator','echo skip'); self.assertRule('ci')
  def test_legitimate_project(self):

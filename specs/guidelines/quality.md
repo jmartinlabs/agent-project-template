@@ -2,6 +2,8 @@
 
 ## Template commands
 Run `./scripts/validate-template` and `./scripts/test-validator` with Python 3.10+.
+Run `python3 scripts/test-agent-usage` and `python3 scripts/test-auto-agent-usage`
+for local usage reporting and its advisory Codex lifecycle adapter.
 No package installation is required. CI runs both on pushes and pull requests.
 
 ## Enforced rules
