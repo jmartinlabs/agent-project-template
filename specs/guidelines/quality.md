@@ -33,3 +33,7 @@ Use a shared conservative `docs`/`full` classifier and test workflow execution
 conditions, including mandatory documentation/security controls and failure fallbacks.
 The template validator checks preservation of these instructions structurally;
 derived-project harness tests must prove the actual classifier and workflow behavior.
+Product documentation includes explicitly bounded brainstorming, specification,
+progress and testplan families plus reviewed exact context/tracking paths; backlog
+alone is insufficient. Adapt the allowlist to existing project naming, with protected
+exclusions taking precedence and real Git add/modify/delete/rename regressions.
