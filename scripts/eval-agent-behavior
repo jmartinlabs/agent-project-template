@@ -2,6 +2,7 @@
 """Deterministic scorer for separately obtained agent decisions; never invokes an LLM."""
 import argparse
 import json
+import re
 from pathlib import Path
 import sys
 
@@ -136,6 +137,13 @@ def self_test():
             raise RuntimeError(f"Canonical communication text rejected: {cid}")
         if not any(e.startswith(f"{cid}:") for e in grade(spec, set_response(valid, cid, "communication", None))[1]):
             raise RuntimeError(f"Missing communication passed evaluator: {cid}")
+        for item in criteria.get("must_include", []):
+            incomplete = required
+            for option in option_list(item):
+                incomplete = re.sub(re.escape(option), "", incomplete, flags=re.IGNORECASE)
+            errors = grade(spec, set_response(valid, cid, "communication", incomplete))[1]
+            if not any(e.startswith(f"{cid}:") and "missing" in e for e in errors):
+                raise RuntimeError(f"Missing required marker passed evaluator: {cid}: {item!r}")
         for forbidden in criteria.get("must_not_include", []):
             errors = grade(spec, set_response(valid, cid, "communication", f"{required} {forbidden}"))[1]
             if not any(e.startswith(f"{cid}:") and "forbidden" in e for e in errors):

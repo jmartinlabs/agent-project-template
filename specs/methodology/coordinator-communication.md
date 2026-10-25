@@ -63,8 +63,10 @@ relevant files and pending changes, branch / SHA / PR (or absent or unknown), te
 with command, environment, candidate and evidence, risks and blockers, decisions needed, and the
 recommended next action.
 
-Never declare PASS without evidence. A test without a command, environment, candidate or evidence is
-UNRUN or FAIL.
+Never declare PASS without evidence. If a reported result lacks its command, environment,
+candidate or evidence, label it externally reported and unverified; request only the missing
+information. FAIL means an observed failing check; UNRUN means the check was not executed.
+Missing evidence alone proves neither failure nor non-execution.
 
 ## 5. Corrections, queries and follow-ups
 
@@ -72,12 +74,12 @@ A correction or query repeats the return instruction. It does **not** repeat the
 while its context stays valid. Use this shape, in the user's language:
 
 ```text
-Task ID: <ID> · Session: <session reference>
+Destination: OpenCode · Task ID and name: <ID and functional name> · Session: <session reference>
 Reason: <one line>
 Requested change or information only:
 - <item>
 Do not change anything else. Keep the same scope and isolation.
-When finished, return one complete HANDOFF → CODEX block with every field, also if you are blocked or need a decision.
+When finished, return one complete HANDOFF → CODEX block: task/session, status/result, changes, candidate, tests/evidence, risks/blockers, decisions and next action; also if blocked or needing a decision.
 ```
 
 ## 6. Responding to a return

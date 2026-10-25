@@ -296,6 +296,10 @@ class ValidationTests(unittest.TestCase):
      p.write_text(original)
  def test_communication_contract_required(self):
   (self.root/'specs/methodology/coordinator-communication.md').unlink(); self.assertRule('structure')
+ def test_copyable_packet_shared_resources(self):
+  self.change('templates/agent-work-packet.md','Shared test resources: <separate ports, databases and temporary directories','Shared test resources: <unspecified'); self.assertRule('communication')
+ def test_communication_unverified_is_not_failed(self):
+  self.change('specs/methodology/coordinator-communication.md','Missing evidence alone proves neither failure nor non-execution.','Missing evidence means FAIL.'); self.assertRule('communication')
  def test_communication_states_required(self):
   self.change('specs/methodology/coordinator-communication.md','ESPERANDO RETORNO','ESPERANDO'); self.assertRule('communication')
  def test_communication_return_fields_required(self):
