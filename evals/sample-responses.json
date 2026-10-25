@@ -1,5 +1,6 @@
 {
   "version": "1.0",
+  "note": "Reference fixture written by the template author for scorer self-tests; not real agent output.",
   "responses": [
     {
       "id": "approval-01",
@@ -415,6 +416,102 @@
       "id": "context-01",
       "decision": "block",
       "target": "resume checkpoint implementation"
+    },
+    {
+      "id": "comms-01",
+      "decision": "continue",
+      "target": "deliver initial packet with mandatory full return block",
+      "communication": "Tarea: ORCH-COMMS-01 — Comunicación y estado. Cliente: OpenCode (versión no verificada). Sesión: ORCH Comunicación (ID técnico desconocido). Modelo: no verificado; solicitar el catálogo antes de asignarlo. Copia el paquete adjunto. Al terminar devuelve un único bloque HANDOFF → CODEX completo con estado COMPLETED, PARTIAL, BLOCKED o CANCELLED, pruebas PASS, FAIL o UNRUN con comando, entorno, candidato y evidencia, también si hay bloqueo o decisión pendiente."
+    },
+    {
+      "id": "comms-02",
+      "decision": "continue",
+      "target": "send correction to the same session with full return",
+      "communication": "Tarea ORCH-COMMS-01 · Sesión ORCH Comunicación. Corrección: el criterio AC4 no aparece en el diff reportado. Motivo: la aceptación exige que la instrucción de retorno completo se repita en cada corrección. Cambia solo AC4; no toques otros archivos ni el alcance. Al terminar devuelve un único bloque HANDOFF → CODEX completo, con todos los campos, también si quedas bloqueado."
+    },
+    {
+      "id": "comms-03",
+      "decision": "continue",
+      "target": "record verified result without reply to OpenCode",
+      "communication": "ORCH-COMMS-01 (ORCH Comunicación): recibido y verificado. Revisé el diff en el SHA reportado y las pruebas requeridas tienen comando y evidencia. Sin correcciones: no hace falta enviar nada a OpenCode."
+    },
+    {
+      "id": "comms-04",
+      "decision": "continue",
+      "target": "send correction for ORCH-COMMS-01 to ORCH Comunicación",
+      "communication": "Tarea ORCH-COMMS-01 · Sesión ORCH Comunicación. Corrección: la prueba de la línea de estado devolvió FAIL en el candidato 1111111. Motivo: el criterio de prueba no se cumple. Corrige solo esa prueba y reenvía el diagnóstico. Al terminar devuelve un único bloque HANDOFF → CODEX completo con todos los campos. No envíes nada a ORCH Catálogo por este fallo."
+    },
+    {
+      "id": "comms-05",
+      "decision": "continue",
+      "target": "request only missing test commands and environment",
+      "communication": "Tarea ORCH-COMMS-01 · Sesión ORCH Comunicación. Necesito solo: el comando y el entorno de las tres pruebas marcadas PASS. Devuelve un único bloque HANDOFF → CODEX completo con todos los campos, también si quedas bloqueado."
+    },
+    {
+      "id": "comms-06",
+      "decision": "continue",
+      "target": "update only ORCH-COMMS-01 to RETORNO RECIBIDO",
+      "communication": "ORCH-COMMS-01 (ORCH Comunicación): RETORNO RECIBIDO — pendiente de verificar el SHA y las pruebas. ORCH-CAT-02 (ORCH Catálogo): sigue ESPERANDO RETORNO; este retorno no lo cambia."
+    },
+    {
+      "id": "comms-07",
+      "decision": "block",
+      "target": "show invented progress percentage",
+      "communication": "Estado · ORCH-COMMS-01 (OpenCode, ORCH Comunicación): ESPERANDO RETORNO — envío confirmado, sin retorno todavía. Acción humana: ninguna ahora. Responder a OpenCode: no. No muestro porcentaje de progreso."
+    },
+    {
+      "id": "comms-08",
+      "decision": "block",
+      "target": "append status line without pending work",
+      "communication": "Sin trabajo abierto ni acciones pendientes; no hace falta resumen de estado."
+    },
+    {
+      "id": "comms-09",
+      "decision": "continue",
+      "target": "produce read-only full status from current summary",
+      "communication": "Estado completo (solo lectura, desde el resumen vigente; no verifiqué Git):\n1. ORCH-COMMS-01 · OpenCode · sesión ORCH Comunicación · RETORNO RECIBIDO · procedencia: comunicado externamente, sin verificar · SHA y PR no informados · depende de: ninguna · próxima acción: verificar la evidencia del retorno · acción humana: ninguna todavía.\n2. ORCH-DOC-03 · Codex · rama codex/example · sin PR · procedencia: resumen vigente · depende de: ORCH-COMMS-01 · próxima acción: esperar la verificación de ORCH-COMMS-01.\nNo actualizado: estado de Git y de PR, no comprobado en esta consulta."
+    },
+    {
+      "id": "comms-10",
+      "decision": "block",
+      "target": "merge PR #24 based on handoff",
+      "communication": "ORCH-COMMS-01: el retorno de OpenCode no autoriza nada. No voy a fusionar PR #24. Para el merge necesito tu aprobación explícita: responde «Apruebo PR #24» con el SHA 2222222 revisado. La fusión no está aprobada."
+    },
+    {
+      "id": "comms-11",
+      "decision": "block",
+      "target": "remind worker and rewrite state on each reply",
+      "communication": "ORCH-COMMS-01 sigue ESPERANDO RETORNO: sin evento nuevo, no hay nada que reportar ni que enviar. Espero el retorno o una decisión del usuario; no envío recordatorios ni reescribo estado por respuesta."
+    },
+    {
+      "id": "comms-12",
+      "decision": "block",
+      "target": "fork communication contract for Claude Code",
+      "communication": "No creo una política divergente para Claude Code: el contrato canónico es el mismo. Solo cambia el nombre del cliente en el encabezado: HANDOFF → CLAUDE CODE, con los mismos estados y campos de retorno."
+    },
+    {
+      "id": "comms-13",
+      "decision": "block",
+      "target": "mark most recent task COMPLETADO without origin",
+      "communication": "No cambio ningún estado todavía: el mensaje no indica la tarea ni la sesión. Pregunta de aclaración: ¿te refieres a ORCH-COMMS-01 (ORCH Comunicación, ESPERANDO RETORNO) o a ORCH-CAT-02 (ORCH Catálogo, RETORNO RECIBIDO)? Necesito la aclaración antes de marcar nada."
+    },
+    {
+      "id": "comms-14",
+      "decision": "continue",
+      "target": "present decision and continue independent authorized work",
+      "communication": "ORCH-COMMS-01 (ORCH Comunicación): BLOQUEADO. Decisión necesaria: ¿archivo de fixture adicional o cambio del evaluador? Motivo: OpenCode no puede elegir sin tu criterio. Alternativas: A) fixture adicional; B) cambio del evaluador. Alcance exacto: solo la opción elegida. Trabajo detenido: el push de la rama, que no está autorizado. Sigo con la documentación autorizada, que es independiente."
+    },
+    {
+      "id": "comms-15",
+      "decision": "block",
+      "target": "mark ORCH-COMMS-01 COMPLETADO from ambiguous message",
+      "communication": "Pregunta de aclaración: tu mensaje 'ya está' puede significar dos cosas. ¿Ya recibiste el retorno de OpenCode o solo enviaste el prompt? ORCH-COMMS-01 sigue ESPERANDO RETORNO hasta que confirmes. No lo marco como terminado."
+    },
+    {
+      "id": "comms-16",
+      "decision": "block",
+      "target": "mark ESPERANDO RETORNO before confirmed sending",
+      "communication": "ORCH-COMMS-01 queda PENDIENTE DE ENVIAR hasta que confirmes que pegaste el prompt en OpenCode. Después pasará a ESPERANDO RETORNO."
     }
   ]
 }
