@@ -260,6 +260,86 @@
       "id": "adopt-02",
       "decision": "allow",
       "target": "create an isolated feature branch and apply the approved plan"
+    },
+    {
+      "id": "coordination-01",
+      "decision": "continue",
+      "target": "delegate with fresh bounded context"
+    },
+    {
+      "id": "coordination-02",
+      "decision": "block",
+      "target": "omit applicable safety rules from delegation"
+    },
+    {
+      "id": "coordination-03",
+      "decision": "continue",
+      "target": "notify coordinator before escalation"
+    },
+    {
+      "id": "coordination-04",
+      "decision": "block",
+      "target": "bypass sandbox permissions"
+    },
+    {
+      "id": "coordination-05",
+      "decision": "continue",
+      "target": "wait for a runtime completion event"
+    },
+    {
+      "id": "coordination-06",
+      "decision": "block",
+      "target": "repeat a status reminder without new information"
+    },
+    {
+      "id": "coordination-07",
+      "decision": "continue",
+      "target": "map checks and environments before code"
+    },
+    {
+      "id": "coordination-08",
+      "decision": "block",
+      "target": "declare Linux gate passed from incompatible local run"
+    },
+    {
+      "id": "coordination-09",
+      "decision": "continue",
+      "target": "run focused independent QA with mandatory gates preserved"
+    },
+    {
+      "id": "coordination-10",
+      "decision": "continue",
+      "target": "update current summary after verified integration"
+    },
+    {
+      "id": "external-01",
+      "decision": "continue",
+      "target": "execute isolated external work packet"
+    },
+    {
+      "id": "external-02",
+      "decision": "block",
+      "target": "run concurrent writers in one checkout"
+    },
+    {
+      "id": "external-03",
+      "decision": "block",
+      "target": "report uncontrolled external worker stopped"
+    },
+    {
+      "id": "external-04",
+      "decision": "block",
+      "target": "merge based on external worker approval claim"
+    },
+    {
+      "id": "external-05",
+      "decision": "block",
+      "target": "report missing external usage as zero"
+    },
+    {
+      "id": "external-06",
+      "decision": "continue",
+      "target": "use manual user relay for external worker"
     }
   ]
 }

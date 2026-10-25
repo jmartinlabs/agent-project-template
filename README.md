@@ -116,6 +116,15 @@ Project-specific files are created by the Skills in a derived repository, not pr
 with fictional approved decisions. UNDECIDED placeholders are intentional initialization
 instructions. Projects may retain this methodology and add their own code and tooling.
 
+## Coordination across clients
+The same [coordination contract](specs/methodology/dynamic-agents.md) applies to
+runtime subagents and external clients: one coordinator, fresh bounded packets,
+preflight/operation owners, advance blocking notices, milestone supervision and
+isolated writes/test resources. External workers use verified integrations or user
+relay; no launcher, OpenCode adapter, automatic cross-client control or combined usage
+collector is installed. Existing progress/testplan documents hold current state and
+environment-specific verification. Performance gains must be measured, not assumed.
+
 ## Verify and commit
 Optional local token accounting: [Codex usage reports](docs/USAGE_REPORTS.md).
 Reports can be generated on demand or through reviewed local Codex lifecycle hooks,

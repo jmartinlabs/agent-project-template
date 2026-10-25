@@ -30,3 +30,7 @@ location. Setup progress links to decisions instead of duplicating their text.
 Eight steps: bootstrap → context files → enforceable rules → roadmap → specification
 → reusable spec Skill → build → reusable dev Skill. Skills implement these repeatable
 processes; the initialization walkthrough coordinates the first four steps.
+
+Mixed-client work reuses the [work packet](../templates/agent-work-packet.md) and
+[coordination contract](methodology/dynamic-agents.md). A current summary in existing
+progress/setup/board documents owns operational state; other documents link it.

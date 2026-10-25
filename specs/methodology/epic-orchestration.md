@@ -9,6 +9,8 @@ For Full work, or Standard work with several independent workstreams. It extends
 - The coordinator is the **single writer** of the board. Delegates return outcomes, SHA and test evidence; they never edit the board.
 - Reconcile the board at session start and at major gates against approved specs, checkpoints, Git and tests. Mark missing evidence `unknown` or `unverified`; never infer approval.
 - Update only fields that materially change (ownership, authorization, candidate, QA verdict, blocker, PR state), not on every worker message.
+- Link one current summary; after integration replace stale pending labels with verified
+  SHA/PR/check state and retain the historical record as superseded.
 - Each row: unique feature ID, stage, scope and hard dependencies, approval, assigned role, isolated branch/checkout, blockers, evidence link, next action, last verification.
 - A ready task is not an approved spec. An open PR is not a merge.
 
@@ -36,6 +38,8 @@ Start with a falsifiable hypothesis, one discriminating probe and expected evide
 
 ## Work packets
 Each delegate gets a [work packet](../../templates/agent-work-packet.md) and a [role contract](../../.agents/roles/README.md). Specialists never promote a draft to approved, merge a PR or update the board.
+Mixed-client workers, preflight, advance escalation notices, fresh context and resource
+isolation follow [dynamic agent management](dynamic-agents.md); no parallel scheduler.
 
 ## Financial and security decisions
 Never infer approval from a checked option, silence, an earlier related approval or a PR review. Accounting semantics, financial calculations, migrations, security, published contracts, material scope, production changes and merges need explicit user approval. Research, test planning and drafts that commit none of these may continue.

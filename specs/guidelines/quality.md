@@ -29,6 +29,13 @@ required automated checks pass; documentation and progress updated; reviewed cha
 Blocked/skipped/unrun is not passed. No zero-test readiness claim.
 
 ## Derived-project CI
+Before implementation, map acceptance criteria to checks, local/CI environment, owner
+and expected evidence in the existing test plan. Check platform prerequisites first;
+an incompatible local run cannot replace the required CI gate. Use focal checks per
+delta and required verification per stable candidate, recording reasons for repeats.
+QA independently assesses candidate/diff/evidence and unresolved risks. Reuse valid
+evidence without suppressing mandatory financial, security or CI controls. At closure,
+link one current checkpoint rather than duplicate historical statuses.
 
 Bootstrap must implement the [change-aware CI contract](../methodology/ci-policy.md).
 Use a shared conservative `docs`/`full` classifier and test workflow execution
