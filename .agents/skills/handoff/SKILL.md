@@ -35,13 +35,21 @@ handles in this session, and existing task, branch, worktree, PR and approval ev
    pushed, list the pending files and mark remote portability **unverified**.
 5. **Write the minimum handoff.** Reuse the existing progress or board file. Include:
    `STOP REQUESTED — NO AUTO-RESUME`; feature and authorized scope; repo, branch, worktree, HEAD,
-   PR; worker stop status; done vs partial work and uncommitted changes; checks as PASS/FAIL/UNRUN
+   PR; decisions and their sources; worker stop status; done vs partial work and uncommitted changes; checks as PASS/FAIL/UNRUN
    with evidence and candidate SHA; open bugs and blocked gates; approvals still valid vs pending;
    **one next safe action**. Link specs instead of copying them. If nothing can be persisted,
    print the checkpoint and mark it `not persisted`. Make this the linked current
    summary, superseding stale labels without deleting history. Include external client
    IDs, start/stop owners and uncontrolled workers; do not imply cross-client control.
-6. **Conclude.** Confirm no new execution started and the checkpoint is reachable. Report
+6. **Verify persistence and continuation.** Reread the written checkpoint and verify its
+   path, HEAD, pending changes and evidence links against the inventory. Report failures
+   as unverified, never claim a durable checkpoint from a write attempt alone. Provide a
+   complete copyable next-chat instruction with repository/path, checkpoint location,
+   candidate branch/SHA/PR, authorized scope and decisions, valid versus pending approvals,
+   evidence, risks/blockers, pending work and one next safe action. Ask the next coordinator
+   to inspect Git drift and approvals before proposing continuation; the checkpoint itself
+   grants no authorization. The user opens the new chat manually.
+7. **Conclude.** Confirm no new execution started and the checkpoint is reachable. Report
    `stopped` only with runtime confirmation, otherwise `unconfirmed`. The final message must not
    trigger more tasks or agents.
 

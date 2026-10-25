@@ -25,6 +25,34 @@ spawn further agents unless the coordinator explicitly allows it in a supported 
 6. **Supervise at milestones.** Review the candidate diff and test evidence at handoff or on a material blocker, not after every message. Prevent overlapping edits: concurrent writers need disjoint ownership and authorized isolated checkouts, otherwise serialize. Checkouts follow [the local worktree policy](approvals.md#local-worktrees); the packet records responsibilities, not new consent.
 7. **Close or reassign** when a deliverable completes, blocks or becomes redundant. Require the SHA, real PASS/FAIL/UNRUN evidence, blockers and next safe action. Do not auto-create replacement workers.
 
+## Quota and dispatch gate
+For Codex, query remaining subscription quota when a supported client tool exists:
+execution start and before new assignments after meaningful milestones or quota warnings.
+Reuse a recent reading within the same dispatch batch; no continuous polling, new service
+or automatic paid consumption. Identify source and reading time. Prefer per-limit data;
+compute remaining as `max(0, min(100, 100 - usedPercent))` for valid numeric values.
+Use the minimum remaining across the five-hour (300 minutes) and weekly (10080 minutes)
+windows. Missing/null/invalid values are unavailable, never zero or an invented percentage.
+Partial data is incomplete: apply restrictions from known windows and disclose the gap;
+unknown data never proves normal quota or blocks authorized work solely by assumption.
+Token accounting in the usage reader is not subscription quota. Do not infer Codex quota
+from Claude/OpenCode usage or assume this desktop tool exists in other clients.
+
+- **More than 25% remaining:** normal allocation by complexity and quality: prioritize
+  Codex for complex/critical work; consider enabled OpenCode for bounded verifiable work.
+- **25% or less:** warn; no new Codex task or subagent, **including QA**, without explicit
+  authorization for that identified task. General development approval is insufficient.
+  Propose manual OpenCode only if enabled and suitable. Required QA stays pending until
+  authorized or otherwise independently performed under the existing quality contract.
+- **5% or less:** warn and stop initiating new tasks. Previous authorizations do not
+  suffice: require a new explicit task authorization after this warning. Preserve state
+  and existing advances at safe boundaries; do not destructively interrupt running work.
+  Do not launch another Codex task merely to save a checkpoint; preserve it in the current
+  session where possible. No automatic replacement workers or paid quota reset.
+
+Record task-specific exceptions and their relation to the warning in the existing packet
+or current summary. A warning is not approval; quota exceptions never waive QA or merges.
+
 ## Resource discipline
 ### Preparation and blocking operations
 Before dispatch, perform a scope-sized preflight: checkout/revision and pending changes,
@@ -66,6 +94,22 @@ required for uncertain impact, mandatory gates or financial/security risk. QA in
 inspects the candidate and evidence, runs checks that resolve risks and records reasons
 for repeats; it does not merely accept the author's summary. Consolidate findings into
 a bounded correction packet, then review the delta.
+
+## Manual OpenCode allocation
+The user declares external availability for each execution; absent a declaration,
+OpenCode is not enabled. Do not launch or integrate it via CLI, MCP or APIs. When enabled,
+use the copyable variant of the existing work packet, including a recommended model from
+that installation's verified available catalog (otherwise mark recommendation unverified
+and request the catalog before assigning a model). The user copies the prompt and returns
+`HANDOFF → CODEX` manually. Commits and PR preparation are permitted only within existing
+project authorization; the packet grants none. Notify significant assignments, models,
+blockers and deliveries. Continue useful independent authorized work, then wait when none
+remains; never repeatedly query the user or a worker for unchanged status.
+
+On return, independently inspect the actual diff and candidate SHA, acceptance evidence
+and CI, preferably using independent QA. Request bounded corrections where needed; an
+external handoff cannot approve itself or a merge. Apply the quota gate before assigning
+Codex review, including review by the coordinator as a new task.
 
 ## Workers in other clients
 One coordinator owns scheduling and integration across Codex, Claude Code, OpenCode or

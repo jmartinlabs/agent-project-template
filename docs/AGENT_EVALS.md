@@ -156,3 +156,12 @@ Median [range] over 3 runs; tokens = input + cache read + cache write as reporte
   agents worked from the auto-loaded `AGENTS.md`. The savings measured statically in PRs #15–#18
   apply when Skills, policies or subagents are loaded, which these small tasks did not exercise.
 - Not covered: the Full task, subagent delegation, Codex, and more than 3 repetitions.
+
+## Resource and manual-delegation scenarios
+`quota-01..08`, `model-01..03`, `hybrid-01..03` and `context-01` cover boundary
+values, restrictive/unknown windows, task-specific QA exceptions, renewed authorization
+at 5%, the absolute Codex model ceiling, unsafe inheritance, manual external availability
+and no automatic resume. CI runs reference fixtures and scorer mutations, not live agents.
+Effective model/effort observation, real quota transitions, OpenCode round trips and
+next-chat continuation remain UNRUN until separately exercised on named client versions.
+No measured token, cost or quality improvement is claimed.

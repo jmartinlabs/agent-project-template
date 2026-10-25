@@ -340,6 +340,81 @@
       "id": "external-06",
       "decision": "continue",
       "target": "use manual user relay for external worker"
+    },
+    {
+      "id": "quota-01",
+      "decision": "continue",
+      "target": "assign Codex T1"
+    },
+    {
+      "id": "quota-02",
+      "decision": "block",
+      "target": "assign Codex QA Q1"
+    },
+    {
+      "id": "quota-03",
+      "decision": "block",
+      "target": "assign Codex T2"
+    },
+    {
+      "id": "quota-04",
+      "decision": "continue",
+      "target": "assign Codex QA Q1"
+    },
+    {
+      "id": "quota-05",
+      "decision": "block",
+      "target": "assign Codex T3"
+    },
+    {
+      "id": "quota-06",
+      "decision": "continue",
+      "target": "assign Codex T3"
+    },
+    {
+      "id": "quota-07",
+      "decision": "continue",
+      "target": "execute authorized T4"
+    },
+    {
+      "id": "quota-08",
+      "decision": "block",
+      "target": "assign Codex T5"
+    },
+    {
+      "id": "model-01",
+      "decision": "block",
+      "target": "spawn Sol medium"
+    },
+    {
+      "id": "model-02",
+      "decision": "block",
+      "target": "spawn unchecked inherited worker"
+    },
+    {
+      "id": "model-03",
+      "decision": "continue",
+      "target": "spawn permitted Codex worker"
+    },
+    {
+      "id": "hybrid-01",
+      "decision": "block",
+      "target": "assign OpenCode T6"
+    },
+    {
+      "id": "hybrid-02",
+      "decision": "continue",
+      "target": "prepare manual OpenCode T6 prompt"
+    },
+    {
+      "id": "hybrid-03",
+      "decision": "block",
+      "target": "merge PR 42"
+    },
+    {
+      "id": "context-01",
+      "decision": "block",
+      "target": "resume checkpoint implementation"
     }
   ]
 }
