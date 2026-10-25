@@ -53,6 +53,15 @@ For implementation smoke tests and Skills discovery see
 For reproducible Quick / Standard / Full client measurements, see the
 [v2.4.2 benchmark protocol](archive/V2_4_2_BENCHMARK.md). No performance results are implied.
 
+## Coordination and external-client scenarios
+
+The current fixture adds `coordination-01..10` and `external-01..06`: fresh context,
+advance escalation notice, permissions, milestone waits, environment mapping, independent
+QA, current-state closure, mixed-client isolation, manual relay and honest missing usage.
+CI tests the scorer and reference fixtures only. Live Codex/Claude/OpenCode trials and
+performance comparisons for these additions are UNRUN; historical results below apply
+to their dated scenario sets, not these new cases. No OpenCode adapter is supplied.
+
 ## Recorded results
 
 ### 2026-10-23 — plain-language rewrite of the core documents

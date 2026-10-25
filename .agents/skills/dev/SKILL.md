@@ -16,10 +16,16 @@ verified acceptance evidence, relevant documentation updates and local commits.
    Review acceptance checks and identify contradictions; stop on important conflicts.
 2. Start/resume progress and test plan using their templates. Create coherent tasks and
    map every acceptance ID to an automated/manual check, expected result, command and
-   evidence location. Preserve previous evidence with run dates and label stale results.
-3. Implement small working increments. Maintain task state, relevant errors and next
+   evidence location, local/CI platform, owner and negative/integration cases before code.
+   Preserve previous evidence with run dates and label stale results.
+3. Preflight the affected environment and assign permission-sensitive operation owners.
+   Follow [coordination](../../../specs/methodology/dynamic-agents.md) for advance
+   escalation notices, external workers and shared test resources; never bypass approval.
+   Implement small working increments. Maintain task state, relevant errors and next
    action. Run relevant automated tests and required build/type/lint checks. Inspect
-   errors and regressions, correct defects and repeat affected checks.
+   errors and regressions, correct defects and repeat affected checks. Complete required
+   checks on each stable candidate; reuse evidence only for unchanged inputs/environment,
+   recording reasons for repeats. Incompatible local runs never replace CI gates.
 4. Verify actual functionality, not just compilation or a process/port. For non-visual
    applications assert API/CLI/library/integration behavior and error cases.
 5. For web applications operate all browser acceptance flows using Playwright; run
@@ -34,7 +40,9 @@ verified acceptance evidence, relevant documentation updates and local commits.
    deviations. Update progress/test results and documentation. Review own diff and staged
    files for regressions, secrets and unrelated changes, then commit each working increment.
 7. Finish only when every acceptance check passes with current evidence and required
-   regression checks pass. Summarize commands/results, commits, limitations and next action. In orchestrated work hand verified candidate evidence to independent QA; the coordinator alone updates the board and proposes authorized PR actions.
+   regression checks pass. Summarize commands/results, commits, limitations and next action. In orchestrated work hand verified candidate evidence to independent QA; the coordinator alone updates the board and proposes authorized PR actions. Update
+   one current checkpoint with SHA/pending changes, check/QA evidence, PR/merge state
+   and next action; supersede stale current labels without deleting history.
 ## Stop conditions
 Never deploy to production, publish or perform destructive operations without explicit
 permission. Stop on important conflicts or missing required authorization. Record blockers;

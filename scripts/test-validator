@@ -238,6 +238,44 @@ class ValidationTests(unittest.TestCase):
      self.assertRule('usage-hooks')
     finally:
      p.write_text(original)
+ def test_coordination_obligations(self):
+  # Structural drift guards only, not a claim that real clients followed the rules.
+  cases = (
+   ('specs/methodology/dynamic-agents.md', 'scope-sized preflight'),
+   ('specs/methodology/dynamic-agents.md', 'suspending escalation, the worker notifies the coordinator'),
+   ('specs/methodology/dynamic-agents.md', 'Advance notice is not another user approval gate'),
+   ('specs/methodology/dynamic-agents.md', 'fresh bounded context by default'),
+   ('specs/methodology/dynamic-agents.md', 'not repeated status reminders'),
+   ('specs/methodology/dynamic-agents.md', 'QA independently'),
+   ('specs/methodology/dynamic-agents.md', 'No OpenCode adapter is supplied'),
+   ('specs/methodology/dynamic-agents.md', 'explicit user authorization and supported tools'),
+   ('specs/methodology/dynamic-agents.md', 'separate checkouts/worktrees AND non-overlapping ownership'),
+   ('specs/methodology/dynamic-agents.md', 'Separate test ports, databases'),
+   ('specs/methodology/dynamic-agents.md', 'other-client usage is'),
+   ('specs/methodology/dynamic-agents.md', 'Replace stale current-state labels'),
+   ('specs/methodology/dynamic-agents.md', 'savings still need measurement'),
+   ('templates/agent-work-packet.md', 'Client / version / session ID'),
+   ('templates/agent-work-packet.md', 'Blocking notice'),
+   ('templates/progress.md', 'Current checkpoint'),
+   ('templates/testplan.md', 'Local / CI platform and owner'),
+   ('.agents/skills/orchestrate/SKILL.md', 'progressively spaced CI queries'),
+   ('.agents/skills/dev/SKILL.md', 'negative/integration cases before code'),
+   ('.agents/skills/task/SKILL.md', 'execution platform and operation owners before code'),
+   ('.agents/skills/handoff/SKILL.md', 'external client'),
+  )
+  for name,token in cases:
+   with self.subTest(name=name,token=token):
+    p=self.root/name; original=p.read_text()
+    self.assertIn(token,original)
+    try:
+     p.write_text(original.replace(token,'REMOVED'))
+     self.assertRule('coordination')
+    finally:
+     p.write_text(original)
+ def test_external_contract_does_not_register_clients(self):
+  p=self.root/'specs/methodology/dynamic-agents.md'
+  p.write_text(p.read_text()+'\nAn additional user-selected client may use the same verified packet.\n')
+  self.assertEqual(validate(self.root),[])
  def test_ci(self):
   self.change('.github/workflows/validate.yml','./scripts/test-validator','echo skip'); self.assertRule('ci')
  def test_legitimate_project(self):

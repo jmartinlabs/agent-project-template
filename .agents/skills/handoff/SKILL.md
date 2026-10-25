@@ -38,7 +38,9 @@ handles in this session, and existing task, branch, worktree, PR and approval ev
    PR; worker stop status; done vs partial work and uncommitted changes; checks as PASS/FAIL/UNRUN
    with evidence and candidate SHA; open bugs and blocked gates; approvals still valid vs pending;
    **one next safe action**. Link specs instead of copying them. If nothing can be persisted,
-   print the checkpoint and mark it `not persisted`.
+   print the checkpoint and mark it `not persisted`. Make this the linked current
+   summary, superseding stale labels without deleting history. Include external client
+   IDs, start/stop owners and uncontrolled workers; do not imply cross-client control.
 6. **Conclude.** Confirm no new execution started and the checkpoint is reachable. Report
    `stopped` only with runtime confirmation, otherwise `unconfirmed`. The final message must not
    trigger more tasks or agents.
