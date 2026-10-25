@@ -25,7 +25,7 @@ A classification, a proportionate plan, optional model advice, the authorized sc
 4. **Full work.** New project: init-project covers questions, architecture, an end-to-end bootstrap and a roadmap. Existing large feature: roadmap only if several epics need sequencing; otherwise spec then dev. Brainstorming records decisions and open questions; never silently approve a proposal.
 5. **Overlapping epics** follow specs/methodology/epic-orchestration.md. Reconcile approvals, Git and tests at session start and at milestones, not after every message. A single workstream uses its own progress and testplan. Keep independent work moving when one task is blocked.
 6. **Delegation** follows specs/methodology/dynamic-agents.md. Default to one executor (you or one specialist) per bounded task. Delegate a whole outcome with checks, ownership, applicable rules and stop conditions. Add parallel agents only for independent work whose benefit beats the overhead. Required independent QA still reviews the candidate. Use fresh bounded context, scope-sized preflight and operation owners; follow the same contract for external clients, never assume messaging or stop control.
-7. **Runtime.** Keep the current model when adequate. Launch subagents only if the tools exist; otherwise work sequentially. Never invent workers or model switches. Supervise at outcomes/blockers/decisions using bounded event waits and progressively spaced CI queries; no reminders or repeated reads without new evidence.
+7. **Runtime.** Apply the model ceiling in model-selection.md and the quota dispatch gate in dynamic-agents.md before new Codex tasks, including QA. Record external availability per execution; use the existing packet for manual OpenCode. Keep the current model when adequate. Launch subagents only if the tools exist; otherwise work sequentially. Never invent workers or model switches. Supervise at outcomes/blockers/decisions using bounded event waits and progressively spaced CI queries; no reminders or repeated reads without new evidence.
 8. **Ownership.** Concurrent edits need disjoint files and authorized isolated checkouts; otherwise serialize. Local worktrees follow [the canonical policy](../../../specs/methodology/approvals.md#local-worktrees). After an approved spec and development authorization, route to dev; after a verifiable candidate, run independent QA. Workers never approve specs, edit the shared board, delegate further without authorization or merge.
 9. **Gates.** Apply specs/methodology/approvals.md to every protected gate, including PR merges. A development or spec approval never implies merge. If discoveries raise the risk, reclassify and ask again.
 10. **Verify and hand off.** Check acceptance, needed regressions and the real diff; report PASS / FAIL / UNRUN. Save a short checkpoint only at real handoffs (approval, candidate, QA, blocker, PR) with the SHA and next safe action. Other open chats are not subagents. Update one current summary with candidate, check/QA evidence, PR/merge state and next action; replace stale labels and link historical entries.
@@ -34,6 +34,12 @@ A classification, a proportionate plan, optional model advice, the authorized sc
 - Coordinate outcomes, not messages: one plan, one complete packet, one verification handoff, one concise result. Do not reread unchanged context or repeat equivalent tests without a reason.
 - Before investigating a failure, state a falsifiable hypothesis, a discriminating probe and an exit condition. After two comparable attempts with no new evidence, checkpoint the blocker and ask for a new hypothesis or scope decision.
 - Report token or quota costs only from real client telemetry. A quota warning never justifies skipping required QA, security tests or approvals.
+
+## Context transfer
+After a significant delivery, recommend a new chat only when accumulated context justifies
+it, explicitly saying **run `$handoff`** first. Native compaction remains native: no arbitrary
+context thresholds, forced compaction or automatic chat creation/restarts. The user opens
+the next chat manually with the verified handoff instructions.
 
 ## Stop conditions
 Stop at unresolved approvals, unsafe or destructive operations, conflicting approved requirements, missing access or failed required checks. Record the blocker and next action.
