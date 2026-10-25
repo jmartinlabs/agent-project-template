@@ -1,15 +1,47 @@
-# Adaptive model selection (v2.4.2)
+# Adaptive model selection
 
-Recommend capability and reasoning, never a mandatory switch. The user controls the model in Codex or Claude Code; verify actual client options before naming selectable settings. Unknown availability is not a blocker.
+The user controls the coordinator model; never change it as a consequence of delegation.
+Verify client capabilities before selecting subagent settings. Unknown availability is not
+permission to inherit an unchecked model. Model choice never replaces verification,
+independent QA or protected approvals. Report savings only from real telemetry.
 
+## Codex subagents: absolute ceiling
+The maximum permitted combination is `gpt-6.1-sol` + `low` (UI: GPT-6.1 Sol Light).
+Never automatically escalate model or reasoning above this ceiling, including for QA.
+Use an explicitly selected economical available model for straightforward bounded work;
+reserve `gpt-6.1-sol` + `low` for complex or critical work. There is no numeric cost or
+capability ordering across model families: use a verified permitted economical option,
+not an inferred ranking. Never substitute Astra or another unverified family/version.
+
+Before dispatch, record requested model/effort, available controls and the selection
+assurance supplied by the runtime. In this Codex runtime, explicit `model` and
+`reasoning_effort` overrides require fresh context (`fork_turns="none"`); full-history
+forks inherit settings. Recheck this capability in other clients/versions. If selection
+cannot be guaranteed within the ceiling, do not spawn; record the limitation and work
+sequentially within authorization, or propose a manual permitted alternative. Never
+silently inherit an unchecked coordinator model. Do not raise the coordinator model.
+
+After dispatch, verify observed model/effort from attributable runtime metadata or local
+records when exposed. Record requested versus observed values and evidence; an agent's
+self-report is insufficient. Missing metadata means **effective selection unverified**,
+not a passed check. A mismatch stops further dispatch and requires investigation at a
+safe boundary; never compensate by escalating.
+
+## Portable advice
 | Work | Suggested tier | Suggested reasoning |
 | --- | --- | --- |
 | Straightforward Quick | efficient | low |
-| Bounded Standard or routine approved Full implementation | balanced | medium |
-| Architecture, ambiguous debugging or critical review | advanced | high |
+| Bounded Standard implementation | balanced | within client policy |
+| Architecture, ambiguous debugging or critical review | advanced | within client policy |
 
-These are starting heuristics, not bindings. Consider risk, ambiguity, phase and user preference: balanced by default, efficiency or quality when requested. Keep the current model when adequate. Investigate code and environment before recommending escalation after failures.
+These are advisory capability labels, not permission to exceed the Codex ceiling.
+Keep the current coordinator model when adequate. In Claude Code retain existing
+`model: inherit` profiles unless an authorized client-specific selection is supported;
+Claude model/effort names are not equivalent to GPT settings. Codex limits apply to
+Codex subagents even when another client coordinates them. Do not invent cross-client
+quota or telemetry. When unavailable, use smaller verifiable increments or report a blocker.
 
-Load this document when model advice matters, normally Standard / Full. Show one compact line with workflow, tier, reasoning and rationale; if unknown, say `suggested, availability unverified`. Omit redundant advice for straightforward Quick work. Add no separate approval gate, never claim an automatic switch or unsupported per-agent settings, and use smaller testable increments if a tier is unavailable.
-
-Model choice never replaces verification, required independent QA, regression checks or protected approvals. Never weaken safeguards to save tokens. Report cost or quota savings only with real client telemetry. This advice works in Codex and Claude Code without assuming either client offers the same labels, controls or delegation.
+Load this document when model advice matters, normally Standard / Full. Report one compact
+line: task, client, requested model/effort, assurance and observed evidence (or
+`suggested, availability unverified`). Add no separate approval gate beyond quota and
+existing project approvals. Native client settings remain subject to actual availability.
