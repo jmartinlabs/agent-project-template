@@ -9,7 +9,7 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','specs/methodology/coordinator-communication.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
 def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
@@ -215,6 +215,26 @@ def validate(root):
  }.items():
   for token in tokens:
    if token not in read(name): fail('coordination',f'{name}: missing {token}')
+ # Communication obligations are structural guards; live client behavior is evaluated separately.
+ for name,tokens in {
+  'specs/methodology/coordinator-communication.md':('PENDIENTE DE ENVIAR','ESPERANDO RETORNO','RETORNO RECIBIDO','EN REVISIÓN','CORRECCIÓN PENDIENTE','BLOQUEADO','COMPLETADO','DESCONOCIDO','HANDOFF → CODEX','HANDOFF → CLAUDE CODE','Never invent an ID','Never show percentages','Acción humana','Responder a OpenCode','never authorizes','read-only'),
+  'templates/agent-work-packet.md':('Task ID and origin session','Final status (COMPLETED / PARTIAL / BLOCKED / CANCELLED)','Relevant files and pending changes','Decisions needed','Recommended next action','absent / unknown','Session reference','coordinator-communication.md','Shared test resources: <separate ports, databases and temporary directories'),
+  '.agents/skills/orchestrate/SKILL.md':('coordinator-communication.md','Communication and status','read-only','received report','never authorizes'),
+  'specs/methodology/dynamic-agents.md':('coordinator-communication.md',),
+  'templates/progress.md':('coordinator-communication.md',),
+  'docs/CLAUDE_ADAPTER.md':('coordinator-communication.md','HANDOFF → CLAUDE CODE'),
+ }.items():
+  for token in tokens:
+   if token not in read(name): fail('communication',f'{name}: missing {token}')
+ if '(specs/methodology/coordinator-communication.md)' not in agents: fail('communication','AGENTS.md missing communication contract link')
+ if 'Missing evidence alone proves neither failure nor non-execution.' not in read('specs/methodology/coordinator-communication.md'):
+  fail('communication','missing distinction between unverified, failing and unrun checks')
+ try:
+  cases=json.loads(read('evals/scenarios.json')).get('cases',[])
+  comms=[c for c in cases if str(c.get('id','')).startswith('comms-') and 'criteria' in c.get('expected',{})]
+  if len(comms)<16: fail('agent-evals','communication scenarios with observable criteria are incomplete')
+ except (ValueError,AttributeError,TypeError):
+  fail('agent-evals','scenarios.json invalid for communication criteria')
  # Resource policy guards are structural; runtime behavior needs separate trials.
  for name,tokens in {
   'specs/methodology/model-selection.md':('`gpt-6.1-sol` + `low`','do not spawn','requested versus observed','fork_turns="none"'),
