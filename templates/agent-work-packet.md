@@ -5,7 +5,7 @@
 - **Packet ID:** TASK-UNSET
 - **Epic / stream:** UNSET
 - **Profile:** Functional | Implementation | QA | Infrastructure | bounded custom
-- **Client / version / session ID:** UNVERIFIED; runtime-controlled | external
+- **Client / version / session ID:** OpenCode <verified version> or UNVERIFIED; runtime-controlled | external. Technical session ID only if known; otherwise a stable functional reference. Never invent an ID. Corrections keep the same packet ID and session.
 - **Start/stop owner and permitted communication route:** UNSET; manual user relay without verified integration
 - **Instruction entry points / capability check:** UNVERIFIED; confirm canonical rules are readable
 - **Context:** fresh bounded context by default | inherited with concrete reason | unsupported/disclosed
@@ -30,7 +30,7 @@
 - **User decisions to request:** NONE / LIST
 - **Model selection:** requested model/effort; runtime assurance; observed model/effort and evidence or unverified; follow [model policy](../specs/methodology/model-selection.md)
 - **Quota gate:** source/time, five-hour and weekly remaining or unavailable; restrictive value; task-specific authorization and warning if required
-- **Return schema:** packet ID; done/blocked/cancelled; files/revision; checks passed/failed/unrun; evidence; decisions; next ready action
+- **Return schema:** the copyable `HANDOFF → CODEX` block below, required in every interaction, including blocks and decisions; status COMPLETED / PARTIAL / BLOCKED / CANCELLED; tests PASS / FAIL / UNRUN with evidence; state in [coordinator communication](../specs/methodology/coordinator-communication.md)
 - **Usage evidence:** client source and coverage | unavailable; never infer consumption or control of external workers
 
 Coordinator updates `specs/epic-board.md` only after verifying the returned evidence and current canonical documents.
@@ -39,27 +39,34 @@ Coordinator updates `specs/epic-board.md` only after verifying the returned evid
 Fill every relevant placeholder before the user copies this block. Include the applicable
 rules themselves; local source links alone are insufficient if the worker cannot read them.
 Use the packet above as the single source of scope and authorization, not a second board.
+Write the copyable text in the user's language, keeping the headings and field names.
+When the coordinator is Claude Code, replace `CODEX` in the heading and return fields with `CLAUDE CODE`.
 
 ```text
-Task ID: <packet ID>
+Task ID and name: <packet ID> — <functional name>
+Session reference: <technical session ID if known; otherwise the stable functional reference>
 Client: OpenCode <verified version>; external, manually started/stopped by the user.
-Recommended model: <available model, rationale for bounded work; no invented availability>.
+Repository, branch or worktree, base SHA, PR: <repo path, branch, base SHA, separate checkout; PR: none unless authorized>
+Recommended model: <verified available model and rationale for bounded work> | UNVERIFIED: catalog not checked; request it before assigning a model.
 Objective and minimum context: <task, relevant decisions, source paths and instruction entry points>.
 Authorized scope: <approval source/date, allowed actions, editable paths and exclusions>.
-Isolation: <repo, branch, base SHA, separate checkout, ownership and test resources>.
+Ownership and restrictions: <files this task owns, files it must not touch, other active tasks>.
 Applicable rules: <copy the task's required rules and source links; preserve approvals>.
 Deliverable and acceptance: <concrete checks and expected behavior>.
-Tests: <commands, environment, expected evidence; report PASS/FAIL/UNRUN>.
-Stop on missing permissions, conflicting requirements, ownership collisions or scope expansion.
+Tests: <commands, environment, expected evidence; report PASS/FAIL/UNRUN with evidence>.
+Blockers: stop and report on missing permissions, conflicting requirements, ownership collisions or scope expansion. Do not work around them.
 Implement, test, commit or prepare a PR only when covered by the stated authorization.
 Never merge, deploy, self-approve QA, expand scope or start other workers.
-Return exactly one final copyable message with this heading and all fields:
+Return exactly one final copyable message, also when blocked, partial or needing a decision, with this heading and every field:
 HANDOFF → CODEX
-Task ID and result: ...
-Final status (done/blocked/partial/cancelled): ...
-Branch, commit SHA, PR (or absent), dirty/untracked files: ...
-Changes: ...
-Tests and verifiable evidence (commands, environment, candidate, PASS/FAIL/UNRUN): ...
-Problems, risks and blockers: ...
-Next actions: ...
+Task ID and origin session: ...
+Final status (COMPLETED / PARTIAL / BLOCKED / CANCELLED): ...
+Summary and changes: ...
+Relevant files and pending changes: ...
+Branch, commit SHA, PR (or absent / unknown): ...
+Tests (PASS / FAIL / UNRUN for each command, with command, environment, candidate: SHA plus pending changes, and evidence): ...
+Risks, blockers and open problems: ...
+Decisions needed (or NONE): ...
+Recommended next action: ...
+END HANDOFF → CODEX
 ```

@@ -17,6 +17,9 @@ they do not replace canonical rules.
 - `.claude/agents/` exposes optional task-limited profiles for
   functional, implementation, QA/review and infrastructure work. A profile
   file is not a running worker or a license to delegate without checks.
+- Manual client communication (identity, states, full return block and status) is the same
+  [coordinator communication](../specs/methodology/coordinator-communication.md) contract for Claude Code.
+  Only the client name changes: `HANDOFF → CLAUDE CODE`. Nothing is sent to OpenCode automatically.
 - Call `/orchestrate` with a concrete task and let it choose Quick, Standard,
   or Full according to the already agreed scope. Native Claude Plan mode is
   separate from a Skill. Command names do not give approval or change models.

@@ -20,7 +20,8 @@ Both run the same canonical Skill in `.agents/skills/`.
     [quality](specs/guidelines/quality.md) and [security](specs/guidelines/security.md) guidelines;
   - [epic orchestration](specs/methodology/epic-orchestration.md) for overlapping epics;
   - [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before delegating;
-  - [model selection](specs/methodology/model-selection.md) when model advice matters.
+  - [model selection](specs/methodology/model-selection.md) when model advice matters;
+  - [coordinator communication](specs/methodology/coordinator-communication.md) for manual client packets, returns, feedback and status.
 - Project-specific restrictions take precedence over generic shortcuts.
 - Default to one executor. Keep required independent QA.
 
