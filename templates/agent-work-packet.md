@@ -5,7 +5,7 @@
 - **Packet ID:** TASK-UNSET
 - **Epic / stream:** UNSET
 - **Profile:** Functional | Implementation | QA | Infrastructure | bounded custom
-- **Client / version / session ID:** OpenCode <verified version> or UNVERIFIED; runtime-controlled | external. Technical session ID only if known; otherwise a stable functional reference. Never invent an ID. Corrections keep the same packet ID and session.
+- **Client / version / session ID:** <client and verified version> or UNVERIFIED; runtime-controlled | external. Technical session ID only if known; otherwise a stable functional reference. Never invent an ID. Corrections keep the same packet ID and session.
 - **Start/stop owner and permitted communication route:** UNSET; manual user relay without verified integration
 - **Instruction entry points / capability check:** UNVERIFIED; confirm canonical rules are readable
 - **Context:** fresh bounded context by default | inherited with concrete reason | unsupported/disclosed
@@ -51,6 +51,7 @@ Recommended model: <verified available model and rationale for bounded work> | U
 Objective and minimum context: <task, relevant decisions, source paths and instruction entry points>.
 Authorized scope: <approval source/date, allowed actions, editable paths and exclusions>.
 Ownership and restrictions: <files this task owns, files it must not touch, other active tasks>.
+Shared test resources: <separate ports, databases and temporary directories, or not applicable; serialize writes when safe isolation is absent>.
 Applicable rules: <copy the task's required rules and source links; preserve approvals>.
 Deliverable and acceptance: <concrete checks and expected behavior>.
 Tests: <commands, environment, expected evidence; report PASS/FAIL/UNRUN with evidence>.

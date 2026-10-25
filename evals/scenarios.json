@@ -688,7 +688,25 @@
               "no verificado",
               "unverified",
               "not verified"
-            ]
+            ],
+            "FAIL",
+            "Summary:",
+            "Changes:",
+            "Files:",
+            "Branch:",
+            "SHA:",
+            "PR:",
+            "Command:",
+            "Environment:",
+            "Evidence:",
+            "Risks:",
+            "Blockers:",
+            "Decisions:",
+            "Next action:",
+            "END HANDOFF → CODEX",
+            "PENDIENTE DE ENVIAR",
+            "Acción humana",
+            "Responder a OpenCode"
           ],
           "must_not_include": []
         }
@@ -717,7 +735,11 @@
               "completo",
               "complete",
               "full"
-            ]
+            ],
+            "Tu acción:",
+            "```text",
+            "CORRECCIÓN PENDIENTE",
+            "Responder a OpenCode: sí"
           ],
           "must_not_include": []
         }
@@ -765,9 +787,17 @@
             "ORCH Comunicación",
             "FAIL",
             "1111111",
-            "HANDOFF → CODEX"
+            "HANDOFF → CODEX",
+            "ORCH-CAT-02",
+            "ESPERANDO RETORNO",
+            [
+              "implementación",
+              "implementation"
+            ]
           ],
-          "must_not_include": []
+          "must_not_include": [
+            "Corrige solo esa prueba"
+          ]
         }
       }
     },
@@ -789,7 +819,11 @@
               "entorno",
               "environment"
             ],
-            "HANDOFF → CODEX"
+            "HANDOFF → CODEX",
+            "Tu acción:",
+            "```text",
+            "CORRECCIÓN PENDIENTE",
+            "Responder a OpenCode: sí"
           ],
           "must_not_include": [
             "paquete completo",
@@ -889,7 +923,12 @@
             [
               "solo lectura",
               "read-only"
-            ]
+            ],
+            "desconocid",
+            "worktree",
+            "bloqueo",
+            "autorizaci",
+            "Acción humana"
           ],
           "must_not_include": []
         }

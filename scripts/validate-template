@@ -218,7 +218,7 @@ def validate(root):
  # Communication obligations are structural guards; live client behavior is evaluated separately.
  for name,tokens in {
   'specs/methodology/coordinator-communication.md':('PENDIENTE DE ENVIAR','ESPERANDO RETORNO','RETORNO RECIBIDO','EN REVISIÓN','CORRECCIÓN PENDIENTE','BLOQUEADO','COMPLETADO','DESCONOCIDO','HANDOFF → CODEX','HANDOFF → CLAUDE CODE','Never invent an ID','Never show percentages','Acción humana','Responder a OpenCode','never authorizes','read-only'),
-  'templates/agent-work-packet.md':('Task ID and origin session','Final status (COMPLETED / PARTIAL / BLOCKED / CANCELLED)','Relevant files and pending changes','Decisions needed','Recommended next action','absent / unknown','Session reference','coordinator-communication.md'),
+  'templates/agent-work-packet.md':('Task ID and origin session','Final status (COMPLETED / PARTIAL / BLOCKED / CANCELLED)','Relevant files and pending changes','Decisions needed','Recommended next action','absent / unknown','Session reference','coordinator-communication.md','Shared test resources: <separate ports, databases and temporary directories'),
   '.agents/skills/orchestrate/SKILL.md':('coordinator-communication.md','Communication and status','read-only','received report','never authorizes'),
   'specs/methodology/dynamic-agents.md':('coordinator-communication.md',),
   'templates/progress.md':('coordinator-communication.md',),
@@ -227,6 +227,8 @@ def validate(root):
   for token in tokens:
    if token not in read(name): fail('communication',f'{name}: missing {token}')
  if '(specs/methodology/coordinator-communication.md)' not in agents: fail('communication','AGENTS.md missing communication contract link')
+ if 'Missing evidence alone proves neither failure nor non-execution.' not in read('specs/methodology/coordinator-communication.md'):
+  fail('communication','missing distinction between unverified, failing and unrun checks')
  try:
   cases=json.loads(read('evals/scenarios.json')).get('cases',[])
   comms=[c for c in cases if str(c.get('id','')).startswith('comms-') and 'criteria' in c.get('expected',{})]

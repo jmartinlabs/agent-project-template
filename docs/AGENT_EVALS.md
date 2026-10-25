@@ -49,6 +49,11 @@ text to contain every `must_include` item (each item may list alternatives) and 
 the `must_not_include` strings, case-insensitively. These are observable markers for
 identifiers, target sessions, states and the mandatory return block. They do not prove
 the message's quality, and a passing reference fixture is not evidence of agent behavior.
+The initial-packet case requires the return field markers as well as status words;
+its reference includes the actual packet instead of referring to an absent attachment.
+The scorer self-test removes each required marker and injects each forbidden marker
+to check rejection. Marker presence still cannot establish semantic completeness,
+correct routing or truthful evidence; independent review remains necessary.
 
 These scenarios test reasoning in a sandbox and cannot prove that a future agent
 will not use another merge path or bypass a tool guard. Approval evidence must
