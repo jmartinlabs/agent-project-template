@@ -373,6 +373,14 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(validate(self.root),[])
  def test_ci(self):
   self.change('.github/workflows/validate.yml','./scripts/test-validator','echo skip'); self.assertRule('ci')
+ def test_ci_whitespace_net_delta(self):
+  self.change('.github/workflows/validate.yml','git diff --check "$base" HEAD','git diff --check'); self.assertRule('ci')
+ def test_ci_whitespace_full_history(self):
+  self.change('.github/workflows/validate.yml','fetch-depth: 0','fetch-depth: 1'); self.assertRule('ci')
+ def test_ci_whitespace_push_base(self):
+  self.change('.github/workflows/validate.yml',' || github.event.before',''); self.assertRule('ci')
+ def test_ci_whitespace_tag_skip(self):
+  self.change('.github/workflows/validate.yml',"      if: github.ref_type != 'tag'\n",''); self.assertRule('ci')
  def test_legitimate_project(self):
   self.change('specs/guidelines/architecture.md','# Architecture','# Architecture\nApproved for this project: Rust and SQLite.')
   self.change('README.md','# Universal','# Universal\n[Folder](templates) [External](https://example.com)\nUNDECIDED api_key: YOUR_KEY')
