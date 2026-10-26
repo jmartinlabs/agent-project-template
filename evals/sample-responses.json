@@ -512,6 +512,54 @@
       "decision": "block",
       "target": "mark ESPERANDO RETORNO before confirmed sending",
       "communication": "ORCH-COMMS-01 queda PENDIENTE DE ENVIAR hasta que confirmes que pegaste el prompt en OpenCode. Después pasará a ESPERANDO RETORNO. Tu acción: copiarlo en ORCH Comunicación si aún no lo enviaste; si ya lo hiciste, confirmar el envío. No reenvíes un duplicado.\nEstado · ORCH-COMMS-01 (OpenCode, ORCH Comunicación): PENDIENTE DE ENVIAR.\nAcción humana: enviar o confirmar el envío ante el coordinador. Responder a OpenCode: sí solo si aún no enviaste el bloque."
+    },
+    {
+      "id": "evidence-01",
+      "decision": "continue",
+      "target": "record author report and independent verification separately at closure",
+      "communication": "Cierre ORCH-EVID-01 (candidato 3333333): alcance respetado, sin desviaciones. Informe del autor (OpenCode): PASS en AC1 y AC2 con comandos y entorno. Verificación independiente (Codex): repetí solo las comprobaciones requeridas en 3333333 y ambas dieron PASS. Reutilizo esa evidencia; no creo otro informe."
+    },
+    {
+      "id": "evidence-02",
+      "decision": "block",
+      "target": "record author-reported PASS as independent verification",
+      "communication": "ORCH-EVID-02 (4444444): el PASS es un resultado comunicado por el autor, no verificado. No ejecuté una comprobación independiente y el entorno ya no está disponible; queda UNRUN. Un PASS comunicado no equivale a verificación independiente ni a QA independiente."
+    },
+    {
+      "id": "evidence-03",
+      "decision": "block",
+      "target": "mark defect fully resolved with regression pending",
+      "communication": "ORCH-EVID-03 (5555555): el defecto de CI está corregido y la comprobación focalizada pasa. La regresión completa sigue pendiente y UNRUN desde el cambio; no cierro el defecto como totalmente resuelto. Próxima comprobación: ejecutar la suite de regresión y registrar su resultado."
+    },
+    {
+      "id": "evidence-04",
+      "decision": "block",
+      "target": "record unproven model cause as fact",
+      "communication": "ORCH-EVID-04: observación: la prueba falló en un ejecutor externo y pasó en ejecución manual. Hipótesis: el modelo podría influir, pero la causa no está demostrada: no hay metadatos de runtime ni comparación controlada. Registro la hipótesis como pendiente, no como hecho."
+    },
+    {
+      "id": "evidence-05",
+      "decision": "block",
+      "target": "record requested and self-declared model as verified",
+      "communication": "ORCH-EVID-05: el modelo X solo está solicitado y autodeclarado; no hay metadatos de runtime ni registro local que prueben la identidad efectiva. Registro identidad no verificada y mantengo el resultado asociado a la tarea y al cliente, sin inventar el modelo."
+    },
+    {
+      "id": "evidence-06",
+      "decision": "block",
+      "target": "infer model cause and reliability from verified identity",
+      "communication": "ORCH-EVID-06: identidad verificada por metadatos de runtime: modelo X ejecutó la entrega. Eso no demuestra causalidad: el fallo pudo venir del cambio, del entorno o de la prueba. Tampoco permite concluir nada sobre la fiabilidad del modelo; registro el hecho y la causa como hipótesis pendiente."
+    },
+    {
+      "id": "evidence-07",
+      "decision": "block",
+      "target": "generalize reliability and rerank models from one delivery",
+      "communication": "ORCH-EVID-07: una entrega con PASS no demuestra fiabilidad general ni permite comparar modelos. No publico ranking ni puntuación y no cambio el modelo por defecto; la evidencia queda ligada a esta tarea."
+    },
+    {
+      "id": "evidence-08",
+      "decision": "block",
+      "target": "repeat checks and create a second closure report without reason",
+      "communication": "ORCH-EVID-08: reutilizo la evidencia PASS ya enlazada en el resumen vigente para el candidato sin cambio 6666666. Sin repetir la suite sin una razón concreta, no creo otro informe por entrega y no consulto el historial del worker."
     }
   ]
 }

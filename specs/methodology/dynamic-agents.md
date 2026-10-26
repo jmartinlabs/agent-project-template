@@ -149,6 +149,35 @@ Replace stale current-state labels; preserve historical entries as explicitly su
 Other documents link that summary rather than maintain competing statuses. Token/time
 savings still need measurement across comparable work, with scope and compaction recorded.
 
+## Delivery evidence at closure
+
+Closure adds one short record to that current summary, not a new report per delivery. It states:
+
+- **Scope conformance:** whether the delivered change stayed inside the authorized scope, with any
+  observed deviation; out-of-scope work is disclosed, never hidden.
+- **Verification:** each acceptance check as PASS / FAIL / UNRUN, who ran it, and its reproducible
+  evidence (command, environment and candidate revision when applicable). Reuse valid existing
+  evidence; repeat a check only for a concrete reason such as a changed delta, uncertain impact or a
+  mandatory gate. A reported but unverified result stays distinct from PASS and from FAIL.
+- **Defects and resolution:** defects found by review or CI, the correction, the check that confirmed
+  it and any pending regression. "Fixed to good quality" without that evidence is not a resolution.
+- **Provenance:** distinguish the author's reported result, an independent check actually performed,
+  a verified observation and a cause that remains a hypothesis. Restating the author's report never
+  turns it into independent QA.
+- **Executor identity:** record the client and model actually used only with the identity evidence
+  defined in [model selection](model-selection.md), such as attributable runtime metadata or local
+  records. A requested model, a packet label or an agent's self-declaration is not verified identity;
+  without that evidence, record identity as unverified and keep the result attached to the
+  task/client, without inventing a model.
+- **No causal or reliability inference:** identifying the executor does not show that it caused a
+  failure or a success, and one delivery never proves its general reliability. Derive no rankings,
+  scores or automatic model changes from it.
+
+Keep the record brief and proportional: use the existing summary, link evidence instead of copying it,
+and avoid new files, repeated tests or history queries without a concrete reason. The same record
+serves Codex and Claude Code. Fixture or text checks do not prove that a real closure was complete;
+independent QA still reviews it.
+
 ## Measurement discipline
 - Measure verified outcomes, not agent or message counts. Do not invent per-agent token costs without real telemetry.
 - Investigations need a discriminating probe. After two comparable attempts with no progress, checkpoint and escalate.

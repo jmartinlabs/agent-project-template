@@ -310,6 +310,33 @@ class ValidationTests(unittest.TestCase):
   self.change('AGENTS.md','(specs/methodology/coordinator-communication.md)','(README.md)'); self.assertRule('communication')
  def test_communication_criteria_fixtures(self):
   self.change('evals/scenarios.json','"id": "comms-','"id": "removed-'); self.assertRule('agent-evals')
+ def test_delivery_evidence_contract(self):
+  cases = (
+   ('.agents/skills/orchestrate/SKILL.md', 'delivery-evidence-at-closure'),
+   ('.agents/skills/orchestrate/SKILL.md', 'scope conformance and deviations'),
+   ('.agents/skills/orchestrate/SKILL.md', 'verified effective identity'),
+   ('.agents/skills/orchestrate/SKILL.md', 'create no extra report'),
+   ('specs/methodology/dynamic-agents.md', '## Delivery evidence at closure'),
+   ('specs/methodology/dynamic-agents.md', 'PASS / FAIL / UNRUN'),
+   ('specs/methodology/dynamic-agents.md', 'pending regression'),
+   ('specs/methodology/dynamic-agents.md', "author's reported result"),
+   ('specs/methodology/dynamic-agents.md', 'independent check actually performed'),
+   ('specs/methodology/dynamic-agents.md', 'cause that remains a hypothesis'),
+   ('specs/methodology/dynamic-agents.md', 'self-declaration'),
+   ('docs/AGENT_EVALS.md', 'evidence-01..08'),
+   ('docs/AGENT_EVALS.md', 'semantic completeness'),
+  )
+  for name, token in cases:
+   with self.subTest(name=name, token=token):
+    p=self.root/name; original=p.read_text()
+    self.assertIn(token, original)
+    try:
+     p.write_text(original.replace(token, 'REMOVED'))
+     self.assertRule('delivery-evidence')
+    finally:
+     p.write_text(original)
+ def test_delivery_evidence_scenarios(self):
+  self.change('evals/scenarios.json','"id": "evidence-','"id": "removed-'); self.assertRule('agent-evals')
  def test_external_contract_does_not_register_clients(self):
   p=self.root/'specs/methodology/dynamic-agents.md'
   p.write_text(p.read_text()+'\nAn additional user-selected client may use the same verified packet.\n')
