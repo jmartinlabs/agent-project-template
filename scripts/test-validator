@@ -381,6 +381,8 @@ class ValidationTests(unittest.TestCase):
   self.change('.github/workflows/validate.yml',' || github.event.before',''); self.assertRule('ci')
  def test_ci_whitespace_tag_skip(self):
   self.change('.github/workflows/validate.yml',"      if: github.ref_type != 'tag'\n",''); self.assertRule('ci')
+ def test_ci_whitespace_bare_step(self):
+  self.change('.github/workflows/validate.yml','      - name: Check whitespace in the change range','      - run: git diff --check\n      - name: Check whitespace in the change range'); self.assertRule('ci')
  def test_legitimate_project(self):
   self.change('specs/guidelines/architecture.md','# Architecture','# Architecture\nApproved for this project: Rust and SQLite.')
   self.change('README.md','# Universal','# Universal\n[Folder](templates) [External](https://example.com)\nUNDECIDED api_key: YOUR_KEY')
