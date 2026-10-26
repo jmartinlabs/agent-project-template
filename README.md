@@ -142,6 +142,7 @@ git status --short
 ```
 `git diff --check HEAD` covers staged and unstaged changes against HEAD; untracked
 files are not included.
+
 `test-validator` builds fixtures from tracked files when Git metadata exists, so untracked
 local files are excluded; a `.git`-less export is copied with the current ignore patterns
 and does not isolate pre-existing local files.
