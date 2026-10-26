@@ -233,8 +233,18 @@ def validate(root):
   cases=json.loads(read('evals/scenarios.json')).get('cases',[])
   comms=[c for c in cases if str(c.get('id','')).startswith('comms-') and 'criteria' in c.get('expected',{})]
   if len(comms)<16: fail('agent-evals','communication scenarios with observable criteria are incomplete')
+  evidence=[c for c in cases if str(c.get('id','')).startswith('evidence-') and 'criteria' in c.get('expected',{})]
+  if len(evidence)<8: fail('agent-evals','delivery-evidence scenarios with observable criteria are incomplete')
  except (ValueError,AttributeError,TypeError):
   fail('agent-evals','scenarios.json invalid for communication criteria')
+ # Delivery closure evidence is structural here; real report quality needs independent review.
+ for name,tokens in {
+  '.agents/skills/orchestrate/SKILL.md':('delivery-evidence-at-closure','scope conformance and deviations','verified effective identity','general reliability','create no extra report'),
+  'specs/methodology/dynamic-agents.md':('## Delivery evidence at closure','Scope conformance:','PASS / FAIL / UNRUN','pending regression',"author's reported result",'independent check actually performed','cause that remains a hypothesis','self-declaration','general reliability','one short record'),
+  'docs/AGENT_EVALS.md':('evidence-01..08','do not prove','semantic completeness'),
+ }.items():
+  for token in tokens:
+   if token not in read(name): fail('delivery-evidence',f'{name}: missing {token}')
  # Resource policy guards are structural; runtime behavior needs separate trials.
  for name,tokens in {
   'specs/methodology/model-selection.md':('`gpt-6.1-sol` + `low`','do not spawn','requested versus observed','fork_turns="none"'),

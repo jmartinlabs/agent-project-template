@@ -84,6 +84,20 @@ a decision request (14) and PENDIENTE DE ENVIAR versus ESPERANDO RETORNO (16). T
 entries for these cases are reference fixtures written by the template author, not agent output.
 Their live runs on Codex, Claude Code and OpenCode, and the OpenCode round trip, are UNRUN.
 
+## Delivery evidence scenarios
+
+The current fixture adds `evidence-01..08` for the [closure record](../specs/methodology/dynamic-agents.md#delivery-evidence-at-closure):
+author and independent reviewer separated, an author-reported PASS without independent
+validation, a corrected defect with a pending regression, an unproven cause presented as
+fact, a requested or self-declared model without verified identity, verified identity
+without causal attribution, reliability generalization from one delivery, and reuse of
+existing evidence without repeated tests or a second report. CI scores the reference
+fixtures and mutates each required marker and forbidden string.
+
+These are observable text markers. They do not prove real closure behavior, truthful
+evidence or full semantic completeness; independent review remains necessary. Live
+Codex, Claude Code and OpenCode runs for these cases are UNRUN.
+
 ## Recorded results
 
 ### 2026-10-23 — plain-language rewrite of the core documents
