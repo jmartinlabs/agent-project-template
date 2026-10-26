@@ -3,6 +3,7 @@
 from pathlib import Path
 import contextlib
 import io
+import json
 import os
 import re
 import runpy
@@ -414,6 +415,108 @@ class ValidationTests(unittest.TestCase):
    with self.subTest(name=name):
     p=self.root/name; original=p.read_text()
     p.write_text(original.replace('approvals.md#local-worktrees','approvals.md')); self.assertRule('consistency'); p.write_text(original)
+ def test_publication_policy_contract(self):
+  cases = (
+   '## Branch and PR publication', 'No separate publication approval is needed',
+   'local only', 'draft PR', 'Before pushing, review the diff',
+   'An open PR does', 'Creating or merging a specification PR neither approves its content',
+   'explicit, identifiable approval for that PR',
+   'Never enable auto-merge', 'creating repositories',
+   'handoff workflow keeps its own prohibition',
+  )
+  p=self.root/'specs/methodology/approvals.md'; original=p.read_text()
+  for token in cases:
+   with self.subTest(token=token):
+    self.assertIn(token, original)
+    try:
+     p.write_text(original.replace(token, 'REMOVED'))
+     self.assertRule('publication')
+    finally:
+     p.write_text(original)
+ def test_publication_policy_links(self):
+  for name in ('AGENTS.md', '.agents/skills/dev/SKILL.md', '.agents/skills/tweak/SKILL.md',
+               '.agents/skills/task/SKILL.md', 'specs/methodology/workflows.md',
+               'specs/methodology/dynamic-agents.md', 'specs/guidelines/security.md'):
+   with self.subTest(name=name):
+    p=self.root/name; original=p.read_text()
+    self.assertIn('approvals.md#branch-and-pr-publication', original)
+    try:
+     p.write_text(original.replace('approvals.md#branch-and-pr-publication', 'approvals.md'))
+     self.assertRule('publication')
+    finally:
+     p.write_text(original)
+ def test_publication_related_contracts(self):
+  cases = (
+   ('specs/methodology/epic-orchestration.md', 'merge remains a separate approval'),
+   ('templates/agent-work-packet.md', 'authorized scope includes publication'),
+   ('templates/epic-board.md', 'published/updated within the authorized scope'),
+   ('specs/methodology/acceptance-scenarios.md', 'within the authorized scope'),
+   ('docs/GUIA_VISUAL_ORQUESTACION.md', 'PR publicada'),
+  )
+  for name, token in cases:
+   with self.subTest(name=name, token=token):
+    p=self.root/name; original=p.read_text()
+    self.assertIn(token, original)
+    try:
+     p.write_text(original.replace(token, 'REMOVED'))
+     self.assertRule('publication')
+    finally:
+     p.write_text(original)
+ def test_execution_continuity_contract(self):
+  cases = (
+   '## Execution continuity', 'a partial result', 'authorized, executable work remains',
+   'completed work with its evidence', 'decision or approval that only the user can provide',
+   'user request to stop', 'blocker that cannot be resolved',
+   'next action in the same turn', 'Reuse a valid authorization',
+  )
+  p=self.root/'.agents/skills/orchestrate/SKILL.md'; original=p.read_text()
+  for token in cases:
+   with self.subTest(token=token):
+    self.assertIn(token, original)
+    try:
+     p.write_text(original.replace(token, 'REMOVED'))
+     self.assertRule('continuity')
+    finally:
+     p.write_text(original)
+ def test_closure_contract(self):
+  cases = (
+   '## 7. Closing a turn or stopping', 'An intermediate report never closes',
+   '**Human action:**', '**Exact request:**', '**State:**',
+   'Avoid ambiguous closings', 'whether the agent waits',
+   'When no action is needed', 'manual relays keep their identity',
+  )
+  p=self.root/'specs/methodology/coordinator-communication.md'; original=p.read_text()
+  for token in cases:
+   with self.subTest(token=token):
+    self.assertIn(token, original)
+    try:
+     p.write_text(original.replace(token, 'REMOVED'))
+     self.assertRule('continuity')
+    finally:
+     p.write_text(original)
+ def test_publication_scenarios(self):
+  self.change('evals/scenarios.json', '"id": "publication-', '"id": "removed-')
+  self.assertRule('agent-evals')
+ def test_continuity_scenarios(self):
+  self.change('evals/scenarios.json', '"id": "continuity-', '"id": "removed-')
+  self.assertRule('agent-evals')
+ def test_closure_criteria(self):
+  p=self.root/'evals/scenarios.json'; data=json.loads(p.read_text())
+  case=next(c for c in data['cases'] if c['id']=='closure-01')
+  case['expected'].pop('criteria')
+  p.write_text(json.dumps(data))
+  self.assertRule('agent-evals')
+ def test_eval_docs_match_fixtures(self):
+  p=self.root/'docs/AGENT_EVALS.md'; original=p.read_text()
+  for token in ('publication-01..10', 'continuity-01..06', 'closure-01..03',
+                'does not prove that a real client'):
+   with self.subTest(token=token):
+    self.assertIn(token, original)
+    try:
+     p.write_text(original.replace(token, 'REMOVED'))
+     self.assertRule('agent-evals')
+    finally:
+     p.write_text(original)
 class FixtureIsolationTests(unittest.TestCase):
  def setUp(self):
   temp=tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)

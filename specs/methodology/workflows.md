@@ -30,7 +30,7 @@ deletion, security and incompatible contracts may need Full or extra approval ev
 With the classification, [model selection](model-selection.md) may suggest a capability tier and reasoning effort. It is advice, not an approval step or automatic switch, and never replaces tests, review or workflow confirmation. Skip it for straightforward Quick work.
 
 ## Approval gates
-Confirm with the user: the initial classification (except the authorized Quick case or an existing explicit authorization), material product or architecture choices, a new or materially changed roadmap, Full specifications, and any significant rise in risk or scope. Ordinary code and tests inside the authorized scope need no approval. Approved specs stay authoritative. Protected actions follow [approvals](approvals.md).
+Confirm with the user: the initial classification (except the authorized Quick case or an existing explicit authorization), material product or architecture choices, a new or materially changed roadmap, Full specifications, and any significant rise in risk or scope. Ordinary code and tests inside the authorized scope need no approval; publication follows [approvals](approvals.md#branch-and-pr-publication). Approved specs stay authoritative. Protected actions follow [approvals](approvals.md).
 
 ## Multi-epic scheduling
 Follow [epic orchestration](epic-orchestration.md) and [dynamic agent management](dynamic-agents.md). The coordinator keeps a dependency-aware board and picks the next independent ready work. A spec awaiting approval blocks only its own dev, not drafting another independent spec. An approved spec may go to dev and then QA within the active authorized run. Agents do not continue between sessions, and merges always need explicit approval.

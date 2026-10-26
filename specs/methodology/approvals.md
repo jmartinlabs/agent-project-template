@@ -22,9 +22,32 @@ Green CI, finished QA, a pre-approved plan, earlier scope authorization or finis
 ## Ordinary work (no new approval)
 
 Inside a scope the user already authorized, these need no per-step approval unless the
-project says otherwise: implementation, tests, using subagents, branches, pushes, PR
-preparation and local worktrees that meet the policy below. Treat them as continuing
+project says otherwise: implementation, tests, using subagents, and local worktrees that
+meet the policy below. Publication follows the next section. Treat them as continuing
 authorized work, not as protected actions.
+
+## Branch and PR publication
+
+Authorization to do the work — code or documentation, including drafting or editing a
+specification — also authorizes publishing its branch and creating or updating its pull
+request in the existing repository. No separate publication approval is needed.
+
+- Respect explicit instructions such as "local only" or "do not publish"; not every task
+  needs a PR.
+- Before pushing, review the diff, staged files, secrets and changes owned by others.
+- A draft PR is allowed while checks or decisions are pending, naming them. An open PR does
+  not end the task while executable checks remain; complete the required checks and QA
+  before calling it ready for merge.
+- Update the task's existing PR instead of opening a duplicate.
+- Creating or merging a specification PR neither approves its content nor authorizes
+  development when those are separate gates.
+- A PR merge always needs its own explicit, identifiable approval for that PR and the
+  approved candidate. Never enable auto-merge as a shortcut.
+
+This policy does not cover creating repositories, changing visibility, direct pushes to
+protected branches, force pushes, releases, packages or deployments. Those remain protected
+or forbidden as the project requires. The handoff workflow keeps its own prohibition on
+opening a PR.
 
 ## How to ask and what counts
 
@@ -72,7 +95,8 @@ current checkout or stop that step.
 
 A Work Packet assigns responsibilities and file ownership; a worktree provides isolation;
 authorization comes from the user's granted scope. Neither the packet nor the worktree grants
-new tasks, protected actions, publication or merges. Preserve uncommitted changes and
+new tasks, protected actions, publication or merges; publication remains ordinary only
+inside the user's authorized scope. Preserve uncommitted changes and
 never remove a worktree with pending work without user authorization.
 Stricter derived-project restrictions always take precedence, including a rule that every
 worktree needs approval.

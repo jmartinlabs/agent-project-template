@@ -46,7 +46,7 @@ When the coordinator is Claude Code, replace `CODEX` in the heading and return f
 Task ID and name: <packet ID> — <functional name>
 Session reference: <technical session ID if known; otherwise the stable functional reference>
 Client: OpenCode <verified version>; external, manually started/stopped by the user.
-Repository, branch or worktree, base SHA, PR: <repo path, branch, base SHA, separate checkout; PR: none unless authorized>
+Repository, branch or worktree, base SHA, PR: <repo path, branch, base SHA, separate checkout; PR: none unless the authorized scope includes publication>
 Recommended model: <verified available model and rationale for bounded work> | UNVERIFIED: catalog not checked; request it before assigning a model.
 Objective and minimum context: <task, relevant decisions, source paths and instruction entry points>.
 Authorized scope: <approval source/date, allowed actions, editable paths and exclusions>.
@@ -56,7 +56,7 @@ Applicable rules: <copy the task's required rules and source links; preserve app
 Deliverable and acceptance: <concrete checks and expected behavior>.
 Tests: <commands, environment, expected evidence; report PASS/FAIL/UNRUN with evidence>.
 Blockers: stop and report on missing permissions, conflicting requirements, ownership collisions or scope expansion. Do not work around them.
-Implement, test, commit or prepare a PR only when covered by the stated authorization.
+Implement, test and commit only when covered by the stated authorization. Push and create or update the PR only when the authorized scope includes publication; respect local-only instructions.
 Never merge, deploy, self-approve QA, expand scope or start other workers.
 Return exactly one final copyable message, also when blocked, partial or needing a decision, with this heading and every field:
 HANDOFF → CODEX
