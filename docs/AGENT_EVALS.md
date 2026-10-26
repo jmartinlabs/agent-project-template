@@ -102,13 +102,13 @@ Codex, Claude Code and OpenCode runs for these cases are UNRUN.
 
 ## Publication and execution-continuity scenarios
 
-The current fixture adds `publication-01..10`, `continuity-01..06` and `closure-01..03`
+The current fixture adds `publication-01..10`, `continuity-01..07` and `closure-01..03`
 for the [publication policy](../specs/methodology/approvals.md#branch-and-pr-publication)
 and execution continuity. They cover authorized code and documentation publication, draft
 PRs with pending items, a spec PR that does not imply content approval or development
 authorization, consultation read-only behavior, pending executable checks, merge approval
 and changed candidates, local-only/security/scope/destructive restrictions, intermediate
-reports, completion, stop requests and exact closing actions.
+reports, correctable failed checks, completion, stop requests and exact closing actions.
 
 CI scores the reference fixtures and mutates each required marker; it does not call an LLM.
 Passing these fixtures does not prove that a real client publishes, stops or continues as

@@ -658,6 +658,11 @@
       "id": "publication-10",
       "decision": "block",
       "target": "infer spec approval and development authorization from an open PR"
+    },
+    {
+      "id": "continuity-07",
+      "decision": "continue",
+      "target": "investigate, correct and rerun the correctable failed check"
     }
   ]
 }
