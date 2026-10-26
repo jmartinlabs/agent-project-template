@@ -141,8 +141,8 @@ git diff --check
 git status --short
 ```
 `test-validator` builds fixtures from tracked files when Git metadata exists, so untracked
-local files are excluded; a `.git`-less export is copied whole and does not isolate
-pre-existing local files.
+local files are excluded; a `.git`-less export is copied with the current ignore patterns
+and does not isolate pre-existing local files.
 Review the diff, stage explicit files, inspect the staged diff and commit working changes.
 Do not include unrelated user changes or credentials. Derived projects additionally run
 the real commands recorded in their quality guidelines. See [quality](specs/guidelines/quality.md)

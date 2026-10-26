@@ -14,6 +14,7 @@ import unittest
 ROOT=Path(__file__).resolve().parents[1]
 validate=runpy.run_path(str(ROOT/'scripts/validate-template'))['validate']
 NO_GIT_NOTICE='NOTICE: fixture built without Git metadata; untracked-file isolation is not enforced.'
+# Concatenated so this file does not trip the portability rule it exercises.
 MACHINE_PATH='/'+'Users/algo'
 def build_fixture(source_root,dest_root):
  # Isolate fixtures from untracked local files (handoffs, caches): with Git metadata,
@@ -24,6 +25,8 @@ def build_fixture(source_root,dest_root):
    listed=subprocess.run(['git','-C',str(source_root),'ls-files','-z','--cached'],capture_output=True,check=True)
   except FileNotFoundError as exc:
    raise RuntimeError(f'Git metadata present in {source_root} but git is unavailable') from exc
+  except OSError as exc:
+   raise RuntimeError(f'cannot run git ls-files in {source_root}: {exc}') from exc
   except subprocess.CalledProcessError as exc:
    detail=exc.stderr.decode('utf-8','replace').strip()
    raise RuntimeError(f'git ls-files failed in {source_root}: {detail or exc}') from exc
@@ -450,4 +453,20 @@ class FixtureIsolationTests(unittest.TestCase):
    if path is None: os.environ.pop('PATH',None)
    else: os.environ['PATH']=path
   self.assertIn('git is unavailable',str(caught.exception)); self.assertNotIn(NO_GIT_NOTICE,out.getvalue()); self.assertFalse((self.tmp/'fixture').exists())
+ def test_worktree_git_file_copies_tracked_content(self):
+  source=self.repository(); (source/'README.md').write_text('HEAD content\n'); self.commit(source)
+  linked=self.tmp/'linked'; self.git(source,'worktree','add','-q','-b','linked-branch',str(linked))
+  (linked/'README.md').write_text('working content\n')
+  self.assertTrue((linked/'.git').is_file())
+  out=io.StringIO()
+  with contextlib.redirect_stdout(out): fixture=build_fixture(linked,self.tmp/'fixture')
+  self.assertNotIn(NO_GIT_NOTICE,out.getvalue())
+  self.assertEqual((fixture/'README.md').read_text(),'working content\n')
+ def test_ls_files_failure_does_not_fallback(self):
+  source=self.tmp/'broken'; source.mkdir(); (source/'.git').write_text('not a gitdir\n')
+  (source/'local.md').write_text(MACHINE_PATH+'\n')
+  out=io.StringIO()
+  with contextlib.redirect_stdout(out), self.assertRaises(RuntimeError) as caught: build_fixture(source,self.tmp/'fixture')
+  self.assertIn('git ls-files failed',str(caught.exception))
+  self.assertNotIn(NO_GIT_NOTICE,out.getvalue()); self.assertFalse((self.tmp/'fixture').exists())
 if __name__=='__main__': unittest.main(verbosity=2)
