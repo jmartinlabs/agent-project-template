@@ -236,8 +236,17 @@ def validate(root):
   if len(comms)<16: fail('agent-evals','communication scenarios with observable criteria are incomplete')
   evidence=[c for c in cases if str(c.get('id','')).startswith('evidence-') and 'criteria' in c.get('expected',{})]
   if len(evidence)<8: fail('agent-evals','delivery-evidence scenarios with observable criteria are incomplete')
+  publication=[c for c in cases if str(c.get('id','')).startswith('publication-')]
+  if len(publication)<10: fail('agent-evals','publication scenarios are incomplete')
+  continuity=[c for c in cases if str(c.get('id','')).startswith('continuity-')]
+  if len(continuity)<6: fail('agent-evals','continuity scenarios are incomplete')
+  closure=[c for c in cases if str(c.get('id','')).startswith('closure-') and 'criteria' in c.get('expected',{})]
+  if len(closure)<3: fail('agent-evals','closure scenarios with observable criteria are incomplete')
  except (ValueError,AttributeError,TypeError):
   fail('agent-evals','scenarios.json invalid for communication criteria')
+ evals_doc=read('docs/AGENT_EVALS.md')
+ for token in ('publication-01..10','continuity-01..06','closure-01..03','does not prove that a real client'):
+  if token not in evals_doc: fail('agent-evals',f'docs/AGENT_EVALS.md missing {token}')
  # Delivery closure evidence is structural here; real report quality needs independent review.
  for name,tokens in {
   '.agents/skills/orchestrate/SKILL.md':('delivery-evidence-at-closure','scope conformance and deviations','verified effective identity','general reliability','create no extra report'),
@@ -267,6 +276,31 @@ def validate(root):
  }.items():
   for token in tokens:
    if token not in read(name): fail('consistency',f'{name}: missing {token}')
+ # Publication policy is canonical in approvals.md; linked files stay short.
+ for name,tokens in {
+  'specs/methodology/approvals.md':('## Branch and PR publication','No separate publication approval is needed','local only','draft PR','Before pushing, review the diff','An open PR does','Creating or merging a specification PR neither approves its content','explicit, identifiable approval for that PR','Never enable auto-merge','creating repositories','handoff workflow keeps its own prohibition'),
+  'AGENTS.md':('approvals.md#branch-and-pr-publication','execution-continuity','Continue authorized work'),
+  '.agents/skills/dev/SKILL.md':('approvals.md#branch-and-pr-publication',),
+  '.agents/skills/tweak/SKILL.md':('approvals.md#branch-and-pr-publication',),
+  '.agents/skills/task/SKILL.md':('approvals.md#branch-and-pr-publication',),
+  'specs/methodology/workflows.md':('approvals.md#branch-and-pr-publication',),
+  'specs/methodology/dynamic-agents.md':('approvals.md#branch-and-pr-publication',),
+  'specs/guidelines/security.md':('approvals.md#branch-and-pr-publication','package or artifact publication'),
+  'specs/methodology/epic-orchestration.md':('merge remains a separate approval',),
+  'templates/agent-work-packet.md':('authorized scope includes publication',),
+  'templates/epic-board.md':('published/updated within the authorized scope',),
+  'specs/methodology/acceptance-scenarios.md':('within the authorized scope',),
+  'docs/GUIA_VISUAL_ORQUESTACION.md':('PR publicada',),
+ }.items():
+  for token in tokens:
+   if token not in read(name): fail('publication',f'{name}: missing {token}')
+ # Execution continuity lives in orchestrate; closure wording lives in the communication contract.
+ for name,tokens in {
+  '.agents/skills/orchestrate/SKILL.md':('## Execution continuity','a partial result','authorized, executable work remains','completed work with its evidence','decision or approval that only the user can provide','user request to stop','blocker that cannot be resolved','next action in the same turn','Reuse a valid authorization'),
+  'specs/methodology/coordinator-communication.md':('## 7. Closing a turn or stopping','An intermediate report never closes','**Human action:**','**Exact request:**','**State:**','Avoid ambiguous closings','whether the agent waits','When no action is needed','manual relays keep their identity'),
+ }.items():
+  for token in tokens:
+   if token not in read(name): fail('continuity',f'{name}: missing {token}')
  return errors
 if __name__=='__main__':
  if len(sys.argv)>2: sys.exit('Usage: validate-template [repository-root]')

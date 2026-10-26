@@ -19,7 +19,7 @@ For Full work, or Standard work with several independent workstreams. It extends
 - **spec:** planned → drafting → awaiting-approval → approved. Drafts and brainstorming may be prepared autonomously; **only the user approves** functional or financial decisions and the final spec.
 - **dev:** not-ready → ready → implementing → testing/review → verified. Ready only with a recorded **approved** spec, satisfied hard dependencies and authorization for the scope. Without an approved spec, implementation cannot start; QA may still draft test cases.
 - **QA:** planned → test-design → awaiting-implementation → verifying → passed/failed/blocked. Never report a pass before running against the actual candidate.
-- **merge:** proposed PR → ready-for-user-review → user-approved → merged. Never auto-merge. Merging is a separate approval gate per [approvals](approvals.md).
+- **merge:** published or draft PR → ready-for-user-review → user-approved → merged. Never auto-merge. Merging is a separate approval gate per [approvals](approvals.md).
 
 ## Scheduler (at milestones, not every message)
 
@@ -28,7 +28,7 @@ For Full work, or Standard work with several independent workstreams. It extends
 3. Recompute **ready** work when gates change: approved and authorized implementation; candidate QA; independent spec drafting up to approval; bounded investigations.
 4. Follow user priorities and the critical path. When something is blocked, pick the next independent ready item.
 5. Prefer one complete development packet per feature, then independent QA on the candidate. Parallelize only distinct ready work worth the overhead; concurrent edits need disjoint ownership and authorized isolated checkouts.
-6. At milestones (approved spec, candidate, QA verdict, PR) update only changed state. Approved spec + dev authorization → dev; candidate → independent QA; checks and QA green → PR for approval.
+6. At milestones (approved spec, candidate, QA verdict, PR) update only changed state. Approved spec + dev authorization → dev; candidate → independent QA; checks and QA green → publish/update the PR within the authorized scope; merge remains a separate approval.
 7. End an active run with a short board summary: done, underway, waiting on user, blocked, newly ready, next action. Nothing runs between sessions.
 
 Delegation sizing follows [dynamic agent management](dynamic-agents.md): default to one executor plus required independent QA.

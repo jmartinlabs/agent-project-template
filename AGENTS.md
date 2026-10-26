@@ -15,6 +15,7 @@ Both run the same canonical Skill in `.agents/skills/`.
 - Quick proceeds without extra confirmation only if clearly requested, reversible, low risk and free of protected gates.
 - Standard and Full need confirmation unless the same scope is already explicitly authorized.
 - Consultation/analysis never authorizes edits. Read-only planning mode never permits implementation.
+- Continue authorized work until complete or a real blocker; only yield for a completed result, a needed decision or approval, a stop request or an unresolvable blocker, per [orchestrate](.agents/skills/orchestrate/SKILL.md#execution-continuity).
 - Load documents on demand, not all at once:
   - applicable [architecture](specs/guidelines/architecture.md), [UI](specs/guidelines/ui.md),
     [quality](specs/guidelines/quality.md) and [security](specs/guidelines/security.md) guidelines;
@@ -27,7 +28,8 @@ Both run the same canonical Skill in `.agents/skills/`.
 
 ## Approvals and safety
 - Protected actions need an explicit, identifiable approval per [approvals](specs/methodology/approvals.md). Generic assent never counts; QA, CI or development approval never implies merge.
-- Ask before material product or architecture decisions, destructive actions, security-sensitive changes, remote creation or publication, production deployment, or visibility changes.
+- Authorized work covers branch/PR publication under the [publication policy](specs/methodology/approvals.md#branch-and-pr-publication); merge still needs explicit, identifiable approval.
+- Ask before material product or architecture decisions, destructive actions, security-sensitive changes, remote repository creation or visibility changes, production deployment, or other protected actions.
 - Stop on conflicting approved requirements or missing permissions.
 - Do not mark work done while acceptance checks fail or are unverified. Report blocked checks.
 - Preserve existing work; stage only your own reviewed changes. Never commit secrets.

@@ -31,6 +31,24 @@ A classification, a proportionate plan, optional model advice, the authorized sc
 9. **Gates.** Apply specs/methodology/approvals.md to every protected gate, including PR merges. A development or spec approval never implies merge. If discoveries raise the risk, reclassify and ask again.
 10. **Verify and hand off.** Check acceptance, needed regressions and the real diff; report PASS / FAIL / UNRUN. At closure, add the [delivery-evidence record](../../../specs/methodology/dynamic-agents.md#delivery-evidence-at-closure) to the current summary: scope conformance and deviations; each check with its executor and reproducible evidence; defects with fix, confirming check and pending regressions; author report, independent verification, observed fact and unproven cause kept distinct. Name an executor model only with verified effective identity, and never infer causality or general reliability from one delivery. Reuse existing evidence and create no extra report. Save a short checkpoint only at real handoffs (approval, candidate, QA, blocker, PR) with the SHA and next safe action. Other open chats are not subagents. Update one current summary with candidate, check/QA evidence, PR/merge state and next action; replace stale labels and link historical entries. A received report is not a verified result until you check its evidence.
 
+## Execution continuity
+
+Continue the authorized scope until it is complete or a real blocker remains. An intermediate
+report, a partial result or an invitation to say "continue" never justifies ending the turn
+while authorized, executable work remains.
+
+Yield the turn only for:
+
+- completed work with its evidence;
+- a decision or approval that only the user can provide;
+- a user request to stop; or
+- a blocker that cannot be resolved with the available access or authorization.
+
+"Continuing to verify" is an update followed by the next action in the same turn, not a
+closing promise. Reuse a valid authorization for corrections and checks in the same scope;
+do not ask for repeated permission. When finishing or stopping, use the closure contract in
+[coordinator communication](../../../specs/methodology/coordinator-communication.md#7-closing-a-turn-or-stopping).
+
 ## Efficiency and bounded investigations
 - Coordinate outcomes, not messages: one plan, one complete packet, one verification handoff, one concise result. Do not reread unchanged context or repeat equivalent tests without a reason.
 - Before investigating a failure, state a falsifiable hypothesis, a discriminating probe and an exit condition. After two comparable attempts with no new evidence, checkpoint the blocker and ask for a new hypothesis or scope decision.
@@ -48,7 +66,7 @@ the next chat manually with the verified handoff instructions.
 - Manual states (PENDIENTE DE ENVIAR, ESPERANDO RETORNO, RETORNO RECIBIDO, EN REVISIÓN, CORRECCIÓN PENDIENTE, BLOQUEADO, COMPLETADO, DESCONOCIDO) follow the [coordinator communication](../../../specs/methodology/coordinator-communication.md) contract. Never infer execution from a delivered prompt; never invent percentages.
 - End the reply with a 2–4 line status only when open work or pending actions exist. It uses the current summary and events, with no Git, worker or file reads or writes per message.
 - A request for the full state is read-only. List every open task with provenance (verified, communicated externally or unknown), last result, Git/PR data as recorded, blockers, pending decisions, dependencies and next actions. Declare what was not updated; check sources only when asked or when stale.
-- A received handoff never authorizes PR approval, merge, deployment or a scope expansion.
+- A received handoff never authorizes merge approval, deployment or a scope expansion.
 
 ## Stop conditions
 Stop at unresolved approvals, unsafe or destructive operations, conflicting approved requirements, missing access or failed required checks. Record the blocker and next action.

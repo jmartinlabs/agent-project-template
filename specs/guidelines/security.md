@@ -5,8 +5,11 @@ Never commit secrets or real personal data. Use fictional deterministic fixtures
 credentials via the environment/secret store; document names and destinations, never values.
 Do not print credentials. Keep TLS, package signatures and checksums enabled.
 Inspect existing work and authorization before changes. Ask explicitly before destructive
-operations, production deployment, remote publication, permission or visibility changes,
-or material security-sensitive changes. No force pushes or silent overwrites.
+operations, production deployment, package or artifact publication, remote repository
+creation, repository permission or visibility changes, or material security-sensitive changes. Branch/PR
+publication inside an authorized scope follows
+[approvals](../methodology/approvals.md#branch-and-pr-publication). No force pushes or
+silent overwrites.
 Commit only reviewed own files. Inspect staged diff for credentials and unrelated work.
 
 ## Project initialization — UNDECIDED

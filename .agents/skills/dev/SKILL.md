@@ -40,11 +40,12 @@ verified acceptance evidence, relevant documentation updates and local commits.
    deviations. Update progress/test results and documentation. Review own diff and staged
    files for regressions, secrets and unrelated changes, then commit each working increment.
 7. Finish only when every acceptance check passes with current evidence and required
-   regression checks pass. Summarize commands/results, commits, limitations and next action. In orchestrated work hand verified candidate evidence to independent QA; the coordinator alone updates the board and proposes authorized PR actions. Update
+   regression checks pass. Summarize commands/results, commits, limitations and next action. In orchestrated work hand verified candidate evidence to independent QA; the coordinator alone updates the board, and branch/PR publication follows the authorized scope and the packet's ownership. Update
    one current checkpoint with SHA/pending changes, check/QA evidence, PR/merge state
    and next action; supersede stale current labels without deleting history.
 ## Stop conditions
-Never deploy to production, publish or perform destructive operations without explicit
-permission. Stop on important conflicts or missing required authorization. Record blockers;
+Never deploy to production or perform destructive operations without explicit permission.
+Branch/PR publication follows [approvals](../../../specs/methodology/approvals.md#branch-and-pr-publication);
+respect local-only instructions. Stop on important conflicts or missing required authorization. Record blockers;
 failed, skipped and unrun checks remain open. Do not finish as complete while acceptance
 checks fail. Preserve enough progress to resume in another session.

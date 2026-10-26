@@ -37,7 +37,7 @@ Expected: Coordinator reconciles board, marks E1.6 dev not-ready, prepares preci
 ## E2 — Approved spec handoff without manual Skill invocation
 
 Prompt: User explicitly approves E1.6 full specification in the current run; its hard dependencies are satisfied.
-Expected: Coordinator records canonical approval evidence, routes to $dev 06, gathers real tests and independently reviewed evidence, then prepares a PR subject to repository authorization. Never auto-merge.
+Expected: Coordinator records canonical approval evidence, routes to $dev 06, gathers real tests and independently reviewed evidence, then publishes the branch and PR within the authorized scope (a draft if checks or decisions remain) and completes required checks before declaring it ready. Never auto-merge; merge needs explicit approval.
 
 ## E3 — Stale board / concurrent write conflict
 
