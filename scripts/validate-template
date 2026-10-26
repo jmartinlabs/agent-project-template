@@ -171,8 +171,9 @@ def validate(root):
   for token in tokens:
    if token not in read(name): fail('verification-entry',f'{name}: missing {token}')
  s=read('.github/workflows/validate.yml')
- for token in ('pull_request','contents: read','./scripts/validate-template','./scripts/test-validator','node scripts/check-mermaid.mjs','mermaid@11.12.1','python3 scripts/test-agent-usage','python3 scripts/test-auto-agent-usage'):
+ for token in ('pull_request','contents: read','./scripts/validate-template','./scripts/test-validator','node scripts/check-mermaid.mjs','mermaid@11.12.1','python3 scripts/test-agent-usage','python3 scripts/test-auto-agent-usage','fetch-depth: 0','git diff --check "$base" HEAD','github.event.pull_request.base.sha','github.event.before',"github.ref_type != 'tag'",'github.event.repository.default_branch'):
   if token not in s: fail('ci',f'missing {token}')
+ if re.search(r'(?m)^\s*- run: git diff --check\s*$',s): fail('ci','bare git diff --check step compares nothing')
  # Limit automatic reporting to advisory local lifecycle commands.
  try:
   usage_hooks=json.loads(read('.codex/hooks.json')).get('hooks',{})
