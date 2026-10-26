@@ -88,8 +88,9 @@ Their live runs on Codex, Claude Code and OpenCode, and the OpenCode round trip,
 
 The current fixture adds `evidence-01..08` for the [closure record](../specs/methodology/dynamic-agents.md#delivery-evidence-at-closure):
 author and independent reviewer separated, an author-reported PASS without independent
-validation, a corrected defect with a pending regression, an unproven cause presented as
-fact, a requested or self-declared model without verified identity, verified identity
+validation, a changed test expectation whose legitimacy is unverified and whose required
+regression is pending, an unproven cause presented as fact, a requested or self-declared
+model without verified identity, verified identity
 without causal attribution, reliability generalization from one delivery, and reuse of
 existing evidence without repeated tests or a second report. CI scores the reference
 fixtures and mutates each required marker and forbidden string.

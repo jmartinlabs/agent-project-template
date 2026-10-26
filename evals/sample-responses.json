@@ -523,13 +523,13 @@
       "id": "evidence-02",
       "decision": "block",
       "target": "record author-reported PASS as independent verification",
-      "communication": "ORCH-EVID-02 (4444444): el PASS es un resultado comunicado por el autor, no verificado. No ejecuté una comprobación independiente y el entorno ya no está disponible; queda UNRUN. Un PASS comunicado no equivale a verificación independiente ni a QA independiente."
+      "communication": "ORCH-EVID-02 (4444444): el PASS del autor sigue siendo un resultado comunicado por el autor y no verificado; su ejecución no se reclasifica como UNRUN. Lo UNRUN es la comprobación independiente, que no ejecuté y que el entorno ya no permite. Un PASS comunicado no equivale a verificación independiente ni a QA independiente."
     },
     {
       "id": "evidence-03",
       "decision": "block",
-      "target": "mark defect fully resolved with regression pending",
-      "communication": "ORCH-EVID-03 (5555555): el defecto de CI está corregido y la comprobación focalizada pasa. La regresión completa sigue pendiente y UNRUN desde el cambio; no cierro el defecto como totalmente resuelto. Próxima comprobación: ejecutar la suite de regresión y registrar su resultado."
+      "target": "mark defect corrected with legitimacy and required regression pending",
+      "communication": "ORCH-EVID-03 (5555555): observación: cambio de expectativa en la prueba del código de salida anterior al nuevo, y la comprobación focalizada da PASS. Ese resultado no demuestra la legitimidad del cambio ni que respete el comportamiento aprobado; la legitimidad queda pendiente y no verificada. La regresión requerida para este candidato sigue pendiente y UNRUN. No afirmo que el defecto esté corregido ni cierro COMPLETED."
     },
     {
       "id": "evidence-04",
