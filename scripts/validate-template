@@ -239,13 +239,13 @@ def validate(root):
   publication=[c for c in cases if str(c.get('id','')).startswith('publication-')]
   if len(publication)<10: fail('agent-evals','publication scenarios are incomplete')
   continuity=[c for c in cases if str(c.get('id','')).startswith('continuity-')]
-  if len(continuity)<6: fail('agent-evals','continuity scenarios are incomplete')
+  if len(continuity)<7: fail('agent-evals','continuity scenarios are incomplete')
   closure=[c for c in cases if str(c.get('id','')).startswith('closure-') and 'criteria' in c.get('expected',{})]
   if len(closure)<3: fail('agent-evals','closure scenarios with observable criteria are incomplete')
  except (ValueError,AttributeError,TypeError):
   fail('agent-evals','scenarios.json invalid for communication criteria')
  evals_doc=read('docs/AGENT_EVALS.md')
- for token in ('publication-01..10','continuity-01..06','closure-01..03','does not prove that a real client'):
+ for token in ('publication-01..10','continuity-01..07','closure-01..03','does not prove that a real client'):
   if token not in evals_doc: fail('agent-evals',f'docs/AGENT_EVALS.md missing {token}')
  # Delivery closure evidence is structural here; real report quality needs independent review.
  for name,tokens in {
@@ -296,8 +296,9 @@ def validate(root):
    if token not in read(name): fail('publication',f'{name}: missing {token}')
  # Execution continuity lives in orchestrate; closure wording lives in the communication contract.
  for name,tokens in {
-  '.agents/skills/orchestrate/SKILL.md':('## Execution continuity','a partial result','authorized, executable work remains','completed work with its evidence','decision or approval that only the user can provide','user request to stop','blocker that cannot be resolved','next action in the same turn','Reuse a valid authorization'),
-  'specs/methodology/coordinator-communication.md':('## 7. Closing a turn or stopping','An intermediate report never closes','**Human action:**','**Exact request:**','**State:**','Avoid ambiguous closings','whether the agent waits','When no action is needed','manual relays keep their identity'),
+  '.agents/skills/orchestrate/SKILL.md':('## Execution continuity','a partial result','authorized, executable work remains','completed work with its evidence','decision or approval that only the user can provide','user request to stop','blocker that cannot be resolved','corrected inside the authorized scope','rerun the affected verification','next action in the same turn','Reuse a valid authorization'),
+  '.agents/skills/task/SKILL.md':('failed mandatory acceptance checks that cannot be corrected inside the authorized scope','rerun the affected verification'),
+  'specs/methodology/coordinator-communication.md':('## 7. Closing a turn or stopping','Whether to yield the turn is defined in','This section defines only the communication contract','**Human action:**','**Exact request:**','**State:**','Avoid ambiguous closings','whether the agent waits','When no action is needed','manual relays keep their identity'),
  }.items():
   for token in tokens:
    if token not in read(name): fail('continuity',f'{name}: missing {token}')

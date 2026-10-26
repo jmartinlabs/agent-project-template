@@ -44,6 +44,10 @@ Yield the turn only for:
 - a user request to stop; or
 - a blocker that cannot be resolved with the available access or authorization.
 
+A required check that fails and can be corrected inside the authorized scope is not a blocker:
+investigate the failure, correct the cause and rerun the affected verification before yielding.
+Stop only when a real blocker remains.
+
 "Continuing to verify" is an update followed by the next action in the same turn, not a
 closing promise. Reuse a valid authorization for corrections and checks in the same scope;
 do not ask for repeated permission. When finishing or stopping, use the closure contract in
@@ -69,4 +73,4 @@ the next chat manually with the verified handoff instructions.
 - A received handoff never authorizes merge approval, deployment or a scope expansion.
 
 ## Stop conditions
-Stop at unresolved approvals, unsafe or destructive operations, conflicting approved requirements, missing access or failed required checks. Record the blocker and next action.
+Stop at unresolved approvals, unsafe or destructive operations, conflicting approved requirements, missing access, or a failed required check that cannot be corrected inside the authorized scope. Investigate and correct a correctable failure, then rerun the affected verification. Record the blocker and next action.

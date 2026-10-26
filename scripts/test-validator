@@ -467,6 +467,7 @@ class ValidationTests(unittest.TestCase):
    '## Execution continuity', 'a partial result', 'authorized, executable work remains',
    'completed work with its evidence', 'decision or approval that only the user can provide',
    'user request to stop', 'blocker that cannot be resolved',
+   'corrected inside the authorized scope', 'rerun the affected verification',
    'next action in the same turn', 'Reuse a valid authorization',
   )
   p=self.root/'.agents/skills/orchestrate/SKILL.md'; original=p.read_text()
@@ -478,9 +479,21 @@ class ValidationTests(unittest.TestCase):
      self.assertRule('continuity')
     finally:
      p.write_text(original)
+ def test_task_correctable_failure(self):
+  p=self.root/'.agents/skills/task/SKILL.md'; original=p.read_text()
+  for token in ('failed mandatory acceptance checks that cannot be corrected inside the authorized scope',
+                'rerun the affected verification'):
+   with self.subTest(token=token):
+    self.assertIn(token, original)
+    try:
+     p.write_text(original.replace(token, 'REMOVED'))
+     self.assertRule('continuity')
+    finally:
+     p.write_text(original)
  def test_closure_contract(self):
   cases = (
-   '## 7. Closing a turn or stopping', 'An intermediate report never closes',
+   '## 7. Closing a turn or stopping', 'Whether to yield the turn is defined in',
+   'This section defines only the communication contract',
    '**Human action:**', '**Exact request:**', '**State:**',
    'Avoid ambiguous closings', 'whether the agent waits',
    'When no action is needed', 'manual relays keep their identity',
@@ -508,7 +521,7 @@ class ValidationTests(unittest.TestCase):
   self.assertRule('agent-evals')
  def test_eval_docs_match_fixtures(self):
   p=self.root/'docs/AGENT_EVALS.md'; original=p.read_text()
-  for token in ('publication-01..10', 'continuity-01..06', 'closure-01..03',
+  for token in ('publication-01..10', 'continuity-01..07', 'closure-01..03',
                 'does not prove that a real client'):
    with self.subTest(token=token):
     self.assertIn(token, original)
