@@ -96,7 +96,7 @@ flowchart TD
     E --> F["QA: pruebas reales y review"]
     F --> G{"¿Checks superados?"}
     G -->|No| E
-    G -->|Sí| H["PR preparada con permiso"]
+    G -->|Sí| H["PR publicada dentro del alcance autorizado"]
     H --> I{"Usuario aprueba merge"}
     I -->|No| J["Mantener PR abierta"]
     I -->|Sí| K["Merge autorizado"]
@@ -118,7 +118,7 @@ flowchart LR
     D2 --> RV
     D3 --> RV
     RV --> TEST["Integración y QA"]
-    TEST --> P["PR; merge solo aprobado"]
+    TEST --> P["PR publicada; merge solo aprobado"]
 ```
 
 **No presupongas que cada agente recibe automáticamente una rama o worktree.** Los cambios paralelos necesitan ownership sin solapamiento e aislamiento explícitamente autorizado. Si dos tareas van a editar el mismo archivo, se serializan o se negocia una separación real. La investigación de solo lectura puede compartir repositorio.
