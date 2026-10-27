@@ -1,51 +1,82 @@
-name: Validate template
-on: [push, pull_request, workflow_dispatch]
-permissions:
-  contents: read
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: ./scripts/validate-template
-      - run: ./scripts/test-validator
-      - run: python3 scripts/test-agent-usage
-      - run: python3 scripts/test-auto-agent-usage
-      - run: python3 scripts/eval-agent-behavior --self-test
-      # Parser-level validation: structural Python checks alone cannot catch malformed Mermaid edges.
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: npm install --no-save --no-package-lock --ignore-scripts mermaid@11.12.1 jsdom@26.1.0
-      - run: node scripts/check-mermaid.mjs docs/GUIA_VISUAL_ORQUESTACION.md
-      - name: Prove malformed Mermaid is rejected
-        run: |
-          cat > "$RUNNER_TEMP/invalid-mermaid.md" <<'EOF'
-          ```mermaid
-          flowchart TD
-            A -->|broken B
-          ```
-          EOF
-          if node scripts/check-mermaid.mjs "$RUNNER_TEMP/invalid-mermaid.md"; then
-            echo 'Malformed Mermaid was incorrectly accepted'
-            exit 1
-          fi
-      - name: Check whitespace in the change range
-        if: github.ref_type != 'tag'
-        env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: |
-          base="$BASE_SHA"
-          if [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then
-            base="origin/${{ github.event.repository.default_branch }}"
-          fi
-          if ! git cat-file -e "${base}^{commit}" 2>/dev/null; then
-            git fetch --no-tags origin "$base"
-          fi
-          git diff --check "$base" HEAD
+{
+  "name": "Validate template",
+  "on": {
+    "push": {
+      "branches": [
+        "main"
+      ]
+    },
+    "pull_request": {
+      "branches": [
+        "main"
+      ]
+    },
+    "workflow_dispatch": {}
+  },
+  "permissions": {
+    "contents": "read"
+  },
+  "concurrency": {
+    "group": "${{ github.workflow }}:${{ github.event_name }}:${{ github.event.pull_request.number || github.ref }}:${{ github.event_name == 'workflow_dispatch' && github.run_id || 'automatic' }}",
+    "cancel-in-progress": "${{ github.event_name == 'pull_request' }}"
+  },
+  "jobs": {
+    "required": {
+      "runs-on": "ubuntu-latest",
+      "timeout-minutes": 10,
+      "steps": [
+        {
+          "uses": "actions/checkout@v4",
+          "with": {
+            "persist-credentials": false,
+            "fetch-depth": 0
+          }
+        },
+        {
+          "uses": "actions/setup-python@v5",
+          "with": {
+            "python-version": "3.12"
+          }
+        },
+        {
+          "run": "./scripts/validate-template"
+        },
+        {
+          "run": "./scripts/test-validator"
+        },
+        {
+          "run": "python3 scripts/test-agent-usage"
+        },
+        {
+          "run": "python3 scripts/test-auto-agent-usage"
+        },
+        {
+          "run": "python3 scripts/eval-agent-behavior --self-test"
+        },
+        {
+          "uses": "actions/setup-node@v4",
+          "with": {
+            "node-version": "22"
+          }
+        },
+        {
+          "run": "npm install --no-save --no-package-lock --ignore-scripts mermaid@11.12.1 jsdom@26.1.0"
+        },
+        {
+          "run": "node scripts/check-mermaid.mjs docs/GUIA_VISUAL_ORQUESTACION.md"
+        },
+        {
+          "name": "Prove malformed Mermaid is rejected",
+          "run": "set -eu\ncat > \"$RUNNER_TEMP/invalid-mermaid.md\" <<'EOF'\n```mermaid\nflowchart TD\n  A -->|broken B\n```\nEOF\nif node scripts/check-mermaid.mjs \"$RUNNER_TEMP/invalid-mermaid.md\"; then\n  echo 'Malformed Mermaid was incorrectly accepted'\n  exit 1\nfi"
+        },
+        {
+          "name": "Check whitespace in the change range",
+          "env": {
+            "BASE_SHA": "${{ github.event.pull_request.base.sha || github.event.before }}"
+          },
+          "run": "set -eu\nbase=\"$BASE_SHA\"\nif [ -z \"$base\" ] || [ \"$base\" = \"0000000000000000000000000000000000000000\" ]; then\n  base=\"origin/${{ github.event.repository.default_branch }}\"\nfi\nif ! git cat-file -e \"${base}^{commit}\" 2>/dev/null; then\n  git fetch --no-tags origin \"$base\"\nfi\ngit diff --check \"$base\" HEAD"
+        }
+      ]
+    }
+  }
+}

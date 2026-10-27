@@ -375,15 +375,61 @@ class ValidationTests(unittest.TestCase):
  def test_ci(self):
   self.change('.github/workflows/validate.yml','./scripts/test-validator','echo skip'); self.assertRule('ci')
  def test_ci_whitespace_net_delta(self):
-  self.change('.github/workflows/validate.yml','git diff --check "$base" HEAD','git diff --check'); self.assertRule('ci')
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][-1].update({'run':'git diff --check'}))
+ def mutate_workflow(self, mutation):
+  p=self.root/'.github/workflows/validate.yml'; data=json.loads(p.read_text())
+  mutation(data); p.write_text(json.dumps(data)); self.assertRule('ci')
  def test_ci_whitespace_full_history(self):
-  self.change('.github/workflows/validate.yml','fetch-depth: 0','fetch-depth: 1'); self.assertRule('ci')
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][0]['with'].update({'fetch-depth':1}))
  def test_ci_whitespace_push_base(self):
-  self.change('.github/workflows/validate.yml',' || github.event.before',''); self.assertRule('ci')
- def test_ci_whitespace_tag_skip(self):
-  self.change('.github/workflows/validate.yml',"      if: github.ref_type != 'tag'\n",''); self.assertRule('ci')
- def test_ci_whitespace_bare_step(self):
-  self.change('.github/workflows/validate.yml','      - name: Check whitespace in the change range','      - run: git diff --check\n      - name: Check whitespace in the change range'); self.assertRule('ci')
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][-1]['env'].update({'BASE_SHA':'${{ github.event.pull_request.base.sha }}'}))
+ def test_ci_working_branch_push_rejected(self):
+  self.mutate_workflow(lambda w: w['on']['push'].update({'branches':['**']}))
+ def test_ci_pr_path_filter_rejected(self):
+  self.mutate_workflow(lambda w: w['on']['pull_request'].update({'paths':['docs/**']}))
+ def test_ci_required_job_skip_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required'].update({'if':'false'}))
+ def test_ci_step_skip_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][2].update({'if':'false'}))
+ def test_ci_allowed_failure_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][2].update({'continue-on-error':True}))
+ def test_ci_commented_command_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][2].update({'run':'# ./scripts/validate-template'}))
+ def test_ci_cross_event_cancellation_rejected(self):
+  self.mutate_workflow(lambda w: w['concurrency'].update({'group':'${{ github.ref }}'}))
+ def test_ci_main_cancellation_rejected(self):
+  self.mutate_workflow(lambda w: w['concurrency'].update({'cancel-in-progress':True}))
+ def test_ci_duplicate_command_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'].append({'run':'./scripts/test-validator'}))
+ def test_ci_failure_masked_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][3].update({'run':'./scripts/test-validator || true'}))
+ def test_ci_whitespace_failure_masked_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][-1].update({'run':w['jobs']['required']['steps'][-1]['run']+' || true'}))
+ def test_ci_step_environment_override_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][2].update({'env':{'PYTHONPATH':'unreviewed'}}))
+ def test_ci_mermaid_negative_failure_masked_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][-2].update({'run':w['jobs']['required']['steps'][-2]['run']+'\nexit 0'}))
+ def test_ci_top_level_environment_override_rejected(self):
+  self.mutate_workflow(lambda w: w.update({'env':{'BASH_ENV':'unreviewed'}}))
+ def test_ci_boolean_numeric_checkout_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][0]['with'].update({'persist-credentials':0}))
+ def test_ci_persisted_credentials_rejected(self):
+  self.mutate_workflow(lambda w: w['jobs']['required']['steps'][0]['with'].update({'persist-credentials':True}))
+ def test_ci_duplicate_json_key_rejected(self):
+  p=self.root/'.github/workflows/validate.yml'
+  p.write_text(p.read_text().replace('"name": "Validate template"','"name": "Validate template", "name": "hidden"'))
+  self.assertRule('ci')
+ def test_ci_main_pr_manual_events_valid(self):
+  workflow=json.loads((self.root/'.github/workflows/validate.yml').read_text())
+  self.assertEqual(workflow['on'],{'push':{'branches':['main']},'pull_request':{'branches':['main']},'workflow_dispatch':{}})
+  self.assertEqual(validate(self.root),[])
+ def test_local_first_evidence_contract(self):
+  p=self.root/'specs/methodology/ci-policy.md'; original=p.read_text()
+  for token in ('local-first QA','current base commit','reachable raw logs','A PASS declared by an agent','blocks integration','Codex and Claude Code','one unconditional `required` job'):
+   with self.subTest(token=token):
+    try:
+     p.write_text(original.replace(token,'REMOVED')); self.assertRule('ci-policy')
+    finally: p.write_text(original)
  def test_legitimate_project(self):
   self.change('specs/guidelines/architecture.md','# Architecture','# Architecture\nApproved for this project: Rust and SQLite.')
   self.change('README.md','# Universal','# Universal\n[Folder](templates) [External](https://example.com)\nUNDECIDED api_key: YOUR_KEY')

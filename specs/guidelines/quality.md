@@ -4,7 +4,9 @@
 Run `./scripts/validate-template` and `./scripts/test-validator` with Python 3.10+.
 Run `python3 scripts/test-agent-usage` and `python3 scripts/test-auto-agent-usage`
 for local usage reporting and its advisory Codex lifecycle adapter.
-No package installation is required. CI runs both on pushes and pull requests.
+Python checks need no package installation. The real Mermaid parser requires its
+pinned Node packages. CI runs one `required` job on PRs to main, pushes to main and
+manual dispatch; working-branch pushes do not duplicate PR runs.
 
 ## Enforced rules
 The validator checks required structure, local Markdown file links (including AGENTS),
@@ -51,3 +53,12 @@ Use one canonical verification command locally and in CI, reusing an adequate ex
 command. Bootstrap records its prerequisites, working directory, comparison inputs
 and forced full mode in AGENTS.md and these guidelines. Follow the entry point's
 failure, coverage and regression requirements in the CI contract.
+
+The CI contract separates delivery coverage from execution profiles: local-full QA,
+fast CI and independent critical CI. Complete application regressions and E2E stay
+local in compatible environments; critical-path checks remain independent in CI.
+The existing testplan/checkpoint binds evidence to candidate, base, environment and
+raw logs. Independent QA verifies validity and freshness before integration; an agent's
+PASS claim or green fast CI is insufficient. See the canonical contract for stale
+evidence, cancellation and conservative-selector requirements. Codex and Claude Code
+use the same policy through the existing adapters; optional hooks are not gates.
