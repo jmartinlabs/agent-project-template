@@ -22,7 +22,8 @@ updates, evidence in setup progress and a working local commit.
    build/type checks required by the chosen tooling, then tests; record commands/results.
    Implement the [change-aware CI contract](../../../specs/methodology/ci-policy.md):
    a shared conservative `docs`/`full` classifier, mandatory baseline controls,
-   applicable full checks and behavioral harness/workflow regression fixtures.
+   local-full delivery coverage, fast-CI and independent critical-CI profiles,
+   and behavioral harness/workflow regression fixtures.
    Prove the contract locally before changing Actions execution; record commands
    and justified inapplicable checks in project quality guidelines.
 5. Start and inspect the application/service and exercise representative behavior.
@@ -32,7 +33,8 @@ updates, evidence in setup progress and a working local commit.
    the CI contract's entry point requirements. Reuse an adequate existing command;
    do not create a redundant wrapper. Document its working directory, prerequisites,
    comparison inputs and forced full mode in AGENTS.md and quality guidelines.
-   Verify failure propagation, coverage, local/CI parity and absence of duplicate suites.
+   Verify failure propagation, coverage, local/CI parity within profiles, evidence
+   validity and absence of duplicate suites; use the CI contract as the single policy.
    Document exact working directories, install/run/check commands and prerequisites.
    Update architecture to implemented reality; record test evidence and next action.
 7. Review diff, stage only own files, check for secrets, then commit the working state.

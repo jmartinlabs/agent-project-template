@@ -149,7 +149,7 @@ def validate(root):
  for p in [root/'AGENTS.md',*(root/'.agents/skills').rglob('SKILL.md')]:
   if p.is_file() and re.search(r'(?i)(?:all projects|every project|all applications) must (?:use|install|run)\b',p.read_text()): fail('neutrality',f'universal stack mandate in {p.relative_to(root)}')
  for name,tokens in {
-  'specs/methodology/ci-policy.md':('exactly `docs` and `full`','explicitly allowlisted','classification errors default to `full`','both sides','Documentation and security controls are mandatory','structure and execution conditions','unexpected skipped checks','continue-on-error','Local regression evidence','Only allowlisted backlog','Adaptable product-document allowlist','brainstorming|specification|progress|testplan','Protected exclusions take precedence','Changes to the allowlist or classifier themselves require `full`','additions, modifications and deletions','both rename directions checked','alone and mixed with allowed product documentation','valid alternate product paths','without init-project','Documentation plus code','Missing classifier','Preserve approved security controls'),
+  'specs/methodology/ci-policy.md':('exactly `docs` and `full`','explicitly allowlisted','classification errors default to `full`','both sides','Documentation and security controls are mandatory','structure and execution conditions','unexpected skipped checks','continue-on-error','Local regression evidence','Only allowlisted backlog','Adaptable product-document allowlist','brainstorming|specification|progress|testplan','Protected exclusions take precedence','Changes to the allowlist or classifier themselves require `full`','additions, modifications and deletions','both rename directions checked','alone and mixed with allowed product documentation','valid alternate product paths','without init-project','Documentation plus code','Missing classifier','Preserve approved security controls','local-first QA','## Evidence validity and independent QA','current base commit','reachable raw logs','A PASS declared by an agent','blocks integration','Codex and Claude Code','one unconditional `required` job'),
   '.agents/skills/bootstrap/SKILL.md':('specs/methodology/ci-policy.md','shared conservative `docs`/`full` classifier','Prove the contract locally'),
   'specs/guidelines/quality.md':('../methodology/ci-policy.md','actual classifier and workflow behavior','backlog\nalone is insufficient','protected\nexclusions taking precedence'),
  }.items():
@@ -170,10 +170,57 @@ def validate(root):
  }.items():
   for token in tokens:
    if token not in read(name): fail('verification-entry',f'{name}: missing {token}')
- s=read('.github/workflows/validate.yml')
- for token in ('pull_request','contents: read','./scripts/validate-template','./scripts/test-validator','node scripts/check-mermaid.mjs','mermaid@11.12.1','python3 scripts/test-agent-usage','python3 scripts/test-auto-agent-usage','fetch-depth: 0','git diff --check "$base" HEAD','github.event.pull_request.base.sha','github.event.before',"github.ref_type != 'tag'",'github.event.repository.default_branch'):
-  if token not in s: fail('ci',f'missing {token}')
- if re.search(r'(?m)^\s*- run: git diff --check\s*$',s): fail('ci','bare git diff --check step compares nothing')
+ # Parse the reviewed JSON subset of YAML: command text in comments is not execution.
+ try:
+  def unique(pairs):
+   result={}
+   for key,value in pairs:
+    if key in result: raise ValueError('duplicate workflow key')
+    result[key]=value
+   return result
+  workflow=json.loads(read('.github/workflows/validate.yml'),object_pairs_hook=unique)
+  def differs(a,b): return json.dumps(a,sort_keys=True)!=json.dumps(b,sort_keys=True)
+  if set(workflow)!={'name','on','permissions','concurrency','jobs'} or workflow.get('name')!='Validate template':
+   fail('ci','unexpected workflow overrides or identity')
+  events={'push':{'branches':['main']},'pull_request':{'branches':['main']},'workflow_dispatch':{}}
+  concurrency={'group':"${{ github.workflow }}:${{ github.event_name }}:${{ github.event.pull_request.number || github.ref }}:${{ github.event_name == 'workflow_dispatch' && github.run_id || 'automatic' }}",
+               'cancel-in-progress':"${{ github.event_name == 'pull_request' }}"}
+  if differs(workflow.get('on'),events): fail('ci','only main pushes, PRs to main and manual dispatch are allowed')
+  if differs(workflow.get('permissions'),{'contents':'read'}): fail('ci','read-only contents permissions required')
+  if differs(workflow.get('concurrency'),concurrency): fail('ci','PR-specific cancellation contract changed')
+  jobs=workflow.get('jobs',{})
+  if set(jobs)!={'required'}: fail('ci','exactly one required job is mandatory')
+  job=jobs.get('required',{})
+  if set(job)!={'runs-on','timeout-minutes','steps'} or job.get('runs-on')!='ubuntu-latest' or job.get('timeout-minutes')!=10:
+   fail('ci','required job must be unconditional, bounded and hosted on the approved runner')
+  steps=job.get('steps',[])
+  allowed={'name','uses','with','env','run'}
+  if any(not isinstance(step,dict) or set(step)-allowed for step in steps):
+   fail('ci','unexpected conditions, allowed failures or step execution overrides')
+  actions=[step for step in steps if 'uses' in step]
+  expected_actions=[{'uses':'actions/checkout@v4','with':{'persist-credentials':False,'fetch-depth':0}},
+                    {'uses':'actions/setup-python@v5','with':{'python-version':'3.12'}},
+                    {'uses':'actions/setup-node@v4','with':{'node-version':'22'}}]
+  if differs(actions,expected_actions): fail('ci','checkout history/credentials or approved setup actions changed')
+  commands=[step.get('run') for step in steps if 'run' in step]
+  required_commands=('./scripts/validate-template','./scripts/test-validator',
+    'python3 scripts/test-agent-usage','python3 scripts/test-auto-agent-usage',
+    'python3 scripts/eval-agent-behavior --self-test',
+    'npm install --no-save --no-package-lock --ignore-scripts mermaid@11.12.1 jsdom@26.1.0',
+    'node scripts/check-mermaid.mjs docs/GUIA_VISUAL_ORQUESTACION.md')
+  if any(commands.count(command)!=1 for command in required_commands) or any(set(step)!={'run'} for step in steps if step.get('run') in required_commands):
+   fail('ci','each required command must execute exactly once, not be commented or allowed to fail')
+  whitespace=[step for step in steps if step.get('name')=='Check whitespace in the change range']
+  if len(whitespace)!=1 or whitespace[0].get('env')!={'BASE_SHA':'${{ github.event.pull_request.base.sha || github.event.before }}'}:
+   fail('ci','complete event comparison base is required')
+  elif whitespace[0] != {'name': 'Check whitespace in the change range', 'env': {'BASE_SHA': '${{ github.event.pull_request.base.sha || github.event.before }}'}, 'run': 'set -eu\nbase="$BASE_SHA"\nif [ -z "$base" ] || [ "$base" = "0000000000000000000000000000000000000000" ]; then\n  base="origin/${{ github.event.repository.default_branch }}"\nfi\nif ! git cat-file -e "${base}^{commit}" 2>/dev/null; then\n  git fetch --no-tags origin "$base"\nfi\ngit diff --check "$base" HEAD'}:
+   fail('ci','whitespace must fail closed over the complete change comparison')
+  malformed=[step for step in steps if step.get('name')=='Prove malformed Mermaid is rejected']
+  if malformed != [{'name': 'Prove malformed Mermaid is rejected', 'run': 'set -eu\ncat > "$RUNNER_TEMP/invalid-mermaid.md" <<\'EOF\'\n```mermaid\nflowchart TD\n  A -->|broken B\n```\nEOF\nif node scripts/check-mermaid.mjs "$RUNNER_TEMP/invalid-mermaid.md"; then\n  echo \'Malformed Mermaid was incorrectly accepted\'\n  exit 1\nfi'}]:
+   fail('ci','real malformed Mermaid rejection is required')
+  if len(steps)!=12 or len(commands)!=9: fail('ci','unexpected duplicate or additional workflow steps')
+ except (ValueError,TypeError,AttributeError,KeyError):
+  fail('ci','workflow must use the reviewed parseable JSON/YAML subset')
  # Limit automatic reporting to advisory local lifecycle commands.
  try:
   usage_hooks=json.loads(read('.codex/hooks.json')).get('hooks',{})
