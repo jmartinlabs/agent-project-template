@@ -102,13 +102,21 @@ is a failure, never a successful omission. Profiles are check categories, not
 universal commands: a project without a database, API or browser records the
 justified omission instead of inventing checks.
 
-For automatic `push` events to the integration branch, select only `docs` or `fast`;
-never select `critical` or `full` automatically after merge. The PR gate must already
-have validated the exact integration tree against the current base, and branch
-protection must prevent stale or bypassed merges. If the base or tested tree changes,
-rerun the affected critical checks. Validate a high-risk merge with a manual `full`
-run rather than duplicating the critical suite automatically. A fast post-merge run
-does not attest local QA or replace the PR gate.
+Reducing automatic `push` coverage on the integration branch to `docs` or `fast` is
+conditional. It is permitted only when the project has verified and recorded all of
+these guarantees:
+
+- The PR gate validated the exact integration tree against the current base.
+- Branch protection requires that gate and prevents stale, bypassed or force-pushed
+  merges.
+- Tree equivalence between the tested PR integration and the merged commit is
+  demonstrated, not assumed from the merge method.
+
+If any guarantee is absent, stale or unverified, retain the project's existing
+post-merge coverage; do not automatically reduce critical or full checks from change
+classification alone. If the base or tested tree changes, rerun the affected critical checks.
+Validate a high-risk merge with a manual `full` run rather than duplicating the critical
+suite automatically. A fast post-merge run does not attest local QA or replace the PR gate.
 
 A PR can modify its own workflow, classifier or workflow validator. No in-repository
 check can prove that this did not weaken the gate. Require explicit review of CI,
