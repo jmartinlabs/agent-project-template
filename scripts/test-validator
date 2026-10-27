@@ -182,7 +182,13 @@ class ValidationTests(unittest.TestCase):
     self.assertRule('ci-policy'); p.write_text(original)
  def test_ci_profiles_and_postmerge_contract(self):
   for token in ('execution-profile matrix', 'bounded timeout',
-                'never select `critical` or `full` automatically after merge',
+                'Reducing automatic',
+                'The PR gate validated the exact integration tree against the current base.',
+                'Branch protection requires that gate and prevents stale, bypassed or force-pushed',
+                'Tree equivalence between the tested PR integration and the merged commit is',
+                'If any guarantee is absent, stale or unverified',
+                "retain the project's existing",
+                'do not automatically reduce critical or full checks',
                 'does not attest local QA', 'A PR can modify its own workflow',
                 'Require explicit review of CI', 'rerun the affected critical checks'):
    with self.subTest(token=token):
