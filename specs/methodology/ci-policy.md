@@ -86,6 +86,43 @@ commented-only commands, `continue-on-error` on required checks and event/path f
 that omit the PR gate. Preserve approved security controls, including permissions,
 action pins, checkout credentials and history requirements; classification never relaxes them.
 
+Use an execution-profile matrix that keeps delivery coverage separate from the checks
+selected for an event. The names below are semantic categories; projects map them to
+their own commands and may omit a category only with a documented reason.
+
+| Profile | Minimum check coverage |
+| --- | --- |
+| `docs` | Baseline documentation and security controls. |
+| `fast` | Baseline plus the project's fast type, lint and build checks. |
+| `critical` | Fast plus independent persistence, migration, security, dependency and API/integration checks on the required platform. |
+| `full` | Every applicable check, including end-to-end and acceptance coverage. |
+
+Each profile must have a bounded timeout. A timeout, cancellation or unexpected skip
+is a failure, never a successful omission. Profiles are check categories, not
+universal commands: a project without a database, API or browser records the
+justified omission instead of inventing checks.
+
+Reducing automatic `push` coverage on the integration branch to `docs` or `fast` is
+conditional. It is permitted only when the project has verified and recorded all of
+these guarantees:
+
+- The PR gate validated the exact integration tree against the current base.
+- Branch protection requires that gate and prevents stale, bypassed or force-pushed
+  merges.
+- Tree equivalence between the tested PR integration and the merged commit is
+  demonstrated, not assumed from the merge method.
+
+If any guarantee is absent, stale or unverified, retain the project's existing
+post-merge coverage; do not automatically reduce critical or full checks from change
+classification alone. If the base or tested tree changes, rerun the affected critical checks.
+Validate a high-risk merge with a manual `full` run rather than duplicating the critical
+suite automatically. A fast post-merge run does not attest local QA or replace the PR gate.
+
+A PR can modify its own workflow, classifier or workflow validator. No in-repository
+check can prove that this did not weaken the gate. Require explicit review of CI,
+classifier and validator changes, and do not claim that branch protection alone
+resolves this risk.
+
 ## Evidence validity and independent QA
 Reuse the existing testplan/checkpoint, not a second evidence registry. Before integration,
 the coordinator and independent QA verify the clean candidate commit, current base commit,
