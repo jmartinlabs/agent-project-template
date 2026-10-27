@@ -5,8 +5,9 @@ Run `./scripts/validate-template` and `./scripts/test-validator` with Python 3.1
 Run `python3 scripts/test-agent-usage` and `python3 scripts/test-auto-agent-usage`
 for local usage reporting and its advisory Codex lifecycle adapter.
 Python checks need no package installation. The real Mermaid parser requires its
-pinned Node packages. CI runs one `required` job on PRs to main, pushes to main and
-manual dispatch; working-branch pushes do not duplicate PR runs.
+pinned Node packages. CI runs one `required` job on PRs to main —including
+`ready_for_review`, with drafts still gated—, pushes to main and manual dispatch;
+working-branch pushes do not duplicate PR runs.
 
 ## Enforced rules
 The validator checks required structure, local Markdown file links (including AGENTS),

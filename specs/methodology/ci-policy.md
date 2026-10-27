@@ -68,7 +68,9 @@ Use local-first QA with a minimal CI gate:
   critical verification or fail visibly, never a successful omission.
 - Automatic push runs target only `main`, providing a fast post-merge gate. PR runs
   compare the complete base/head change; working-branch pushes must not duplicate them.
-  Keep manual full verification available. Cancel superseded PR runs using a PR-specific
+  Include `ready_for_review` so a draft that becomes ready is validated, and keep the
+  fast gate active on drafts unless the project explicitly decides otherwise. Keep
+  manual full verification available. Cancel superseded PR runs using a PR-specific
   concurrency group; never let a push cancel the PR check or silently pass a cancellation.
 - Keep a single habitual job rather than separate baseline/full/aggregator runners.
   Preserve the check identity through migration or explicitly coordinate protection
@@ -177,7 +179,8 @@ adaptations with valid alternate product paths and rejected broad Markdown exemp
 
 This repository's one `required` job keeps its complete lightweight template checks,
 including the real Mermaid parser and a malformed-diagram rejection. It runs on PRs
-to main, pushes to main and manual dispatch, with no working-branch push runs. This
+to main —including `ready_for_review`, with drafts still gated—, pushes to main and
+manual dispatch, with no working-branch push runs. This
 repository has no API, database or E2E application suite; do not manufacture one.
 Validator fixtures check the parsed workflow, unconditional execution and safe event
 selection. They do not prove live GitHub cancellation or branch protection enforcement.

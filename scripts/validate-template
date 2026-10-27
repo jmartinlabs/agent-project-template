@@ -182,7 +182,9 @@ def validate(root):
   def differs(a,b): return json.dumps(a,sort_keys=True)!=json.dumps(b,sort_keys=True)
   if set(workflow)!={'name','on','permissions','concurrency','jobs'} or workflow.get('name')!='Validate template':
    fail('ci','unexpected workflow overrides or identity')
-  events={'push':{'branches':['main']},'pull_request':{'branches':['main']},'workflow_dispatch':{}}
+  events={'push':{'branches':['main']},
+          'pull_request':{'branches':['main'],'types':['opened','synchronize','reopened','ready_for_review']},
+          'workflow_dispatch':{}}
   concurrency={'group':"${{ github.workflow }}:${{ github.event_name }}:${{ github.event.pull_request.number || github.ref }}:${{ github.event_name == 'workflow_dispatch' && github.run_id || 'automatic' }}",
                'cancel-in-progress':"${{ github.event_name == 'pull_request' }}"}
   if differs(workflow.get('on'),events): fail('ci','only main pushes, PRs to main and manual dispatch are allowed')
