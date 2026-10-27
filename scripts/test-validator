@@ -421,8 +421,14 @@ class ValidationTests(unittest.TestCase):
   self.assertRule('ci')
  def test_ci_main_pr_manual_events_valid(self):
   workflow=json.loads((self.root/'.github/workflows/validate.yml').read_text())
-  self.assertEqual(workflow['on'],{'push':{'branches':['main']},'pull_request':{'branches':['main']},'workflow_dispatch':{}})
+  self.assertEqual(workflow['on'],{'push':{'branches':['main']},
+    'pull_request':{'branches':['main'],'types':['opened','synchronize','reopened','ready_for_review']},
+    'workflow_dispatch':{}})
   self.assertEqual(validate(self.root),[])
+ def test_ci_ready_for_review_required(self):
+  self.mutate_workflow(lambda w: w['on']['pull_request']['types'].remove('ready_for_review'))
+ def test_ci_draft_gate_not_disabled(self):
+  self.mutate_workflow(lambda w: w['jobs']['required'].update({'if':'github.event.pull_request.draft == false'}))
  def test_local_first_evidence_contract(self):
   p=self.root/'specs/methodology/ci-policy.md'; original=p.read_text()
   for token in ('local-first QA','current base commit','reachable raw logs','A PASS declared by an agent','blocks integration','Codex and Claude Code','one unconditional `required` job'):
