@@ -26,6 +26,9 @@ verified acceptance evidence, relevant documentation updates and local commits.
    errors and regressions, correct defects and repeat affected checks. Complete required
    checks on each stable candidate; reuse evidence only for unchanged inputs/environment,
    recording reasons for repeats. Incompatible local runs never replace CI gates.
+   Follow the [CI contract](../../../specs/methodology/ci-policy.md) for local-full,
+   fast-CI and critical-CI profiles. Independent QA verifies candidate/base/environment
+   and reachable raw logs, not a PASS declared by the author; stale evidence blocks integration.
 4. Verify actual functionality, not just compilation or a process/port. For non-visual
    applications assert API/CLI/library/integration behavior and error cases.
 5. For web applications operate all browser acceptance flows using Playwright; run
