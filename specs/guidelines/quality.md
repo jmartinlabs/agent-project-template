@@ -45,10 +45,11 @@ Use a shared conservative `docs`/`full` classifier and test workflow execution
 conditions, including mandatory documentation/security controls and failure fallbacks.
 The template validator checks preservation of these instructions structurally;
 derived-project harness tests must prove the actual classifier and workflow behavior.
-Product documentation includes explicitly bounded brainstorming, specification,
-progress and testplan families plus reviewed exact context/tracking paths; backlog
-alone is insufficient. Adapt the allowlist to existing project naming, with protected
-exclusions taking precedence and real Git add/modify/delete/rename regressions.
+Ordinary Markdown documentation may live at the root, under `docs/`, `specs/` or
+nested directories. A Markdown extension alone is insufficient to override
+protected exclusions taking precedence: agent instructions, operational paths and
+functional Markdown require `full`. Adapt protected paths to the project and test
+real Git add/modify/delete/rename regressions.
 
 Use one canonical verification command locally and in CI, reusing an adequate existing
 command. Bootstrap records its prerequisites, working directory, comparison inputs
