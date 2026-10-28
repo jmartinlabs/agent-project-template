@@ -95,7 +95,7 @@ See [document ownership](specs/README.md) and [Skills invocation](NEW_PROJECT_PR
 AGENTS.md                         concise agent entry point
 NEW_PROJECT_PROMPT.md              new-project prompt
 ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
-.agents/skills/{adopt-project,orchestrate,handoff,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
+.agents/skills/{adopt-project,orchestrate,handoff,relay,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
 specs/methodology/model-selection.md advisory model and reasoning recommendations
@@ -109,6 +109,8 @@ specs/guidelines/{architecture,ui,quality,security}.md
 templates/{brainstorming,specification,roadmap,progress,testplan}.md
 scripts/validate-template          standard-library checks
 scripts/test-validator            positive/negative regression fixtures
+scripts/agent-relay               optional two-participant Git transport
+scripts/test-agent-relay          relay protocol regression tests
 docs/archive/                      history: prompt backups, v2.4.2 audit/benchmark (not methodology)
 .claude/settings.json              ask-before-run rules and the read-only SessionStart hook
 ```
@@ -120,8 +122,9 @@ instructions. Projects may retain this methodology and add their own code and to
 The same [coordination contract](specs/methodology/dynamic-agents.md) applies to
 runtime subagents and external clients: one coordinator, fresh bounded packets,
 preflight/operation owners, advance blocking notices, milestone supervision and
-isolated writes/test resources. External workers use verified integrations or user
-relay; no launcher, OpenCode adapter, automatic cross-client control or combined usage
+isolated writes/test resources. External workers use verified integrations, user
+relay or the optional repository-local Git relay. The relay is user-triggered transport
+only; no launcher, OpenCode adapter, automatic cross-client control or combined usage
 collector is installed. Existing progress/testplan documents hold current state and
 environment-specific verification. Performance gains must be measured, not assumed.
 
@@ -135,6 +138,7 @@ From the repository root:
 ```sh
 ./scripts/validate-template
 ./scripts/test-validator
+python3 scripts/test-agent-relay
 python3 scripts/test-agent-usage
 python3 scripts/test-auto-agent-usage
 git diff --check HEAD

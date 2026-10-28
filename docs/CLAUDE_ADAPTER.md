@@ -11,9 +11,10 @@ they do not replace canonical rules.
   including on older Claude Code versions that lack direct AGENTS.md support.
   Do not maintain separate, conflicting policies in these files.
 - `.claude/skills/NAME/SKILL.md` enables `/orchestrate`, `/spec`, `/dev`,
-  `/task`, `/tweak`, `/init-project`, `/bootstrap`, `/roadmap`, and
-  `/adopt-project`, and `/handoff`. Each wrapper **reads the corresponding canonical** file
-  under `.agents/skills/NAME/SKILL.md`; none automatically copies its contents.
+  `/task`, `/tweak`, `/init-project`, `/bootstrap`, `/roadmap`, `/relay`,
+  `/adopt-project` and `/handoff`. Each wrapper **reads the corresponding canonical** file
+  under `.agents/skills/NAME/SKILL.md`; none automatically copies its contents. The
+  relay wrapper adds no hook and never reads or publishes automatically.
 - `.claude/agents/` exposes optional task-limited profiles for
   functional, implementation, QA/review and infrastructure work. A profile
   file is not a running worker or a license to delegate without checks.
