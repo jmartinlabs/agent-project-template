@@ -172,7 +172,7 @@ class ValidationTests(unittest.TestCase):
  def test_ci_policy_required(self):
   (self.root/'specs/methodology/ci-policy.md').unlink(); self.assertRule('structure')
  def test_ci_policy_contract(self):
-  for token in ('explicitly allowlisted', 'classification errors default to `full`',
+  for token in ('documentation Markdown', 'classification errors default to `full`',
                 'Documentation and security controls are mandatory',
                 'structure and execution conditions', 'unexpected skipped checks',
                 'continue-on-error', 'Preserve approved security controls'):
@@ -211,13 +211,13 @@ class ValidationTests(unittest.TestCase):
  def test_product_document_policy_regressions(self):
   # Structural preservation guards; generated harnesses test real Git behavior.
   mutations = (
-   ('families', 'brainstorming|specification|progress|testplan'),
+   ('Markdown protection', 'Markdown extension alone is insufficient'),
    ('protected precedence', 'Protected exclusions take precedence'),
-   ('policy changes', 'Changes to the allowlist or classifier themselves require `full`'),
+   ('policy changes', 'Changes to the protected-path policy or classifier themselves require `full`'),
    ('add modify delete', 'additions, modifications and deletions'),
    ('rename endpoints', 'both rename directions checked'),
-   ('mixed protected files', 'alone and mixed with allowed product documentation'),
-   ('adaptable paths', 'valid alternate product paths'),
+   ('mixed protected files', 'alone and mixed with documentation Markdown'),
+   ('adaptable paths', 'document Markdown in different directories'),
    ('existing project', 'without init-project'),
   )
   p=self.root/'specs/methodology/ci-policy.md'; original=p.read_text()
@@ -230,7 +230,7 @@ class ValidationTests(unittest.TestCase):
     finally:
      p.write_text(original)
  def test_quality_product_docs_policy(self):
-  self.change('specs/guidelines/quality.md', 'backlog\nalone is insufficient', 'backlog only')
+  self.change('specs/guidelines/quality.md', 'A Markdown extension alone is insufficient', 'Extension is enough')
   self.assertRule('ci-policy')
  def test_bootstrap_ci_policy(self):
   self.change('.agents/skills/bootstrap/SKILL.md','Prove the contract locally','Skip contract verification')
