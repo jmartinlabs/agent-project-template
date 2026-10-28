@@ -168,7 +168,7 @@ file-reading instructions remain available. No unsupported slash commands are re
 
 Before publication inspect Git status, verify GitHub access, confirm intended owner,
 visibility (private by default) and repository name. The existing origin is
-`josemartin2000/agent-project-template`; do not create over it, reset it or change visibility.
+`jmartinlabs/agent-project-template`; do not create over it, reset it or change visibility.
 After explicit authorization, push the reviewed branch normally, enable **Template
 repository** in repository settings (or `gh repo edit OWNER/REPO --template` with API access),
 and verify accessibility. Create a disposable private repository from the template only
