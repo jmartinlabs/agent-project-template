@@ -54,7 +54,7 @@ Adapt existing projects without init-project, replacing functional decisions or
 reinitializing their harness. Do not silently replace an existing project's CI policy:
 review its protected files, generated content and integration requirements first.
 This is a CI scope policy, not product approval.
-Reference: [MyFinanzas PR #108](https://github.com/josemartin2000/myfinanzas-app/pull/108)
+Reference: [MyFinanzas PR #108](https://github.com/jmartinlabs/myfinanzas-app/pull/108)
 implements this default with project-specific exclusions; its paths are examples,
 not universal defaults.
 
@@ -106,6 +106,18 @@ their own commands and may omit a category only with a documented reason.
 | `fast` | Baseline plus the project's fast type, lint and build checks. |
 | `critical` | Fast plus independent persistence, migration, security, dependency and API/integration checks on the required platform. |
 | `full` | Every applicable check, including end-to-end and acceptance coverage. |
+
+Within `docs`, omitting a regression suite is permitted only after a tested
+evaluation of that suite's real dependency boundary, including the files,
+fixtures or configuration it reads, copies, generates or otherwise consumes. A
+documentation-only comparison does not by itself prove those inputs are unchanged:
+if any dependency can change, or the boundary is uncertain, the suite remains
+required or the project fails visibly. The project's real validators and its
+documentation, security and whitespace controls remain mandatory. Report the
+omission as intentionally skipped, never as passed; a missing or invalid
+comparison, dirty tree, unknown path or uncertain impact selects `full` or fails
+visibly. Record the suite set and dependency boundary per project, and measure the
+CI effect before claiming a reduction.
 
 Each profile must have a bounded timeout. A timeout, cancellation or unexpected skip
 is a failure, never a successful omission. Profiles are check categories, not
