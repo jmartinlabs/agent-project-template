@@ -113,10 +113,10 @@ def validate(root):
  tokens=('[PROJECT_NAME]','[SHORT_DESCRIPTION]','https://github.com/','independent','AGENTS.md','$init-project','specs/setup-progress.md','owner','visibility','authorization','planning','$spec','$dev')
  if not m or any(t.lower() not in m[1].lower() for t in tokens): fail('prompt','incomplete copyable prompt')
  adoption=read('ADOPT_EXISTING_PROJECT_PROMPT.md'); block=re.search(r'```text\n(.*?)\n```',adoption,re.S)
- required_adoption=('github.com/josemartin2000/agent-project-template','adopt-project/SKILL.md','before modifying','approval','existing','do not','orchestrate')
+ required_adoption=('github.com/jmartinlabs/agent-project-template','adopt-project/SKILL.md','before modifying','approval','existing','do not','orchestrate')
  if not block or any(x.lower() not in block[1].lower() for x in required_adoption): fail('adopt-prompt','existing-project prompt incomplete')
  if block:
-  sources=re.findall(r'raw\.githubusercontent\.com/josemartin2000/agent-project-template/([^/\s]+)/',block[1])
+  sources=re.findall(r'raw\.githubusercontent\.com/jmartinlabs/agent-project-template/([^/\s]+)/',block[1])
   pinned=re.search(r'(?im)^Pinned revision: ([0-9a-f]{40})$',block[1])
   if not sources or not pinned or any(ref!=pinned[1] for ref in sources): fail('adopt-prompt','remote Skill source must use the pinned full commit SHA, never a branch')
   for x in ('untrusted','explicit confirmation'):
