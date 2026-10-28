@@ -68,6 +68,16 @@ class ValidationTests(unittest.TestCase):
   (self.root/'.agents/skills/handoff/SKILL.md').unlink(); self.assertRule('structure')
  def test_handoff_adapter_required(self):
   self.change('.claude/skills/handoff/SKILL.md','.agents/skills/handoff/SKILL.md','README.md'); self.assertRule('claude')
+ def test_relay_skill_required(self):
+  (self.root/'.agents/skills/relay/SKILL.md').unlink(); self.assertRule('structure')
+ def test_relay_manifest(self):
+  self.change('.agents/skills/relay/SKILL.md','name: relay','name: wrong'); self.assertRule('manifest')
+ def test_relay_contract_headings(self):
+  self.change('.agents/skills/relay/SKILL.md','## Stop conditions','## End'); self.assertRule('contracts')
+ def test_relay_claude_bridge(self):
+  self.change('.claude/skills/relay/SKILL.md','.agents/skills/relay/SKILL.md','README.md'); self.assertRule('claude')
+ def test_relay_ci_wiring(self):
+  self.change('.github/workflows/validate.yml','python3 scripts/test-agent-relay','python3 scripts/skip-agent-relay'); self.assertRule('ci')
  def test_handoff_no_auto_resume(self):
   self.change('.agents/skills/handoff/SKILL.md','NO AUTO-RESUME','AUTO-RESUME'); self.assertRule('handoff')
  def test_handoff_no_new_development(self):
