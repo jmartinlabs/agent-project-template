@@ -6,7 +6,7 @@
 - **Epic / stream:** UNSET
 - **Profile:** Functional | Implementation | QA | Infrastructure | bounded custom
 - **Client / version / session ID:** <client and verified version> or UNVERIFIED; runtime-controlled | external. Technical session ID only if known; otherwise a stable functional reference. Never invent an ID. Corrections keep the same packet ID and session.
-- **Start/stop owner and permitted communication route:** UNSET; manual user relay without verified integration
+- **Start/stop owner and permitted communication route:** UNSET; manual user relay or an explicitly used repository-local Git relay; no verified client control
 - **Instruction entry points / capability check:** UNVERIFIED; confirm canonical rules are readable
 - **Context:** fresh bounded context by default | inherited with concrete reason | unsupported/disclosed
 - **Objective and done criteria:** UNSET

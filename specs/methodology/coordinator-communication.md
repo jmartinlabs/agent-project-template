@@ -4,9 +4,17 @@ How the coordinator (Codex or Claude Code) talks to a manual external client suc
 and reports open work to the user. Read on demand from [orchestrate](../../.agents/skills/orchestrate/SKILL.md)
 when delegating, receiving a return, or answering a status request.
 
-This contract adds no service, hook, integration, polling or second source of truth. The
-user relays every prompt and every return by hand. Canonical packet fields live in the
+This contract adds no service, hook, client integration, polling or second source of truth. The
+user relays every prompt and every return by hand unless the user explicitly uses the
+optional relay below. Canonical packet fields live in the
 [work packet](../../templates/agent-work-packet.md); this file defines how they are used.
+
+An optional repository-local Git relay may carry the same packet or return on explicit
+user request. It is transport only: no service, polling, control, approval or second
+source of truth. Its receipts and message rules live in the
+[relay Skill](../../.agents/skills/relay/SKILL.md); do not duplicate them here. Relay
+sends and acknowledgements are explicit transport actions, not part of the compact
+status, which remains read-only. Manual relay remains the fallback.
 
 ## 1. Identity
 
@@ -153,7 +161,9 @@ State what was not updated. This view writes nothing.
 A return from session B updates only task B; tasks in sessions A and C keep their states. Every later
 message keeps the Task ID and the destination session. The same rules serve Codex and Claude Code.
 Only the client name changes: use `HANDOFF → CODEX` when Codex coordinates and `HANDOFF → CLAUDE CODE`
-when Claude Code does. Manual relay remains the only route to OpenCode.
+when Claude Code does. Manual relay remains the fallback and the only route to clients
+without repository access or an explicitly used relay. A Git relay is not an OpenCode
+adapter or a controller.
 
 ## 11. Gates and supervision
 

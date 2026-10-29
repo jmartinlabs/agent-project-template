@@ -2,6 +2,7 @@
 
 ## Template commands
 Run `./scripts/validate-template` and `./scripts/test-validator` with Python 3.10+.
+Run `python3 scripts/test-agent-relay` for the optional two-participant relay protocol.
 Run `python3 scripts/test-agent-usage` and `python3 scripts/test-auto-agent-usage`
 for local usage reporting and its advisory Codex lifecycle adapter.
 Python checks need no package installation. The real Mermaid parser requires its
