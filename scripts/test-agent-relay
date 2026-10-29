@@ -85,6 +85,9 @@ class RelayTests(unittest.TestCase):
         self.assertIsNotNone(match, output)
         return match.group(1)
 
+    def last_line(self, output):
+        return output.strip().splitlines()[-1]
+
     def head(self, conversation):
         proc = self.git(self.origin, "rev-parse", f"relay/{conversation}")
         return proc.stdout.strip()
@@ -104,7 +107,8 @@ class RelayTests(unittest.TestCase):
         self.assertEqual(tree.strip(), "relay.md")
         self.join(conversation)
         sent = self.send(self.a, "A", conversation, "Hola B")
-        self.assertIn("Listo - 0001", sent.stdout)
+        self.assertIn("Relay: commit", sent.stdout)
+        self.assertEqual(self.last_line(sent.stdout), "Listo - 0001")
         count_after_send = self.count(conversation)
         read = self.read(self.b, "B", conversation)
         self.assertIn("Hola B", read.stdout)
@@ -112,15 +116,19 @@ class RelayTests(unittest.TestCase):
         message_id = self.message_id(read.stdout)
         self.assertEqual(self.count(conversation), count_after_send)
         acked = self.relay(self.b, "B", "read", conversation, "--ack", "--message-id", message_id)
-        self.assertIn("Leído y registrado - 0001", acked.stdout)
+        self.assertIn("Relay: commit", acked.stdout)
+        self.assertEqual(self.last_line(acked.stdout), "Leído y registrado - 0001")
         self.assertGreater(self.count(conversation), count_after_send)
         self.assertIn("read_by: B", self.doc(conversation, "HEAD"))
         self.assertIn("sequence: 1", self.doc(conversation, "HEAD"))
         count_after_ack = self.count(conversation)
-        self.assertIn("Leído y registrado - 0001", self.read(self.b, "B", conversation).stdout)
+        already = self.read(self.b, "B", conversation)
+        self.assertIn("Relay: commit", already.stdout)
+        self.assertEqual(self.last_line(already.stdout), "Leído y registrado - 0001")
         self.assertEqual(self.count(conversation), count_after_ack)
         response = self.send(self.b, "B", conversation, "Respuesta A", "false", in_reply_to=1)
-        self.assertIn("Listo - 0002", response.stdout)
+        self.assertIn("Relay: commit", response.stdout)
+        self.assertEqual(self.last_line(response.stdout), "Listo - 0002")
         response_doc = self.doc(conversation)
         self.assertIn("in_reply_to: 1", response_doc)
         self.assertIn("read_by: none", response_doc)
@@ -234,7 +242,8 @@ class RelayTests(unittest.TestCase):
         self.join(conversation)
         self.send(self.a, "A", conversation, "Antes de cerrar")
         closed = self.relay(self.a, "A", "close", conversation)
-        self.assertIn("Listo - 0002", closed.stdout)
+        self.assertIn("Relay: commit", closed.stdout)
+        self.assertEqual(self.last_line(closed.stdout), "Listo - 0002")
         self.assertIn("state: closed", self.doc(conversation))
         self.assertNotIn("COMPLETADO", closed.stdout)
         self.assertNotEqual(
@@ -257,6 +266,7 @@ class RelayTests(unittest.TestCase):
         )
         self.assertNotEqual(failed.returncode, 0)
         self.assertNotIn("Listo", failed.stdout)
+        self.assertNotIn("Relay:", failed.stdout)
         self.assertIn("publication rejected", failed.stderr)
 
     def test_secret_like_body_is_rejected(self):
@@ -280,6 +290,21 @@ class RelayTests(unittest.TestCase):
         failed = self.relay(self.b, "B", "read", conversation, "--ack", check=False)
         self.assertNotEqual(failed.returncode, 0)
         self.assertIn("--message-id", failed.stderr)
+
+    def test_github_links_are_pinned_and_remote_aware(self):
+        sha = "a" * 40
+        self.git(self.a, "remote", "add", "gh-ssh", "git@github.com:owner/repo.git")
+        self.git(self.a, "remote", "add", "gh-https", "https://github.com/owner/repo.git")
+        self.git(self.a, "remote", "add", "gh-path", "ssh://git@github.com/owner/repo.git")
+        self.git(self.a, "remote", "add", "other", "https://gitlab.com/owner/repo.git")
+        expected = f"https://github.com/owner/repo/blob/{sha}/relay.md"
+        for remote in ("gh-ssh", "gh-https", "gh-path"):
+            self.assertEqual(self.api["github_blob_url"](self.a, remote, sha), expected)
+        self.assertIsNone(self.api["github_blob_url"](self.a, "origin", sha))
+        self.assertIsNone(self.api["github_blob_url"](self.a, "other", sha))
+        self.assertIsNone(self.api["github_blob_url"](self.a, "gh-ssh", "not-a-sha"))
+        self.assertIn(sha, expected)
+        self.assertNotIn("relay/", expected)
 
     def test_init_creates_orphan_root_commit(self):
         conversation = self.init()

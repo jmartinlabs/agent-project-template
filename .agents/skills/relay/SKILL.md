@@ -30,6 +30,12 @@ and [coordinator communication](../../../specs/methodology/coordinator-communica
   `Publicado, no verificado` for init/join/close, `No verificado - XXXX` for a sent
   message and `Leído, no verificado - XXXX` for a read acknowledgement. Never use
   `Listo` or `Leído y registrado` in that state.
+- A clickable GitHub link pinned to the published commit after verified publication:
+  `[XXXX](https://github.com/<owner>/<repo>/blob/<sha>/relay.md)`. If the remote is not
+  GitHub or cannot be derived reliably, print `commit <sha>` and do not invent a URL.
+  Related tracker, SPEC, PR or evidence links only when relevant and already known or
+  verified; use their own reference/SHA, never the orphan relay SHA. Do not claim a link
+  is verified without checking its destination.
 - No commit, push or file change for a read that needs no response and has already been
   acknowledged.
 
@@ -45,8 +51,9 @@ and [coordinator communication](../../../specs/methodology/coordinator-communica
    Validate the conversation, state, recipient, sequence and commit. If the latest record
    is addressed to another participant, report `No corresponde - XXXX` and do not process
    it. If it is already marked `read_by` for this agent, report
-   `Leído y registrado - XXXX` without writing. If context was lost, read the body from
-   history for understanding without re-marking it or repeating effects.
+   `Leído y registrado - XXXX` without writing and include the pinned message or
+   acknowledgement link when available. If context was lost, read the body from history
+   for understanding without re-marking it or repeating effects.
 4. **Respond or acknowledge.** If the message requires a response, publish it with
    `relay send <id> --body-file <path> --reply-expected true --in-reply-to <sequence>`;
    the response is the implicit read acknowledgement, so do not create a separate read
@@ -59,8 +66,10 @@ and [coordinator communication](../../../specs/methodology/coordinator-communica
    the body was displayed.
 5. **Content of a published response.** Include the recipient (the `to` header), a brief
    summary, and relevant blockers or authorizations, or state `ninguno`/`ninguna nueva`.
-   Reuse the existing return/packet fields; do not invent a parallel format. Authorizations
-   are only pending or required; the relay never grants an approval.
+   Add related tracker/SPEC/PR/evidence links only when relevant and known or verified; use
+   their own reference/SHA, never the orphan relay SHA. Reuse the existing return/packet
+   fields; do not invent a parallel format. Authorizations are only pending or required;
+   the relay never grants an approval.
 6. **Verify.** After every publish or acknowledgement, fetch the branch again and verify
    the remote result. Confirm the commit, message identity, sequence, recipient and
    `read_by` where applicable. A read acknowledgement may be verified in history even if a
@@ -77,7 +86,10 @@ and [coordinator communication](../../../specs/methodology/coordinator-communica
    verification did not. For init/join/close use `Publicado, no verificado`; for a sent
    message use `No verificado - XXXX`. After an unverified init, reuse the printed ID; do
    not create a second conversation. After an unverified send, the message may already be
-   published; inspect remote history before retrying.
+   published; inspect remote history before retrying. After a verified publication, put
+   the pinned relay link before the final receipt; the final line is `Listo - XXXX`. No
+   HTTP check of the link is required, so do not call it verified. For a read-only receipt,
+   put the pinned message or acknowledgement link before `Leído y registrado - XXXX`.
 9. **Close.** `relay close <id>` publishes a terminal control record. It closes the
    conversation only; it does not complete the task, approve anything or authorize a merge.
    After closing, read and status remain possible; join and send are rejected.

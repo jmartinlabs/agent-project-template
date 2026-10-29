@@ -16,6 +16,7 @@ import tempfile
 import uuid
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import quote, urlsplit
 
 FILE = "relay.md"
 BRANCH_PREFIX = "relay/"
@@ -48,6 +49,47 @@ def now():
 
 def seq_text(value):
     return f"{int(value):04d}"
+
+
+def github_blob_url(repo, remote, commit, path=FILE):
+    """Return a GitHub blob URL pinned to the commit, or None when not derivable."""
+    if not re.fullmatch(r"[0-9a-f]{40,64}", commit or ""):
+        return None
+    proc = run_git(["remote", "get-url", remote], repo, check=False)
+    if proc.returncode:
+        return None
+    url = proc.stdout.strip()
+    if not url:
+        return None
+    scp = re.fullmatch(r"(?:[^@/]+@)?github\.com:(.+)", url, re.IGNORECASE)
+    if scp:
+        repo_path = scp.group(1)
+    else:
+        parsed = urlsplit(url)
+        if parsed.scheme not in ("http", "https", "ssh", "git"):
+            return None
+        if (parsed.hostname or "").lower() not in ("github.com", "www.github.com"):
+            return None
+        repo_path = parsed.path.lstrip("/")
+    repo_path = repo_path.rstrip("/")
+    if repo_path.endswith(".git"):
+        repo_path = repo_path[:-4]
+    parts = repo_path.split("/")
+    if len(parts) != 2 or not all(parts):
+        return None
+    owner, name = parts
+    return (
+        f"https://github.com/{quote(owner, safe='')}/{quote(name, safe='')}"
+        f"/blob/{commit}/{quote(path, safe='/')}"
+    )
+
+
+def print_relay_link(repo, remote, commit, label):
+    url = github_blob_url(repo, remote, commit)
+    if url:
+        print(f"Relay: [{label}]({url})")
+    else:
+        print(f"Relay: commit {commit} (sin enlace GitHub disponible)")
 
 
 def git_env(extra=None):
@@ -507,6 +549,7 @@ def cmd_send(args, repo, remote):
     except RelayError as exc:
         print(f"No verificado - {seq_text(sequence)}: {exc}", file=sys.stderr)
         return 2
+    print_relay_link(repo, remote, commit, seq_text(sequence))
     if state == "superseded":
         head2 = fetch_branch(repo, remote, branch)
         latest_meta, _ = show_document(repo, head2, conversation)
@@ -562,6 +605,7 @@ def cmd_read(args, repo, remote):
     if current["type"] == "close":
         if me not in current["participants"]:
             raise RelayError("agent is not a participant")
+        print_relay_link(repo, remote, head, seq_text(current["sequence"]))
         print_record(current, body, head)
         return 0
     if me not in current["participants"]:
@@ -577,9 +621,11 @@ def cmd_read(args, repo, remote):
         )
         return 2
     if me in current["read_by"]:
-        print(f"Leído y registrado - {seq_text(current['sequence'])} (ya estaba registrado; usa --seq {seq_text(current['sequence'])} para releer el cuerpo)")
+        print_relay_link(repo, remote, head, seq_text(current["sequence"]))
+        print(f"Leído y registrado - {seq_text(current['sequence'])}")
         return 0
     if not args.ack:
+        print_relay_link(repo, remote, head, seq_text(current["sequence"]))
         print_record(current, body, head)
         return 0
     if current["state"] != "open":
@@ -596,6 +642,7 @@ def cmd_read(args, repo, remote):
     if state not in ("current", "superseded"):
         print(f"Leído, no verificado - {seq_text(current['sequence'])}: remote verification failed", file=sys.stderr)
         return 2
+    print_relay_link(repo, remote, commit, seq_text(current['sequence']))
     print(f"Leído y registrado - {seq_text(current['sequence'])}")
     return 0
 
@@ -656,6 +703,7 @@ def cmd_close(args, repo, remote):
     except RelayError as exc:
         print(f"Publicado, no verificado - {conversation} close {seq_text(sequence)}: {exc}", file=sys.stderr)
         return 2
+    print_relay_link(repo, remote, commit, seq_text(sequence))
     if state == "superseded":
         head2 = fetch_branch(repo, remote, branch)
         latest_meta, _ = show_document(repo, head2, conversation)
