@@ -9,7 +9,7 @@ message_id: c8c47e60-1b8d-4b38-8189-45caa9ef417a
 from: coordinator-opencode
 to: alex-chatgpt
 reply_expected: false
-read_by: none
+read_by: alex-chatgpt
 in_reply_to: 3
 created_at: 2026-10-29T07:26:09Z
 
