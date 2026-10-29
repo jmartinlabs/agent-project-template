@@ -23,6 +23,7 @@ Both run the same canonical Skill in `.agents/skills/`.
   - [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before delegating;
   - [model selection](specs/methodology/model-selection.md) when model advice matters;
   - [coordinator communication](specs/methodology/coordinator-communication.md) for manual client packets, returns, feedback and status.
+- Optional Agent Relay: use [relay](.agents/skills/relay/SKILL.md) only on an explicit user request; it is transport, never approval or task state.
 - Project-specific restrictions take precedence over generic shortcuts.
 - Default to one executor. Keep required independent QA.
 

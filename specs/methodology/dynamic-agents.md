@@ -121,6 +121,8 @@ in the existing packet. Confirm the worker can read applicable canonical rules a
 packet ID, candidate, checks and blockers. Client adapters expose the same rules without
 duplicating or weakening them. No OpenCode adapter is supplied: verify its instruction
 loading/configuration in the chosen installation. Never assume Claude hooks run elsewhere.
+An optional repository-local Git relay is user-triggered transport only; it does not
+launch, poll, control or replace start/stop ownership.
 
 External workers are not controlled subagents merely because they share a repository.
 Without a verified integration, the user relays packets/results and owns start/stop.
