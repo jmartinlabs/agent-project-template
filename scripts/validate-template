@@ -65,7 +65,10 @@ def parse_opencode_permissions(text):
   if field and current is not None and field[1] not in current:
    current[field[1]]=scalar(field[2]); continue
   errors.append(f'unexpected permission line: {line.strip()}')
- if set(keys)-{'description','mode','permissions'}: errors.append('unexpected frontmatter fields: '+', '.join(sorted(set(keys)-{'description','mode','permissions'})))
+ allowed_fields={'description','mode','permissions','color'}
+ if set(keys)-allowed_fields: errors.append('unexpected frontmatter fields: '+', '.join(sorted(set(keys)-allowed_fields)))
+ if 'color' in keys and not re.fullmatch(r'"#[0-9A-Fa-f]{6}"', keys['color']):
+  errors.append('color must be a quoted six-digit hex value')
  for index,rule in enumerate(rules,1):
   if set(rule)!={'action','resource','effect'}: errors.append(f'permission rule {index} must contain only action, resource and effect')
   if rule.get('effect') not in ('allow','ask','deny'): errors.append(f'permission rule {index} has invalid effect')
@@ -273,7 +276,7 @@ def validate(root):
  for token in ('execution mode adaptively','background only with verified client support','coordinator availability','background persistence'):
   if token not in orchestrator: fail('execution-mode',f'orchestrator missing {token}')
  packet=read('templates/agent-work-packet.md')
- for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema'):
+ for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema', 'Never ask the user directly from a subagent'):
   if token.lower() not in packet.lower(): fail('dynamic-agents',f'agent work packet missing {token}')
  guide=read('docs/GUIA_VISUAL_ORQUESTACION.md')
  diagrams=re.findall(r'(?ms)^\x60{3}mermaid\r?\n(.*?)^\x60{3}[ \t]*$',guide)
