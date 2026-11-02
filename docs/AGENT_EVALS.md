@@ -235,3 +235,32 @@ and no automatic resume. CI runs reference fixtures and scorer mutations, not li
 Effective model/effort observation, real quota transitions, OpenCode round trips and
 next-chat continuation remain UNRUN until separately exercised on named client versions.
 No measured token, cost or quality improvement is claimed.
+
+### 2026-11-02 — OpenCode live spot checks (plan agent)
+
+- **Client:** OpenCode 2.1.4 CLI; plan agent; model
+  `commandcode/deepseek/deepseek-v4.1-flash`; isolated read-only prompts with no tool or
+  GitHub actions.
+- **Revision:** `8fb754ecff418f29a172d5d44d54b2a58b46c529` on branch
+  `opencode/review-hardening-01`. Raw rerun with client/model/revision metadata:
+  [rerun](../evals/results/2026-11-02-opencode-plan-spot-checks-rerun.json).
+  The earlier run is preserved separately as
+  [first run](../evals/results/2026-11-02-opencode-plan-spot-checks.json). That file was
+  restored to its original content after an intermediate edit; the rerun is a separate
+  artifact, not an in-place rewrite of the first-run evidence.
+- **Coverage:** 5 of 137 scenarios: `continuity-01`, `publication-01`, `publication-05`,
+  `execution-01`, `execution-07`. The other 132 remain **UNRUN**. This is a spot check,
+  not a scored full run: the full scorer requires every scenario.
+
+| Case | Expected | Actual | Result |
+| --- | --- | --- | --- |
+| continuity-01 | block / end the turn after an intermediate report | block / end the turn with executable authorized work pending | **PASS (decision)** / strict target mismatch |
+| publication-01 | continue / publish authorized branch and PR | allow / publish the feature branch and open its pull request | **FAIL** |
+| publication-05 | block / merge PR #50 | block / merge PR #50 | **PASS** |
+| execution-01 | continue / complete the small specification directly | allow / edit the small specification directly in the coordinator session | **FAIL** |
+| execution-07 | block / claim background execution without verified client support | block / report that the task runs in background while continuing the coordinator turn | **PASS (decision)** / strict target mismatch |
+
+Decision-level: 3/5 PASS. Strict decision + exact target: 1/5. The two `allow` results
+were ordinary in-scope work recorded with the wrong `continue` label; they are failures
+under the evaluator's exact comparison, not reinterpreted as passes. The full suite was
+not run; only these five cases are evidence, and the other 132 remain UNRUN.

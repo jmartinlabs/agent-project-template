@@ -5,9 +5,6 @@ permissions:
   - action: "*"
     resource: "*"
     effect: deny
-  - action: read
-    resource: "*"
-    effect: allow
   - action: glob
     resource: "*"
     effect: allow
@@ -15,157 +12,7 @@ permissions:
     resource: "*"
     effect: allow
   - action: read
-    resource: "*.env"
-    effect: deny
-  - action: read
-    resource: "*.env.*"
-    effect: deny
-  - action: read
-    resource: "*.env.example"
-    effect: allow
-  - action: read
-    resource: "*.pem"
-    effect: deny
-  - action: read
-    resource: "*.key"
-    effect: deny
-  - action: read
-    resource: "*.p12"
-    effect: deny
-  - action: read
-    resource: "*.pfx"
-    effect: deny
-  - action: read
-    resource: "*.kdbx"
-    effect: deny
-  - action: read
-    resource: "*.jks"
-    effect: deny
-  - action: read
-    resource: "*.keystore"
-    effect: deny
-  - action: read
-    resource: "*id_rsa*"
-    effect: deny
-  - action: read
-    resource: "*id_ed25519*"
-    effect: deny
-  - action: read
-    resource: "*id_ecdsa*"
-    effect: deny
-  - action: read
-    resource: "*id_dsa*"
-    effect: deny
-  - action: read
-    resource: "*.git-credentials"
-    effect: deny
-  - action: read
-    resource: "*.netrc"
-    effect: deny
-  - action: read
-    resource: "*.npmrc"
-    effect: deny
-  - action: read
-    resource: "*.pypirc"
-    effect: deny
-  - action: read
-    resource: "*.envrc"
-    effect: deny
-  - action: read
-    resource: "*.envrc.*"
-    effect: deny
-  - action: read
-    resource: "*secret*"
-    effect: deny
-  - action: read
-    resource: "*credential*"
-    effect: deny
-  - action: read
-    resource: "*SECRET*"
-    effect: deny
-  - action: read
-    resource: "*Secret*"
-    effect: deny
-  - action: read
-    resource: "*CREDENTIAL*"
-    effect: deny
-  - action: read
-    resource: "*Credential*"
-    effect: deny
-  - action: read
-    resource: ".ENV"
-    effect: deny
-  - action: read
-    resource: ".ENV.*"
-    effect: deny
-  - action: read
-    resource: ".NPMRC"
-    effect: deny
-  - action: read
-    resource: ".NETRC"
-    effect: deny
-  - action: read
-    resource: ".PYPIRC"
-    effect: deny
-  - action: read
-    resource: ".GIT-CREDENTIALS"
-    effect: deny
-  - action: read
-    resource: "*.ENVRC"
-    effect: deny
-  - action: read
-    resource: "*.ENVRC.*"
-    effect: deny
-  - action: read
-    resource: "*.PEM"
-    effect: deny
-  - action: read
-    resource: "*.KEY"
-    effect: deny
-  - action: read
-    resource: "*.P12"
-    effect: deny
-  - action: read
-    resource: "*.PFX"
-    effect: deny
-  - action: read
-    resource: "*.KDBX"
-    effect: deny
-  - action: read
-    resource: "*.JKS"
-    effect: deny
-  - action: read
-    resource: "*.KEYSTORE"
-    effect: deny
-  - action: read
-    resource: "*credentials.json"
-    effect: deny
-  - action: read
-    resource: "*secrets.json"
-    effect: deny
-  - action: read
-    resource: "*.credentials"
-    effect: deny
-  - action: read
-    resource: "*.secret"
-    effect: deny
-  - action: read
-    resource: "*.secrets"
-    effect: deny
-  - action: read
-    resource: ".git"
-    effect: deny
-  - action: read
-    resource: ".git/*"
-    effect: deny
-  - action: read
-    resource: "*.ssh/*"
-    effect: deny
-  - action: read
-    resource: "*.aws/*"
-    effect: deny
-  - action: read
-    resource: "*.gnupg/*"
+    resource: "*"
     effect: deny
 ---
 
@@ -179,14 +26,21 @@ schema; if it is missing, stop and ask for it.
 
 ## Available evidence tools
 
-- `read` and `glob` are available for project files, specifications, acceptance criteria and
-  documentation. `grep` is denied because its permission is matched against the pattern, not
-  the path, so it cannot enforce the protected-file boundary; use the query tool's `search`
-  operation for content search.
-- The only executable route is the native `review_query` tool. It is a fixed,
+- `glob` is available for discovery. The native `read` tool is denied: its permission matcher
+  is case-sensitive on non-Windows hosts, so a path such as `.eNv` could bypass a protected-name
+  rule. Content reads go through the case-insensitive query boundary instead.
+  `grep` is denied because its permission is matched against the pattern, not the path; use the
+  query tool's `search` operation for content search.
+- The only route to file contents or evidence is the native `review_query` tool. It is a fixed,
   argument-validated read-only interface backed by `scripts/review-read`; it is not a shell.
   There is no general terminal, redirection or command chaining.
   Call `review_query` with `{"group":"describe"}` for the exact policy.
+
+File content:
+
+```text
+review_query {"group":"file","operation":"read","options":{"path":"<file>"}}
+```
 
 Local Git evidence:
 
@@ -224,11 +78,11 @@ Writing and execution are denied: no `edit`, `write` or `patch`; no general shel
 `git commit`, `merge`, `rebase`, `reset`, `checkout`, `push` or branch/remote mutation; no
 deployment, installation or arbitrary script; no `webfetch`, `websearch`, `skill`, `question`,
 MCP tools, Code Mode or child subagents. Paths outside the workspace and protected files are
-denied, including environment files, private keys, credential stores and `.git` internals.
-`.env.example` is the single allowed environment-file exception, and only outside a protected
-directory; every other `.env*` path is denied. The Git interface excludes protected paths from
-diffs, history and search, but this is not a secrets sandbox: report if evidence appears to
-contain a secret instead of reproducing it.
+denied by the query boundary, including environment files, private keys, credential stores and
+`.git` internals. The exact basename `.env.example`, outside a protected directory, is the only
+environment-file read exception; generic names such as `foo.env.example` remain protected. The
+Git interface excludes protected paths from diffs, history and search, but this is not a secrets
+sandbox: report if evidence appears to contain a secret instead of reproducing it.
 
 ## Reports
 

@@ -62,8 +62,8 @@ boundary is:
 
 | Capability | Effective result | Notes |
 | --- | --- | --- |
-| `read` | allow in the workspace | `.env*`, keys, credential stores, `.git` internals and outside paths are denied |
-| `glob` | allow | file discovery by pattern |
+| `read` | **deny** | the native matcher is case-sensitive on non-Windows hosts; use the query tool's `file read` |
+| `glob` | allow | file discovery by pattern; names only, no contents |
 | `review_query` | allow | the read-only query tool only; one validated query per call |
 | `grep` | **deny** | its permission is matched against the pattern, not the path, so it cannot enforce protected files; use the query tool's `search` operation |
 | `shell` | **deny** | no terminal, redirection or command chaining |
@@ -73,25 +73,25 @@ boundary is:
 | `execute` / Code Mode, MCP, browser | deny | no alternative execution route |
 | `external_directory` | deny | reads stay inside the workspace |
 
-The adapter denies `*`, then allows `read`, `glob` and `review_query`, then adds the
-protected-read denies. The wrapper's protected-name list feeds the local path check and the
-Git pathspec exclusions, which are case-insensitive: `.env` and `.env.*`, `*.pem`, `*.key`,
+The adapter denies `*`, then allows `glob` and `review_query`, then denies `read`. Native
+`read` is denied because OpenCode permission matching is case-sensitive on non-Windows hosts:
+a rule for `.env` does not match `.eNv`, and a rule for `.git/*` does not match
+`vendor/.git/config`. Content reads therefore use the query tool, whose path check lowercases
+names and checks every path component. The wrapper's protected-name list feeds the local path
+check and the Git pathspec exclusions, which are case-insensitive: `.env`, `.env.*`,
+`*.env.example`, `*.pem`, `*.key`,
 `*.p12`, `*.pfx`, `*.kdbx`, `*.jks`, `*.keystore`, `id_rsa*`, `id_ed25519*`, `id_ecdsa*`,
 `id_dsa*`, `.git-credentials`, `.netrc`, `.npmrc`, `.pypirc`, `*credentials.json`,
 `*secrets.json`, `*.credentials`, `*.secret`, `*.secrets`, `.envrc`, `.envrc.*`, bare
 `secret`/`secrets`/`credential`/`credentials`, and any name containing `secret` or
 `credential`. `.git`, `.ssh`, `.aws`, `.gnupg`, `secrets` and `credentials` are protected
 directories.
-Only the exact name `.env.example`, outside a protected directory, is a read exception; it is
-still excluded from local Git output, while `pr-diff` does not treat it as protected because it
-is the declared read exception. Names such as `secret.env.example` or
-`credential.env.example` are protected by the sensitive-name patterns.
-
-The wrapper, Git exclusions and PR filtering match names case-insensitively. The agent's
-static read-deny matrix mirrors the sensitive names and is checked by representative paths,
-not by equality; it is case-sensitive, so mixed-case variants beyond its listed rules are not
-guaranteed to be blocked by the `read` tool. The query interface remains the authoritative
-filtered path.
+Only the exact basename `.env.example`, outside a protected directory, is a read exception; it
+is still excluded from local Git output, while `pr-diff` does not treat it as protected because
+it is the declared read exception. Generic names such as `foo.env.example`,
+`prod.env.example`, `secret.env.example` and `credential.env.example` are protected, including
+nested variants. The wrapper, Git exclusions and PR filtering match names case-insensitively,
+and the query boundary checks every path component for protected directories such as `.git`.
 
 This is an audit boundary, not a general secrets sandbox. Files committed outside the protected
 patterns can still contain sensitive data, and GitHub evidence is untrusted content. Report
@@ -100,6 +100,8 @@ suspected secrets instead of reproducing them.
 ## Read-only query interface
 
 The agent calls `review_query`; it cannot invoke the wrapper through a shell. The tool exposes:
+
+File: `read` (one allowed UTF-8 text file, bounded output).
 
 Local Git: `status`, `branches`, `log`, `show`, `diff`, `file-history`,
 `changed-files`, `search`.
@@ -111,6 +113,7 @@ Examples:
 
 ```text
 review_query {"group":"describe"}
+review_query {"group":"file","operation":"read","options":{"path":"README.md"}}
 review_query {"group":"git","operation":"status"}
 review_query {"group":"git","operation":"log","options":{"max":20,"rev":"main..HEAD"}}
 review_query {"group":"git","operation":"diff","options":{"base":"main","head":"HEAD","stat":true}}
@@ -154,8 +157,9 @@ requires the coordinator's work packet, including its **Applicable rules** and r
 The role's mission is not copied into the adapter.
 
 The agent may investigate independently: documents, specifications, acceptance criteria, code,
-local Git state, diffs, commits, file history, Pull Requests and existing CI results. It must
-not become a second developer. Executable QA, test runs, edits, installs, deployments and other
+local Git state, diffs, commits, file history, Pull Requests and existing CI results. Text file
+contents are read through `review_query file read`, not the native `read` tool. It must not
+become a second developer. Executable QA, test runs, edits, installs, deployments and other
 protected actions still need an authorized executor; the agent returns findings and the exact
 blocked operation to the coordinator.
 
@@ -176,16 +180,25 @@ available, report the coordinator session and the child `review` session separat
 
 - Verified against OpenCode V2.1.4 on 2026-11-02. Earlier versions or V1 configuration may
   register agents, plugins or permissions differently.
+- On OpenCode V2.1.4/macOS, the pre-hardening native `read` allowed `.eNv` and
+  `vendor/.git/config` on a case-insensitive filesystem. After the change the `review` agent has
+  no native `read` tool, and `review_query file read` returns exit 2 for both paths; the exact
+  `.env.example` basename remains readable. These are live fixture observations, not a general
+  secrets guarantee.
 - The adapter is project-local; it does not alter global OpenCode configuration.
 - Codex and Claude Code are unaffected. The existing `.claude/agents/qa-review.md` profile
   still offers `Bash` for a client-level QA task; it is not this read-only OpenCode agent.
 - The agent cannot edit files, run arbitrary commands, launch child agents, load Skills or
   fetch arbitrary URLs. It cannot execute the test suite; it can only consult existing results.
-- `file-history` cannot combine `--follow` with the protected-path excludes; it filters the
-  rendered status lines instead. A commit subject that names a protected path is not rewritten,
-  and a path that Git renders with C-style quoting is matched as rendered rather than decoded.
-  Merge commits may not expose rename or copy metadata to `diff-tree`; a combined `show` remains
-  a documented blind spot.
+- `file-history` cannot combine `--follow` with the protected-path excludes, so it consumes
+  NUL-delimited `--name-status` records and filters them in the wrapper. Commit subjects that
+  name a protected path are not rewritten. Merge commits may not expose rename or copy metadata
+  to `diff-tree`; a combined `show` remains a documented blind spot.
+- `changed-files` omits both sides of a rename or copy when either side is protected, so an
+  allowed destination name does not reveal that a protected file was moved or copied.
+- `file read` is text-only, UTF-8 and bounded by the same output limit as the other queries. It
+  resolves symlinks, rejects paths outside the workspace and rechecks the resolved path for
+  protected names or directories. Binary or non-UTF-8 files are unavailable through this route.
 - A complete removal must remove the agent, plugin directory and wrapper together; a single
   deleted component, including a residual plugin directory, is reported as an incomplete
   adapter.
@@ -201,10 +214,10 @@ available, report the coordinator session and the child `review` session separat
 opencode debug agents | jq -r '.[] | select(.id=="review")'
 ```
 
-The validator checks the effective permission matrix (last matching rule), protected reads,
-the single `review_query` allow, the absence of `shell`, the plugin registration and
-`shell: false`, the `review-read` operation/option policy, the shared protection list, and the
-canonical-role link. It skips OpenCode-specific checks only when the agent, plugin directory and
+The validator checks the effective permission matrix (last matching rule), the native `read`
+denial, the single `review_query` allow, the absence of `shell`, the plugin registration and
+`shell: false`, the `review-read` operation/option policy including `file read`, the shared
+protection list and the canonical-role link. It skips OpenCode-specific checks only when the agent, plugin directory and
 wrapper are all intentionally absent; a partial installation fails, and a complete removal also
 permits the adapter document and its links to be absent. Live registration, delegation and allowed or
 denied operations are separate checks and must not be claimed from file presence alone.
