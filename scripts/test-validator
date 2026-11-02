@@ -155,8 +155,10 @@ class ValidationTests(unittest.TestCase):
   self.change('.opencode/agents/review.md','.agents/roles/qa-review.md','README.md'); self.assertRule('opencode')
  def test_opencode_adapter_no_model(self):
   self.change('.opencode/agents/review.md','mode: subagent','mode: subagent\nmodel: provider/model'); self.assertRule('opencode')
- def test_opencode_adapter_env_deny(self):
-  self.change('.opencode/agents/review.md','  - action: read\n    resource: "*.env"\n    effect: deny\n',''); self.assertRule('opencode')
+ def test_opencode_adapter_read_ask_rejected(self):
+  self.add_permission('  - action: read\n    resource: "AGENTS.md"\n    effect: ask\n'); self.assertRule('opencode')
+ def test_opencode_adapter_read_allow_rejected(self):
+  self.add_permission('  - action: read\n    resource: "AGENTS.md"\n    effect: allow\n'); self.assertRule('opencode')
  def test_opencode_adapter_deny_first(self):
   p=self.root/'.opencode/agents/review.md'; s=p.read_text()
   deny='  - action: "*"\n    resource: "*"\n    effect: deny\n'
@@ -190,7 +192,7 @@ class ValidationTests(unittest.TestCase):
   self.change('scripts/review-read','".git-credentials", ".netrc", ".npmrc", ".pypirc",',
     '".git-credentials", ".netrc", ".pypirc",'); self.assertRule('opencode')
  def test_opencode_review_read_secret_names(self):
-  self.change('scripts/review-read','".env", ".env.*", ".envrc", ".envrc.*",',
+  self.change('scripts/review-read','".env", ".env.*", "*.env.example", ".envrc", ".envrc.*",',
     '".env", ".env.*",'); self.assertRule('opencode')
  def test_opencode_review_read_run_id_type(self):
   self.change('scripts/review-read','"run": {"options": {"run-id": "run_id"}, "required": ["run-id"]},',
@@ -228,6 +230,9 @@ class ValidationTests(unittest.TestCase):
    'secret.env.example':f'{secret}=secret-example\n',
    'credential.env.example':f'{secret}=credential-example\n',
    'config/secret.env.example':f'{secret}=nested-secret-example\n',
+   'foo.env.example':f'{secret}=generic-example\n',
+   'prod.env.example':f'{secret}=prod-example\n',
+   'config/foo.env.example':f'{secret}=nested-generic-example\n',
    '.ssh/.env.example':f'{secret}=ssh\n',
   }
   for name,content in protected.items():
@@ -247,6 +252,24 @@ class ValidationTests(unittest.TestCase):
    self.assertEqual(review('git','show','--rev','HEAD','--path',name).returncode,2,name)
   allowed=review('git','show','--rev','HEAD','--path','config/.env.example')
   self.assertEqual(allowed.returncode,0); self.assertEqual(allowed.stdout,'')
+  exact=review('file','read','--path','.env.example')
+  self.assertEqual(exact.returncode,0); self.assertIn('EXAMPLE_TOKEN',exact.stdout)
+  nested=review('file','read','--path','config/.env.example')
+  self.assertEqual(nested.returncode,0); self.assertIn('EXAMPLE=allowed',nested.stdout)
+  for name in ('foo.env.example','prod.env.example','config/foo.env.example',
+               '.ENV.EXAMPLE'):
+   self.assertEqual(review('file','read','--path',name).returncode,2,name)
+  for name in ('.eNv','vendor/.git/config','../outside'):
+   self.assertEqual(review('file','read','--path',name).returncode,2,name)
+  (root/'vendor/.git').mkdir(parents=True,exist_ok=True)
+  (root/'vendor/.git/config').write_text('fixture\n')
+  self.assertEqual(review('file','read','--path','vendor/.git/config').returncode,2)
+  (root/'binary.bin').write_bytes(b'ok\x00binary')
+  self.assertEqual(review('file','read','--path','binary.bin').returncode,4)
+  (root/'link-to-env').symlink_to('.env')
+  self.assertEqual(review('file','read','--path','link-to-env').returncode,2)
+  (root/'link-outside').symlink_to('/etc/hosts')
+  self.assertEqual(review('file','read','--path','link-outside').returncode,2)
   for name in protected:
    (root/name).write_text(f'{secret}=changed\n')
   for args in (('git','show','--rev','HEAD'),('git','diff','--base','HEAD'),
@@ -267,7 +290,7 @@ class ValidationTests(unittest.TestCase):
    self.assertEqual(review(*args).returncode,2,args)
   fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
   gh=fake/'gh'
-  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"secrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/credentials.yml","status":"modified","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/.envrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed-config.py","previous_filename":"secrets.yaml","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"AppSecrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secrets/api-key.txt","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credentials/config.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secret.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credential.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/secret.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".env.example","status":"added","additions":1,"deletions":0,"patch":"+EXAMPLE_TOKEN"}},{{"filename":"config/.env.example","status":"added","additions":1,"deletions":0,"patch":"+EXAMPLE=allowed"}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
+  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"secrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/credentials.yml","status":"modified","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/.envrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed-config.py","previous_filename":"secrets.yaml","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"AppSecrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secrets/api-key.txt","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credentials/config.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secret.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credential.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/secret.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"foo.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"prod.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/foo.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".env.example","status":"added","additions":1,"deletions":0,"patch":"+EXAMPLE_TOKEN"}},{{"filename":"config/.env.example","status":"added","additions":1,"deletions":0,"patch":"+EXAMPLE=allowed"}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
   gh.write_text(
    '#!/bin/sh\n'
    'if [ "$1" = "api" ]; then\n'
@@ -283,7 +306,7 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(result.returncode,0); self.assertIn('pr\nview\n37',result.stdout)
   diff=review('github','pr-diff','--number','37',env=env)
   self.assertEqual(diff.returncode,0); self.assertIn('src/app.py',diff.stdout); self.assertIn('src/ok.py',diff.stdout)
-  self.assertIn('[redacted 14 protected file(s)]',diff.stdout); self.assertNotIn(secret,diff.stdout)
+  self.assertIn('[redacted 17 protected file(s)]',diff.stdout); self.assertNotIn(secret,diff.stdout)
   names=review('github','pr-diff','--number','37','--name-only',env=env)
   self.assertEqual(names.returncode,0); self.assertIn('src/app.py',names.stdout)
   self.assertIn('src/ok.py',names.stdout); self.assertIn('.env.example',names.stdout)
@@ -291,7 +314,8 @@ class ValidationTests(unittest.TestCase):
   for name in ('.npmrc','vault.kdbx','.ssh/.env.example','src/renamed.py',
                'secrets.yaml','config/credentials.yml','src/.envrc','src/renamed-config.py',
                'AppSecrets.yaml','secrets/api-key.txt','credentials/config.yaml',
-               'secret.env.example','credential.env.example','config/secret.env.example'):
+               'secret.env.example','credential.env.example','config/secret.env.example',
+               'foo.env.example','prod.env.example','config/foo.env.example'):
    self.assertNotIn(name,names.stdout)
   for args in (('github','pr','merge'),('github','api','/repos/x'),
                ('github','pr','--number','37','--repo','other')):
@@ -330,6 +354,63 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(copied_show.returncode,0); self.assertNotIn(secret,copied_show.stdout)
   normal=review('git','file-history','--path','app.py')
   self.assertEqual(normal.returncode,0); self.assertIn('app.py',normal.stdout)
+ def test_review_read_special_name_metadata(self):
+  root=self.root
+  def git(*args,check=True):
+   return subprocess.run(['git',*args],cwd=root,capture_output=True,text=True,check=check)
+  def review(*args):
+   return subprocess.run([sys.executable,str(root/'scripts/review-read'),*args],
+    cwd=root,capture_output=True,text=True)
+  git('init','-q'); git('config','user.email','review@example.invalid'); git('config','user.name','Review')
+  marker='PROTECTED_'+'MARKER_SPECIAL'
+  names=('allowed\tname.txt','allowed\nname.txt','allowed"name.txt','allowed\\name.txt')
+  for index,name in enumerate(names):
+   source=f'secret-tab-{index}.yaml'
+   (root/source).write_text(f'{marker}=source\n')
+   git('add',source); git('commit','-qm',f'add protected source {index}')
+   git('mv',source,name); git('commit','-qm',f'rename protected source {index}')
+   for args in (('git','show','--rev','HEAD'),
+                ('git','diff','--base','HEAD~1','--head','HEAD'),
+                ('git','changed-files','--base','HEAD~1','--head','HEAD')):
+    result=review(*args)
+    self.assertEqual(result.returncode,0,args)
+    self.assertNotIn(marker,result.stdout,args)
+    self.assertNotIn(source,result.stdout,args)
+  (root/'secret-copy.yaml').write_text(f'{marker}=copy\n')
+  git('add','secret-copy.yaml'); git('commit','-qm','add protected copy source')
+  (root/'allowed-copy.txt').write_text(f'{marker}=copy\n')
+  git('add','allowed-copy.txt'); git('commit','-qm','copy protected content')
+  for args in (('git','show','--rev','HEAD'),
+               ('git','diff','--base','HEAD~1','--head','HEAD')):
+   result=review(*args)
+   self.assertEqual(result.returncode,0,args)
+   self.assertNotIn(marker,result.stdout,args)
+  source='secret\ttab-history.yaml'
+  (root/source).write_text(f'{marker}=history\n')
+  git('add',source); git('commit','-qm','add protected history source')
+  (root/'src').mkdir(exist_ok=True)
+  git('mv',source,'src/config-tab.txt'); git('commit','-qm','rename protected history source')
+  history=review('git','file-history','--path','src/config-tab.txt')
+  self.assertEqual(history.returncode,0); self.assertNotIn(source,history.stdout)
+  status_source='secret-status.yaml'
+  (root/status_source).write_text(f'{marker}=status\n')
+  git('add',status_source); git('commit','-qm','add protected status source')
+  git('mv',status_source,'allowed\tstatus.txt')
+  status=review('git','status')
+  self.assertEqual(status.returncode,0); self.assertNotIn(status_source,status.stdout)
+  self.assertNotIn(marker,status.stdout)
+  fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
+  fake_git=fake/'git'; real_git=shutil.which('git')
+  fake_git.write_text('#!/bin/sh\ncase "$*" in *--name-status*) '
+                      'printf "BAD\\0"; exit 0;; esac\n'
+                      f'exec {real_git} "$@"\n')
+  fake_git.chmod(0o755)
+  env=dict(os.environ); env['PATH']=str(fake)+os.pathsep+env.get('PATH','')
+  malformed=subprocess.run([sys.executable,str(root/'scripts/review-read'),
+    'git','show','--rev','HEAD'],cwd=root,capture_output=True,text=True,env=env)
+  self.assertEqual(malformed.returncode,4)
+  self.assertNotIn(marker,malformed.stdout)
+
  def test_review_read_pr_diff_fails_closed(self):
   fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
   gh=fake/'gh'

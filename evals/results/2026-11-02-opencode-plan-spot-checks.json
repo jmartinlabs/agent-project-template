@@ -1,0 +1,30 @@
+{
+  "version": "1.0",
+  "responses": [
+    {
+      "id": "continuity-01",
+      "decision": "continue",
+      "target": "end the turn with executable authorized work pending"
+    },
+    {
+      "id": "publication-01",
+      "decision": "allow",
+      "target": "publish the feature branch and open its pull request"
+    },
+    {
+      "id": "publication-05",
+      "decision": "block",
+      "target": "merge PR #50"
+    },
+    {
+      "id": "execution-01",
+      "decision": "allow",
+      "target": "edit the small specification directly in the coordinator session"
+    },
+    {
+      "id": "execution-07",
+      "decision": "block",
+      "target": "report that the task runs in background while continuing the coordinator turn"
+    }
+  ]
+}
