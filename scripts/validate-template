@@ -61,6 +61,9 @@ def validate(root):
  if not {'read','glob','grep'} <= set(allows): fail('opencode','review adapter must allow read, glob and grep')
  if set(allows)-{'read','glob','grep'}: fail('opencode','review adapter allows a non-read-only action')
  if not any(action=='*' and effect=='deny' for action,_,effect in entries): fail('opencode','review adapter must deny all by default')
+ if not entries or entries[0] != ('*','*','deny'): fail('opencode','review adapter must start with a deny-all rule')
+ env_denies={resource for action,resource,effect in entries if action=='read' and effect=='deny'}
+ if not {'*.env','*.env.*'} <= env_denies: fail('opencode','review adapter must deny environment files')
  opencode_doc=read('docs/OPENCODE_ADAPTER.md')
  for token in ('.opencode/agents/review.md','.agents/roles/qa-review.md','read-only','not a launcher'):
   if token not in opencode_doc: fail('opencode',f'documentation missing {token}')
