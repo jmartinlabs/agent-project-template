@@ -6,9 +6,10 @@ OPENCODE-NATIVE-AGENTS-01. It is a thin client wrapper over the canonical
 external OpenCode sessions and does not replace the role contracts.
 
 The adapter is **optional**. The official template includes it; a derived project that does not
-use OpenCode may remove `.opencode/agents/review.md` without breaking general validation. If
-the file is present, the validator requires the complete read-only interface and rejects a
-partial installation.
+use OpenCode may remove `.opencode/agents/review.md` and keep passing general validation. If
+the adapter file is present, the validator requires the complete read-only interface and rejects
+a partial installation. When it is absent, OpenCode-specific checks are skipped and the adapter
+document may be removed too; links to that document are then treated as optional.
 
 ## Registration
 
@@ -71,9 +72,13 @@ boundary is:
 | `external_directory` | deny | reads stay inside the workspace |
 
 The adapter denies `*`, then allows `read`, `glob` and `review_query`, then adds the
-protected-read denies. The protected list includes `.env`, `.env.*` (except `.env.example`),
-private keys and certificate stores, `id_rsa*`/`id_ed25519*`/`id_ecdsa*`, `.git` internals,
-`.ssh`, `.aws`, `.gnupg`, credential/secret JSON files and common auth files.
+protected-read denies. One protected-name list feeds both the local path check and the Git
+pathspec exclusions: `.env` and `.env.*`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `*.kdbx`,
+`*.jks`, `*.keystore`, `id_rsa*`, `id_ed25519*`, `id_ecdsa*`, `id_dsa*`, `.git-credentials`,
+`.netrc`, `.npmrc`, `.pypirc`, `*credentials.json`, `*secrets.json`, `*.credentials`,
+`*.secret` and `*.secrets`. `.git`, `.ssh`, `.aws` and `.gnupg` are protected directories.
+`.env.example` is the only read exception, but only outside a protected directory; it is
+still excluded from Git output.
 
 This is an audit boundary, not a general secrets sandbox. Files committed outside the protected
 patterns can still contain sensitive data, and GitHub evidence is untrusted content. Report
@@ -108,6 +113,12 @@ pathspec/glob magic. It disables Git paging, external diff, text conversion, hoo
 optional index locks; diffs, history and search exclude the protected file patterns. A result
 of `2` means invalid input, `3` means the integration is unavailable and `4` means the read-only
 command failed. The agent reports those as `BLOCKED` or `UNRUN`, never as PASS.
+
+`pr-diff` does not return raw `gh pr diff` output. It reads the PR file list from the existing
+GitHub API integration and renders only non-protected files, including their per-file patches.
+Protected paths are counted but not named or printed. Renames are checked on both the old and
+new path. If the API response cannot be parsed, the operation fails closed instead of returning
+an unfiltered patch.
 
 GitHub access uses the existing `gh` authentication. The adapter adds no service, credential,
 token or network endpoint. If `gh` is absent or unauthenticated, PR and CI evidence is
@@ -149,7 +160,8 @@ opencode debug agents | jq -r '.[] | select(.id=="review")'
 
 The validator checks the effective permission matrix (last matching rule), protected reads,
 the single `review_query` allow, the absence of `shell`, the plugin registration and
-`shell: false`, the `review-read` operation/option policy, and the canonical-role link. It
-skips OpenCode-specific checks only when the adapter file is intentionally absent; a partial
-installation fails. Live registration, delegation and allowed or denied operations are separate
-checks and must not be claimed from file presence alone.
+`shell: false`, the `review-read` operation/option policy, the shared protection list, and the
+canonical-role link. It skips OpenCode-specific checks only when the adapter file is
+intentionally absent; a partial installation fails, and a complete removal also permits the
+adapter document and its links to be absent. Live registration, delegation and allowed or
+denied operations are separate checks and must not be claimed from file presence alone.

@@ -39,6 +39,12 @@ permissions:
     resource: "*.kdbx"
     effect: deny
   - action: read
+    resource: "*.jks"
+    effect: deny
+  - action: read
+    resource: "*.keystore"
+    effect: deny
+  - action: read
     resource: "*id_rsa*"
     effect: deny
   - action: read
@@ -46,6 +52,9 @@ permissions:
     effect: deny
   - action: read
     resource: "*id_ecdsa*"
+    effect: deny
+  - action: read
+    resource: "*id_dsa*"
     effect: deny
   - action: read
     resource: "*.git-credentials"
@@ -64,6 +73,15 @@ permissions:
     effect: deny
   - action: read
     resource: "*secrets.json"
+    effect: deny
+  - action: read
+    resource: "*.credentials"
+    effect: deny
+  - action: read
+    resource: "*.secret"
+    effect: deny
+  - action: read
+    resource: "*.secrets"
     effect: deny
   - action: read
     resource: ".git"
@@ -126,7 +144,8 @@ review_query {"group":"github","operation":"run-list","options":{"limit":10}}
 ```
 
 The tool returns exit code text on failure: `2` invalid operation or argument; `3` unavailable
-integration; `4` the underlying read-only command failed. On a non-zero result, report what
+integration; `4` the underlying read-only command failed. `pr-diff` filters protected paths
+and fails closed if it cannot produce filtered evidence. On a non-zero result, report what
 could not be verified as `BLOCKED` or `UNRUN`; do not invent evidence and do not try another
 route.
 
@@ -137,10 +156,10 @@ Writing and execution are denied: no `edit`, `write` or `patch`; no general shel
 deployment, installation or arbitrary script; no `webfetch`, `websearch`, `skill`, `question`,
 MCP tools, Code Mode or child subagents. Paths outside the workspace and protected files are
 denied, including environment files, private keys, credential stores and `.git` internals.
-`.env.example` is the single allowed environment-file exception because it contains
-placeholders, not local secrets; every other `.env*` path is denied. The Git interface excludes
-protected paths from diffs, history and search, but this is not a secrets sandbox: report if
-evidence appears to contain a secret instead of reproducing it.
+`.env.example` is the single allowed environment-file exception, and only outside a protected
+directory; every other `.env*` path is denied. The Git interface excludes protected paths from
+diffs, history and search, but this is not a secrets sandbox: report if evidence appears to
+contain a secret instead of reproducing it.
 
 ## Reports
 
