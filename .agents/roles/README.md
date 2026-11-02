@@ -2,7 +2,7 @@
 
 These files are **reusable role profiles**, not registered or permanent agents. The coordinator can assign zero, one or several independent tasks using the same role; see [dynamic agent management](../../specs/methodology/dynamic-agents.md). Read them when constructing bounded subagent tasks. If delegation is unavailable, the coordinator performs the same roles sequentially.
 
-OpenCode additionally registers one optional native `review` subagent that loads the QA/Review contract with read-only tools for independent code, specification, Git and PR/CI audit; see the [OpenCode adapter](../../docs/OPENCODE_ADAPTER.md). It is a client adapter, not a new role or an always-running worker.
+OpenCode additionally offers optional native subagents for `review`, `functional`, `implementation` and `infrastructure`, each a thin client adapter over its canonical role. The specialized agents read through the review adapter's `review_query file read`; implementation edits and shell commands require approval. They are client adapters, not new roles or always-running workers. See the [OpenCode adapter](../../docs/OPENCODE_ADAPTER.md).
 
 - [Functional](functional.md): discovery, brainstorming and specs without self-approval
 - [Implementation](implementation.md): approved-spec-only development

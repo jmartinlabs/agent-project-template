@@ -1,37 +1,65 @@
-# OpenCode adapter: native `review` subagent
+# OpenCode adapters: native review and specialized subagents
 
-This adapter registers **one** OpenCode-native subagent, `review`, for the scope in
-OPENCODE-NATIVE-AGENTS-01. It is a thin client wrapper over the canonical
-[QA/Review role](../.agents/roles/qa-review.md). It is not a launcher or controller for
-external OpenCode sessions and does not replace the role contracts.
+This document covers four optional OpenCode-native subagents: the read-only auditor `review`
+and the specialized `functional`, `implementation` and `infrastructure` adapters. Each is a
+thin client wrapper over its canonical role in [`.agents/roles/`](../.agents/roles/), never a
+replacement for that role contract. None is a launcher or controller for external sessions;
+each is an adapter, not a launcher.
 
-The adapter is **optional**. The official template includes it; a derived project that does not
-use OpenCode may remove the agent, plugin and wrapper together and keep passing general
-validation. The functional installation is the trio `.opencode/agents/review.md`,
-`.opencode/plugins/review-read/index.ts` and `scripts/review-read`: if any one is present, all
-three are required, so an orphan plugin or wrapper fails validation. When all three are absent,
-OpenCode-specific checks are skipped and the adapter document may be removed too; links to that
-document are then treated as optional.
+The **review adapter** is a trio: `.opencode/agents/review.md`,
+`.opencode/plugins/review-read/index.ts` and `scripts/review-read`. If any one is present, all
+three are required. The specialized agents are single Markdown files and are optional
+independently; when present they require the review adapter because their content-read route is
+`review_query file read`. A specialized agent without a complete review adapter fails
+validation. Removing all specialized files is valid; removing only the review trio while
+leaving a specialized agent is not.
+
+The official template includes the files; a derived project that does not use OpenCode may
+remove the review trio and all specialized agents and keep passing general validation. When the
+whole set is absent, OpenCode-specific checks and this document’s links are optional.
 
 ## Registration
 
 OpenCode V2 discovers Markdown agents under `.opencode/agents/<name>.md` and plugins under
 `.opencode/plugins/<name>/`. The adapter consists of:
 
-- `.opencode/agents/review.md`, with `mode: subagent`, a description and the permission
+- `.opencode/agents/review.md`, with `mode: subagent`, a description and the review permission
   matrix below;
 - `.opencode/plugins/review-read/index.ts`, which registers the `review_query` tool under the
   `review` namespace with `codemode: false`;
-- `scripts/review-read`, the argument-validated read-only query implementation.
+- `scripts/review-read`, the argument-validated read-only query implementation;
+- `.opencode/agents/functional.md`, `.opencode/agents/implementation.md` and
+  `.opencode/agents/infrastructure.md`, each optional and linked to its canonical role.
 
 No model is pinned. OpenCode inherits the parent session model for a subagent without a model;
-this adapter does not configure a provider or model.
+these adapters do not configure a provider or model.
 
 Check registration on the installed client:
 
 ```sh
-opencode debug agents | jq -r '.[] | select(.id=="review")'
+opencode debug agents | jq -r '.[] | select(.id=="review" or .id=="functional" or .id=="implementation" or .id=="infrastructure")'
 ```
+
+## Specialized agents
+
+| Agent | Canonical role | Effective capability |
+| --- | --- | --- |
+| `functional` | [functional](../.agents/roles/functional.md) | `glob`, `review_query`; no native read, edit, shell or delegation; only the `spec` skill |
+| `implementation` | [implementation](../.agents/roles/implementation.md) | `glob`, `review_query`; `edit` and `shell` are **ask**; push and PR create/edit/merge denied; only the `dev` skill |
+| `infrastructure` | [infrastructure](../.agents/roles/infrastructure.md) | `glob`, `review_query`; no edit, shell, Docker, database or deployment |
+
+All three deny native `read`, `grep`, delegation, direct web tools and external directories.
+They use `review_query file read` for project text, so the wrapper’s case-insensitive,
+component-aware protected-path boundary applies. `file read` is text-only, UTF-8 and bounded.
+If the review adapter is absent, or the installed query tool does not expose `file read`, the
+agent must stop as BLOCKED rather than fall back to native reads.
+
+`implementation` uses `edit: ask` and `shell: ask` as approval gates. The client does not know
+the work packet’s ownership; the coordinator must approve only paths in that ownership. Shell
+command-text denies for push/merge are defense-in-depth, not an isolation sandbox. The
+specialized agents intentionally narrow the canonical roles: functional and infrastructure are
+read-only, implementation does not publish or merge, and infrastructure execution stays with a
+separately authorized executor.
 
 ## Why a tool, not a shell allowlist
 
@@ -55,7 +83,7 @@ protected paths and non-commit revisions, and runs `git` or `gh` with read-only 
 The template validator reads that literal and the plugin source and rejects added operations,
 options, shells or extra tools.
 
-## Permissions
+## Review permissions
 
 OpenCode applies permission rules in order and the last matching rule wins. The effective
 boundary is:
@@ -188,8 +216,10 @@ available, report the coordinator session and the child `review` session separat
 - The adapter is project-local; it does not alter global OpenCode configuration.
 - Codex and Claude Code are unaffected. The existing `.claude/agents/qa-review.md` profile
   still offers `Bash` for a client-level QA task; it is not this read-only OpenCode agent.
-- The agent cannot edit files, run arbitrary commands, launch child agents, load Skills or
-  fetch arbitrary URLs. It cannot execute the test suite; it can only consult existing results.
+- The `review` agent cannot edit files, run arbitrary commands, launch child agents, load Skills
+  or fetch arbitrary URLs. It cannot execute the test suite; it can only consult existing results.
+  The specialized agents add their own capability envelope above; implementation edits and shell
+  commands require approval and are not technical isolation.
 - `file-history` cannot combine `--follow` with the protected-path excludes, so it consumes
   NUL-delimited `--name-status` records and filters them in the wrapper. Commit subjects that
   name a protected path are not rewritten. Merge commits may not expose rename or copy metadata
@@ -199,9 +229,10 @@ available, report the coordinator session and the child `review` session separat
 - `file read` is text-only, UTF-8 and bounded by the same output limit as the other queries. It
   resolves symlinks, rejects paths outside the workspace and rechecks the resolved path for
   protected names or directories. Binary or non-UTF-8 files are unavailable through this route.
-- A complete removal must remove the agent, plugin directory and wrapper together; a single
-  deleted component, including a residual plugin directory, is reported as an incomplete
-  adapter.
+- A complete review removal must remove the agent, plugin directory and wrapper together; a
+  single deleted component, including a residual plugin directory, is reported as an incomplete
+  adapter. A specialized agent without the complete review trio is also invalid. Removing all
+  specialized agent files is valid and leaves the review adapter independent.
 - Background subagent support and external-session control are not claimed or tested here.
 - The GitHub route depends on `gh` availability and authentication and is not a substitute for
   reviewing the local candidate revision.
@@ -211,13 +242,16 @@ available, report the coordinator session and the child `review` session separat
 ```sh
 ./scripts/validate-template
 ./scripts/test-validator
-opencode debug agents | jq -r '.[] | select(.id=="review")'
+opencode debug agents | jq -r '.[] | select(.id=="review" or .id=="functional" or .id=="implementation" or .id=="infrastructure")'
 ```
 
-The validator checks the effective permission matrix (last matching rule), the native `read`
-denial, the single `review_query` allow, the absence of `shell`, the plugin registration and
-`shell: false`, the `review-read` operation/option policy including `file read`, the shared
-protection list and the canonical-role link. It skips OpenCode-specific checks only when the agent, plugin directory and
-wrapper are all intentionally absent; a partial installation fails, and a complete removal also
-permits the adapter document and its links to be absent. Live registration, delegation and allowed or
-denied operations are separate checks and must not be claimed from file presence alone.
+The validator checks the review trio’s effective permission matrix, native `read` denial, single
+`review_query` allow, plugin registration, `shell: false`, the `review-read` policy including
+`file read`, the shared protection list and the canonical link. For each specialized agent it
+checks `mode: subagent`, the canonical-role link, no model pin, native-read denial, `glob` and
+`review_query` allows, `grep` and delegation/network denials, and the profile-specific envelope:
+read-only for functional/infrastructure; `edit`/`shell` ask plus push/merge denies for
+implementation. A specialized agent is invalid without the complete review trio and empty files
+fail. Each specialized file is optional; removing all is valid and permits the document links to
+be absent. Live registration, delegation and allowed/denied operations remain separate checks and
+must not be claimed from file presence alone.
