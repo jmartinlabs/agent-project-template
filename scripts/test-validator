@@ -295,6 +295,14 @@ class ValidationTests(unittest.TestCase):
    filtered=review('git','status',env=env)
    self.assertEqual(filtered.returncode,0,extra)
    self.assertIn('Untracked.md',filtered.stdout,extra)
+  traces=Path(self.root.parent)/'traces'; traces.mkdir(exist_ok=True)
+  for variable in ('GIT_TRACE','GIT_TRACE2','GIT_TRACE2_EVENT','GIT_TRACE2_PERF',
+                   'GIT_TRACE_PACKET','GIT_TRACE_PERFORMANCE','GIT_TRACE_SETUP'):
+   trace=traces/f'{variable}.log'; trace.unlink(missing_ok=True)
+   env=dict(os.environ); env[variable]=str(trace)
+   result=review('git','status',env=env)
+   self.assertEqual(result.returncode,0,variable)
+   self.assertFalse(trace.exists(),variable)
   for args in (('git','log','--path','.env'),('git','show','--rev','HEAD:.env'),
                ('git','show','--rev','app.py'),('git','diff','--base','app.py'),
                ('git','changed-files','--base','app.py','--head','HEAD'),
