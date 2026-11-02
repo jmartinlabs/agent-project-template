@@ -46,7 +46,9 @@ function buildArgs(input: QueryInput): string[] {
     if (input.operation || input.options) throw new Error("describe takes no operation or options")
     return ["describe"]
   }
-  if (group !== "git" && group !== "github") throw new Error("group must be git, github or describe")
+  if (group !== "git" && group !== "github" && group !== "file") {
+    throw new Error("group must be git, github, file or describe")
+  }
   if (!input.operation || !/^[a-z][a-z0-9-]*$/.test(input.operation)) {
     throw new Error("operation must be a lowercase name")
   }
@@ -82,11 +84,11 @@ export default Plugin.define({
       editor.add({
         name: "query",
         description:
-          "Run one validated read-only Git or GitHub query. No shell, writes, pushes or arbitrary commands.",
+          "Run one validated read-only file, Git or GitHub query. No shell, writes, pushes or arbitrary commands.",
         input: {
           type: "object",
           properties: {
-            group: { type: "string", enum: ["git", "github", "describe"] },
+            group: { type: "string", enum: ["git", "github", "file", "describe"] },
             operation: { type: "string" },
             options: {
               type: "object",
@@ -102,7 +104,7 @@ export default Plugin.define({
           try {
             args = buildArgs(raw as QueryInput)
           } catch (error) {
-            return { content: `INVALID: ${(error as Error).message}` }
+            return { content: `exit 2\nINVALID: ${(error as Error).message}` }
           }
           const result = await runWrapper(directory, args)
           if (result.code === 0) return { content: result.stdout }
