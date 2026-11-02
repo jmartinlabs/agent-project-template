@@ -28,7 +28,8 @@ opencode debug agents | jq -r '.[] | select(.id=="review")'
 The adapter body is deliberately short. It reads
 [`.agents/roles/qa-review.md`](../.agents/roles/qa-review.md) as the single source of truth
 and requires the coordinator's work packet, including its **Applicable rules** and return
-schema. Role rules are not copied into the adapter.
+schema. The role's mission is not copied into the adapter; the adapter adds only the
+client-specific read-only boundary and the work-packet prerequisite.
 
 The pilot narrows the QA/Review profile to a **read-only documentary audit**. It must not be
 confused with functional QA: it cannot execute tests, edit files or run commands. A task that
@@ -98,6 +99,8 @@ Passing `--model` is a test-time choice; it is not stored in the adapter.
 - Verified against OpenCode V2.1.4 on 2026-11-02. Earlier versions or V1 configuration may
   register agents differently.
 - The adapter is project-local; it does not alter global OpenCode configuration.
+- The template validator requires `.opencode/agents/review.md` and this document. A derived
+  project that intentionally removes OpenCode must also remove or conditionalize those checks.
 - Codex and Claude Code are unaffected. The existing `.claude/agents/qa-review.md` profile
   still offers `Bash` for a client-level QA task; it is not this read-only OpenCode agent.
 - The pilot cannot run tests, write files, fetch the web or launch child agents. It is

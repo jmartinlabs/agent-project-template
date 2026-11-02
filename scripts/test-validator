@@ -115,6 +115,13 @@ class ValidationTests(unittest.TestCase):
   self.change('.opencode/agents/review.md','  - action: read\n    resource: "*"\n    effect: allow','  - action: edit\n    resource: "*"\n    effect: allow'); self.assertRule('opencode')
  def test_opencode_adapter_no_model(self):
   self.change('.opencode/agents/review.md','mode: subagent','mode: subagent\nmodel: provider/model'); self.assertRule('opencode')
+ def test_opencode_adapter_env_deny(self):
+  self.change('.opencode/agents/review.md','  - action: read\n    resource: "*.env"\n    effect: deny\n',''); self.assertRule('opencode')
+ def test_opencode_adapter_deny_first(self):
+  p=self.root/'.opencode/agents/review.md'; s=p.read_text()
+  deny='  - action: "*"\n    resource: "*"\n    effect: deny\n'
+  allow='  - action: read\n    resource: "*"\n    effect: allow\n'
+  p.write_text(s.replace(deny,'',1).replace(allow,allow+deny,1)); self.assertRule('opencode')
  def test_hook_orchestrate_required(self):
   self.change('.claude/settings.json','orchestrate/SKILL.md','tweak/SKILL.md'); self.assertRule('hooks')
  def test_hook_rejects_code_execution(self):
