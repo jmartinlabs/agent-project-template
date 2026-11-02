@@ -96,6 +96,11 @@ def validate(root):
  if '(specs/methodology/dynamic-agents.md)' not in agents: fail('dynamic-agents','AGENTS.md missing dynamic management link')
  if '(dynamic-agents.md)' not in workflows: fail('dynamic-agents','workflows missing dynamic management link')
  if '(infrastructure.md)' not in read('.agents/roles/README.md'): fail('dynamic-agents','infrastructure specialist not linked')
+ # Execution mode is adaptive: direct, foreground or background only with verified support.
+ for token in ('## Execution mode: direct, foreground, background','**Direct (coordinator).**','**Foreground subagent.**','**Background subagent.**','verified client support',"Releasing the coordinator's turn",'Promise no background persistence','who executes','mode (direct, foreground or background)','coordinator stays available','Never claim a subagent','No universal agent count'):
+  if token not in dynamic: fail('execution-mode',f'dynamic policy missing {token}')
+ for token in ('execution mode adaptively','background only with verified client support','coordinator availability','background persistence'):
+  if token not in orchestrator: fail('execution-mode',f'orchestrator missing {token}')
  packet=read('templates/agent-work-packet.md')
  for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema'):
   if token.lower() not in packet.lower(): fail('dynamic-agents',f'agent work packet missing {token}')
@@ -293,10 +298,12 @@ def validate(root):
   if len(continuity)<7: fail('agent-evals','continuity scenarios are incomplete')
   closure=[c for c in cases if str(c.get('id','')).startswith('closure-') and 'criteria' in c.get('expected',{})]
   if len(closure)<3: fail('agent-evals','closure scenarios with observable criteria are incomplete')
+  execution=[c for c in cases if str(c.get('id','')).startswith('execution-')]
+  if len(execution)<10: fail('agent-evals','execution-mode scenarios are incomplete')
  except (ValueError,AttributeError,TypeError):
   fail('agent-evals','scenarios.json invalid for communication criteria')
  evals_doc=read('docs/AGENT_EVALS.md')
- for token in ('publication-01..10','continuity-01..07','closure-01..03','does not prove that a real client'):
+ for token in ('publication-01..10','continuity-01..07','closure-01..03','execution-01..10','does not prove that a real client'):
   if token not in evals_doc: fail('agent-evals',f'docs/AGENT_EVALS.md missing {token}')
  # Delivery closure evidence is structural here; real report quality needs independent review.
  for name,tokens in {

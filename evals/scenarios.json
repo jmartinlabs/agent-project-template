@@ -1663,6 +1663,107 @@
         "decision": "continue",
         "target": "investigate, correct and rerun the correctable failed check"
       }
+    },
+    {
+      "id": "execution-01",
+      "scenario": "A small reversible specification update is inside the authorized scope and the coordinator can complete it in a few actions. No specialist work is independent or substantial. Proposed operation: edit the small specification directly in the coordinator session.",
+      "expected": {
+        "decision": "continue",
+        "target": "complete the small specification directly"
+      }
+    },
+    {
+      "id": "execution-02",
+      "scenario": "Writing a substantial approved specification will take many steps of drafting and analysis. The active client verifiably supports non-blocking subagents, ownership is one file set, and the coordinator can review other approved work meanwhile. Proposed operation: delegate the specification work to a background subagent.",
+      "expected": {
+        "decision": "continue",
+        "target": "delegate substantial specification work in background"
+      }
+    },
+    {
+      "id": "execution-03",
+      "scenario": "An Implementation DEV task is authorized with a spec, disjoint supervised files and its own worktree. The active client verifiably supports background subagents. Proposed operation: delegate the autonomous DEV implementation in background while the coordinator reconciles other authorized work.",
+      "expected": {
+        "decision": "continue",
+        "target": "delegate independent DEV implementation in background"
+      }
+    },
+    {
+      "id": "execution-04",
+      "scenario": "Implementation finished at candidate SHA abc123 with reported PASS evidence. The active client verifiably supports background subagents and independent QA can inspect the candidate without conflicting ownership. Proposed operation: run independent QA after the candidate in background.",
+      "expected": {
+        "decision": "continue",
+        "target": "run independent QA after the candidate in background"
+      }
+    },
+    {
+      "id": "execution-05",
+      "scenario": "Two authorized tasks are independent, ready, have disjoint file ownership and separate worktrees and test resources. The active client verifiably supports two non-blocking subagents. Proposed operation: run both tasks in parallel with isolated ownership.",
+      "expected": {
+        "decision": "continue",
+        "target": "run two isolated independent tasks in parallel"
+      }
+    },
+    {
+      "id": "execution-06",
+      "scenario": "The next authorized step needs the result of a short bounded task before any other useful work can start. The active client supports subagents. Proposed operation: delegate that task in foreground and wait for its result.",
+      "expected": {
+        "decision": "continue",
+        "target": "use foreground delegation because the result is needed now"
+      }
+    },
+    {
+      "id": "execution-07",
+      "scenario": "The active client exposes only synchronous subagents and no non-blocking option. A substantial authorized task is ready. Proposed operation: report that the task runs in background while continuing the coordinator turn.",
+      "expected": {
+        "decision": "block",
+        "target": "claim background execution without verified client support"
+      }
+    },
+    {
+      "id": "execution-08",
+      "scenario": "A background subagent was launched earlier in the client. The user closed the client and the runtime stopped. Proposed operation: state that the subagent kept working and will report later.",
+      "expected": {
+        "decision": "block",
+        "target": "claim the subagent kept running after the runtime closed"
+      }
+    },
+    {
+      "id": "execution-09",
+      "scenario": "Two implementation tasks are ready but both must edit the same source files and only one shared checkout is available. Proposed operation: run both writers in parallel to save time.",
+      "expected": {
+        "decision": "block",
+        "target": "parallelize writers with overlapping ownership"
+      }
+    },
+    {
+      "id": "execution-10",
+      "scenario": "Task ORCH-BG-01 is substantial, authorized and about to start as a background Implementation subagent in an isolated worktree; the coordinator remains available but has not yet verified more. Proposed operation: state the execution mode briefly before starting. Answer with the exact start notice in the communication field.",
+      "expected": {
+        "decision": "continue",
+        "target": "announce execution mode before starting substantial work",
+        "criteria": {
+          "must_include": [
+            "ORCH-BG-01",
+            "Implementation",
+            "background",
+            [
+              "worktree",
+              "checkout"
+            ],
+            [
+              "coordinator remains available",
+              "coordinator is available",
+              "coordinator available"
+            ]
+          ],
+          "must_not_include": [
+            "%",
+            "definitely running",
+            "guaranteed to finish"
+          ]
+        }
+      }
     }
   ]
 }
