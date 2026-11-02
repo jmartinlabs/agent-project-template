@@ -163,9 +163,10 @@ def validate(root):
    if not entries or entries[0] != ('*','*','deny'): fail('opencode','review adapter must start with a deny-all rule')
    if effective(entries,'read','AGENTS.md')!='allow' or effective(entries,'read','src/main.py')!='allow': fail('opencode','review adapter must allow project reads')
    if effective(entries,'glob','**/*.py')!='allow': fail('opencode','review adapter must allow glob discovery')
-   for path in ('.env','config/.env','.env.local','.ssh/.env.example','secrets/id_rsa','id_dsa','.git/config','credentials.json','app.pem','.npmrc','.netrc','.pypirc','.git-credentials','vault.kdbx','app.jks','app.keystore','service.credentials','service.secret','service.secrets','secrets.yaml','config/credentials.yml','src/.envrc','.NPMRC','SERVICE.KDBX','Secrets.yaml','secrets/api-key.txt','credentials/config.yaml'):
+   for path in ('.env','config/.env','.env.local','.ssh/.env.example','secrets/id_rsa','id_dsa','.git/config','credentials.json','app.pem','.npmrc','.netrc','.pypirc','.git-credentials','vault.kdbx','app.jks','app.keystore','service.credentials','service.secret','service.secrets','secrets.yaml','config/credentials.yml','src/.envrc','.NPMRC','SERVICE.KDBX','Secrets.yaml','secrets/api-key.txt','credentials/config.yaml','secret.env.example','credential.env.example','config/secret.env.example'):
     if effective(entries,'read',path)!='deny': fail('opencode',f'review adapter must deny protected read: {path}')
    if effective(entries,'read','.env.example')!='allow': fail('opencode','review adapter must allow .env.example')
+   if effective(entries,'read','config/.env.example')!='allow': fail('opencode','review adapter must allow nested .env.example outside protected directories')
    for action in ('edit','subagent','skill','webfetch','websearch','question','execute','external_directory','browser','shell'):
     if effective(entries,action,'*')!='deny': fail('opencode',f'review adapter must deny {action}')
    if effective(entries,'review_query','*')!='allow': fail('opencode','review adapter must allow the read-only query tool')

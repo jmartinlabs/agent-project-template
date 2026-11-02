@@ -225,10 +225,14 @@ class ValidationTests(unittest.TestCase):
    'src/.envrc':f'{secret}=direnv\n',
    'secrets/api-key.txt':f'{secret}=secret-dir\n',
    'credentials/config.yaml':f'{secret}=credential-dir\n',
+   'secret.env.example':f'{secret}=secret-example\n',
+   'credential.env.example':f'{secret}=credential-example\n',
+   'config/secret.env.example':f'{secret}=nested-secret-example\n',
    '.ssh/.env.example':f'{secret}=ssh\n',
   }
   for name,content in protected.items():
    path=root/name; path.parent.mkdir(parents=True,exist_ok=True); path.write_text(content)
+  (root/'config/.env.example').write_text('EXAMPLE=allowed\n')
   git('add','-A')
   for name in protected: git('add','-f',name)
   git('commit','-qm','fixture')
@@ -241,6 +245,8 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(review('git','show','--rev','HEAD','--path','.env.example').returncode,0)
   for name in protected:
    self.assertEqual(review('git','show','--rev','HEAD','--path',name).returncode,2,name)
+  allowed=review('git','show','--rev','HEAD','--path','config/.env.example')
+  self.assertEqual(allowed.returncode,0); self.assertEqual(allowed.stdout,'')
   for name in protected:
    (root/name).write_text(f'{secret}=changed\n')
   for args in (('git','show','--rev','HEAD'),('git','diff','--base','HEAD'),
@@ -261,7 +267,7 @@ class ValidationTests(unittest.TestCase):
    self.assertEqual(review(*args).returncode,2,args)
   fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
   gh=fake/'gh'
-  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"secrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/credentials.yml","status":"modified","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/.envrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed-config.py","previous_filename":"secrets.yaml","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"AppSecrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secrets/api-key.txt","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credentials/config.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".env.example","status":"added","additions":1,"deletions":0,"patch":"+EXAMPLE_TOKEN"}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
+  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"secrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/credentials.yml","status":"modified","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/.envrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed-config.py","previous_filename":"secrets.yaml","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"AppSecrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secrets/api-key.txt","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credentials/config.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secret.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credential.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/secret.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".env.example","status":"added","additions":1,"deletions":0,"patch":"+EXAMPLE_TOKEN"}},{{"filename":"config/.env.example","status":"added","additions":1,"deletions":0,"patch":"+EXAMPLE=allowed"}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
   gh.write_text(
    '#!/bin/sh\n'
    'if [ "$1" = "api" ]; then\n'
@@ -277,13 +283,15 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(result.returncode,0); self.assertIn('pr\nview\n37',result.stdout)
   diff=review('github','pr-diff','--number','37',env=env)
   self.assertEqual(diff.returncode,0); self.assertIn('src/app.py',diff.stdout); self.assertIn('src/ok.py',diff.stdout)
-  self.assertIn('[redacted 11 protected file(s)]',diff.stdout); self.assertNotIn(secret,diff.stdout)
+  self.assertIn('[redacted 14 protected file(s)]',diff.stdout); self.assertNotIn(secret,diff.stdout)
   names=review('github','pr-diff','--number','37','--name-only',env=env)
   self.assertEqual(names.returncode,0); self.assertIn('src/app.py',names.stdout)
   self.assertIn('src/ok.py',names.stdout); self.assertIn('.env.example',names.stdout)
+  self.assertIn('config/.env.example',names.stdout)
   for name in ('.npmrc','vault.kdbx','.ssh/.env.example','src/renamed.py',
                'secrets.yaml','config/credentials.yml','src/.envrc','src/renamed-config.py',
-               'AppSecrets.yaml','secrets/api-key.txt','credentials/config.yaml'):
+               'AppSecrets.yaml','secrets/api-key.txt','credentials/config.yaml',
+               'secret.env.example','credential.env.example','config/secret.env.example'):
    self.assertNotIn(name,names.stdout)
   for args in (('github','pr','merge'),('github','api','/repos/x'),
                ('github','pr','--number','37','--repo','other')):
