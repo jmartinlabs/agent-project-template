@@ -242,6 +242,8 @@ class ValidationTests(unittest.TestCase):
   for name in protected: git('add','-f',name)
   git('commit','-qm','fixture')
   self.assertEqual(review('git','status').returncode,0)
+  redirected=dict(os.environ); redirected['GIT_DIR']=str(root/'missing-git-dir')
+  self.assertEqual(review('git','status',env=redirected).returncode,0)
   self.assertIn('fixture',review('git','log','--max','1').stdout)
   self.assertEqual(review('git','diff','--base','HEAD').returncode,0)
   self.assertEqual(review('git','show','--rev','HEAD').returncode,0)
@@ -270,6 +272,8 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(review('file','read','--path','link-to-env').returncode,2)
   (root/'link-outside').symlink_to('/etc/hosts')
   self.assertEqual(review('file','read','--path','link-outside').returncode,2)
+  (root/'loop-a').symlink_to('loop-b'); (root/'loop-b').symlink_to('loop-a')
+  self.assertEqual(review('file','read','--path','loop-a').returncode,2)
   for name in protected:
    (root/name).write_text(f'{secret}=changed\n')
   for args in (('git','show','--rev','HEAD'),('git','diff','--base','HEAD'),
@@ -283,6 +287,7 @@ class ValidationTests(unittest.TestCase):
   self.assertNotIn('UntrackedSecrets.yaml',st.stdout)
   for args in (('git','log','--path','.env'),('git','show','--rev','HEAD:.env'),
                ('git','show','--rev','app.py'),('git','diff','--base','app.py'),
+               ('git','changed-files','--base','app.py','--head','HEAD'),
                ('git','log','--output','/tmp/x'),('git','push'),
                ('git','diff','--base','HEAD','--path','../outside'),
                ('git','show','--rev','HEAD','--path','.NPMRC'),
@@ -363,7 +368,8 @@ class ValidationTests(unittest.TestCase):
     cwd=root,capture_output=True,text=True)
   git('init','-q'); git('config','user.email','review@example.invalid'); git('config','user.name','Review')
   marker='PROTECTED_'+'MARKER_SPECIAL'
-  names=('allowed\tname.txt','allowed\nname.txt','allowed"name.txt','allowed\\name.txt')
+  names=('allowed\tname.txt','allowed\nname.txt','allowed"name.txt','allowed\\name.txt',
+         'allowed\x01name.txt')
   for index,name in enumerate(names):
    source=f'secret-tab-{index}.yaml'
    (root/source).write_text(f'{marker}=source\n')
@@ -376,6 +382,12 @@ class ValidationTests(unittest.TestCase):
     self.assertEqual(result.returncode,0,args)
     self.assertNotIn(marker,result.stdout,args)
     self.assertNotIn(source,result.stdout,args)
+  (root/'plain.txt').write_text('plain\n')
+  git('add','plain.txt'); git('commit','-qm','add allowed source')
+  git('mv','plain.txt','plain\tnew.txt'); git('commit','-qm','rename allowed source')
+  allowed=review('git','changed-files','--base','HEAD~1','--head','HEAD')
+  self.assertEqual(allowed.returncode,0)
+  self.assertIn('plain\\tnew.txt',allowed.stdout)
   (root/'secret-copy.yaml').write_text(f'{marker}=copy\n')
   git('add','secret-copy.yaml'); git('commit','-qm','add protected copy source')
   (root/'allowed-copy.txt').write_text(f'{marker}=copy\n')
@@ -385,13 +397,16 @@ class ValidationTests(unittest.TestCase):
    result=review(*args)
    self.assertEqual(result.returncode,0,args)
    self.assertNotIn(marker,result.stdout,args)
-  source='secret\ttab-history.yaml'
+   self.assertNotIn('secret-copy.yaml',result.stdout,args)
+  source='secret\nhistory.yaml'
   (root/source).write_text(f'{marker}=history\n')
   git('add',source); git('commit','-qm','add protected history source')
   (root/'src').mkdir(exist_ok=True)
-  git('mv',source,'src/config-tab.txt'); git('commit','-qm','rename protected history source')
-  history=review('git','file-history','--path','src/config-tab.txt')
-  self.assertEqual(history.returncode,0); self.assertNotIn(source,history.stdout)
+  git('mv',source,'src/config-history.txt'); git('commit','-qm','rename protected history source')
+  history=review('git','file-history','--path','src/config-history.txt')
+  self.assertEqual(history.returncode,0)
+  self.assertNotIn(source,history.stdout)
+  self.assertNotIn(source.replace('\n','\\n'),history.stdout)
   status_source='secret-status.yaml'
   (root/status_source).write_text(f'{marker}=status\n')
   git('add',status_source); git('commit','-qm','add protected status source')
@@ -401,15 +416,22 @@ class ValidationTests(unittest.TestCase):
   self.assertNotIn(marker,status.stdout)
   fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
   fake_git=fake/'git'; real_git=shutil.which('git')
-  fake_git.write_text('#!/bin/sh\ncase "$*" in *--name-status*) '
-                      'printf "BAD\\0"; exit 0;; esac\n'
+  fake_git.write_text('#!/bin/sh\ncase "$*" in\n'
+                      '  *--name-status*) printf "BAD\\0"; exit 0;;\n'
+                      '  *status*--short*) printf "BAD\\0"; exit 0;;\n'
+                      'esac\n'
                       f'exec {real_git} "$@"\n')
   fake_git.chmod(0o755)
   env=dict(os.environ); env['PATH']=str(fake)+os.pathsep+env.get('PATH','')
-  malformed=subprocess.run([sys.executable,str(root/'scripts/review-read'),
-    'git','show','--rev','HEAD'],cwd=root,capture_output=True,text=True,env=env)
-  self.assertEqual(malformed.returncode,4)
-  self.assertNotIn(marker,malformed.stdout)
+  for args in (('git','show','--rev','HEAD'),
+               ('git','diff','--base','HEAD'),
+               ('git','changed-files','--base','HEAD~1','--head','HEAD'),
+               ('git','file-history','--path','app.py'),
+               ('git','status')):
+   malformed=subprocess.run([sys.executable,str(root/'scripts/review-read'),*args],
+     cwd=root,capture_output=True,text=True,env=env)
+   self.assertEqual(malformed.returncode,4,args)
+   self.assertNotIn(marker,malformed.stdout,args)
 
  def test_review_read_pr_diff_fails_closed(self):
   fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
@@ -419,6 +441,11 @@ class ValidationTests(unittest.TestCase):
   result=subprocess.run([sys.executable,str(self.root/'scripts/review-read'),
     'github','pr-diff','--number','37'],cwd=self.root,capture_output=True,text=True,env=env)
   self.assertEqual(result.returncode,4); self.assertNotIn('not-json',result.stdout)
+  gh.write_text('#!/bin/sh\nprintf %s "[[{\\"message\\":\\"bad\\"}]]"\n')
+  result=subprocess.run([sys.executable,str(self.root/'scripts/review-read'),
+    'github','pr-diff','--number','37'],cwd=self.root,capture_output=True,text=True,env=env)
+  self.assertEqual(result.returncode,4)
+  self.assertNotIn('bad',result.stdout)
  def test_hook_orchestrate_required(self):
   self.change('.claude/settings.json','orchestrate/SKILL.md','tweak/SKILL.md'); self.assertRule('hooks')
  def test_hook_rejects_code_execution(self):
