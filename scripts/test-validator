@@ -1153,6 +1153,7 @@ class LifecycleBehaviorTests(unittest.TestCase):
   root=self.tmp/'repo'; root.mkdir()
   self.git(root,'init','-q'); (root/'README.md').write_text('# base\n')
   self.git(root,'add','-A'); self.git(root,'commit','-qm','base')
+  self.default_branch=self.git(root,'symbolic-ref','--short','HEAD').stdout.strip()
   return root
  def add_worktree(self,root,branch,name):
   path=self.tmp/name
@@ -1177,7 +1178,7 @@ class LifecycleBehaviorTests(unittest.TestCase):
   self.git(root,'checkout','-q','feature-unmerged')
   (root/'later.txt').write_text('later\n')
   self.git(root,'add','-A'); self.git(root,'commit','-qm','unmerged')
-  self.git(root,'checkout','-q','main')
+  self.git(root,'checkout','-q',self.default_branch)
   self.assertNotEqual(self.git(root,'branch','-d','feature-unmerged',check=False).returncode,0)
   self.assertIn('feature-unmerged',self.git(root,'branch','--list').stdout)
  def test_other_worktree_is_preserved(self):
