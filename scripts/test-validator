@@ -105,6 +105,9 @@ class ValidationTests(unittest.TestCase):
   (self.root/'.claude/settings.json').unlink(); self.assertRule('structure')
  def test_profile_packet_rules(self):
   self.change('.claude/agents/implementation.md','Applicable rules','policy list'); self.assertRule('claude')
+ def test_packet_subagent_questions_route(self):
+  self.change('templates/agent-work-packet.md','Never ask the user directly from a subagent','Ask the user directly from a subagent')
+  self.assertRule('dynamic-agents')
  def test_packet_applicable_rules(self):
   self.change('templates/agent-work-packet.md','Applicable rules','Extra notes'); self.assertRule('dynamic-agents')
  def test_wrapper_no_restated_approvals(self):
@@ -148,6 +151,12 @@ class ValidationTests(unittest.TestCase):
   self.assertRule('opencode')
  def test_opencode_specialized_model(self):
   self.change('.opencode/agents/infrastructure.md','mode: subagent','mode: subagent\nmodel: provider/model')
+  self.assertRule('opencode')
+ def test_opencode_specialized_color_format(self):
+  self.change('.opencode/agents/functional.md','color: "#3B82F6"','color: "blue"')
+  self.assertRule('opencode')
+ def test_opencode_review_color_format(self):
+  self.change('.opencode/agents/review.md','color: "#A855F7"','color: "#GGGGGG"')
   self.assertRule('opencode')
  def test_opencode_specialized_permissions_rejected(self):
   self.change('.opencode/agents/functional.md','mode: subagent',
