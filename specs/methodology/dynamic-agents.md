@@ -152,8 +152,10 @@ start/stop owner, communication route, instruction entry points and evidence des
 in the existing packet. Confirm the worker can read applicable canonical rules and return
 packet ID, candidate, checks and blockers. Client adapters expose the same rules without
 duplicating or weakening them. A repository-local OpenCode `review` subagent is available as
-a read-only documentary adapter (see [OpenCode adapter](../../docs/OPENCODE_ADAPTER.md)); it
-is not a launcher or controller for external OpenCode sessions. Verify other instruction
+a read-only audit adapter (see [OpenCode adapter](../../docs/OPENCODE_ADAPTER.md)); it may
+read project files and consult local Git, PR and CI evidence through a validated query
+interface, but it cannot run tests or modify code. It is not a launcher or controller for
+external OpenCode sessions. Verify other instruction
 loading/configuration in the chosen installation. Never assume Claude hooks run elsewhere.
 An optional repository-local Git relay is user-triggered transport only; it does not
 launch, poll, control or replace start/stop ownership.

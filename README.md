@@ -106,7 +106,9 @@ docs/OPENCODE_ADAPTER.md           native read-only review subagent and its limi
 templates/agent-work-packet.md    delegate work packet contract
 templates/epic-board.md          optional epic coordination board
 .agents/roles/                   functional, implementation and QA roles
-.opencode/agents/review.md       OpenCode native read-only documentary audit adapter
+.opencode/agents/review.md       OpenCode native read-only audit adapter
+.opencode/plugins/review-read/   native review_query tool (structured, no shell)
+scripts/review-read               validated read-only Git and GitHub query interface
 specs/guidelines/{architecture,ui,quality,security}.md
 templates/{brainstorming,specification,roadmap,progress,testplan}.md
 scripts/validate-template          standard-library checks
@@ -127,8 +129,9 @@ preflight/operation owners, advance blocking notices, milestone supervision and
 isolated writes/test resources. External workers use verified integrations, user
 relay or the optional repository-local Git relay. The relay is user-triggered transport
 only; no launcher, automatic cross-client control or combined usage collector is installed.
-The optional OpenCode `review` adapter is a read-only native subagent, not a launcher or
-controller; see [OpenCode adapter](docs/OPENCODE_ADAPTER.md). Existing progress/testplan
+The optional OpenCode `review` adapter is a read-only native subagent that can inspect local
+Git and consult PR/CI evidence through its `review_query` tool; it is not a launcher or
+controller. See [OpenCode adapter](docs/OPENCODE_ADAPTER.md). Existing progress/testplan
 documents hold current state and environment-specific verification. Performance gains must be
 measured, not assumed.
 
