@@ -1,6 +1,7 @@
 ---
 description: Independent read-only audit of code, specifications, local Git history and PR/CI evidence using the canonical QA/review contract.
 mode: subagent
+color: "#A855F7"
 permissions:
   - action: "*"
     resource: "*"

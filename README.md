@@ -47,7 +47,7 @@ While E1.6 awaits a financial decision, the functional lane can draft independen
 
 The coordinator follows [dynamic agent management](specs/methodology/dynamic-agents.md) to **find independent ready work first, then choose agent count**. [Functional, Developer, QA and Infrastructure profiles](.agents/roles/README.md) are reusable role instructions, not permanent agents. Multiple distinct tasks can use the same role. Default to one executor; add specialists only when a supported runtime and independently useful work justify the overhead, preserving required independent QA. Use [agent work packets](templates/agent-work-packet.md) for scope, ownership and verifiable outcomes.
 
-The template registers only one optional OpenCode read-only `review` subagent and documents orchestration; it **does not launch workers automatically**. Check the actual subagent tools and isolation of your client. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
+The template includes optional native OpenCode subagents for `review`, `functional`, `implementation` and `infrastructure`, each a thin wrapper over its canonical role. None is launched automatically; the coordinator selects one dynamically. The specialized agents use OpenCode's default subagent capabilities; the work packet and role contract govern behavior, not a technical permission matrix. `review` remains a separate read-only adapter. Check the actual subagent tools and isolation of your client. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
 
 ## Explicit session shutdown and handoff
 
@@ -102,11 +102,12 @@ specs/methodology/model-selection.md advisory model and reasoning recommendation
 specs/methodology/epic-orchestration.md dependency-aware epic scheduler
 specs/methodology/dynamic-agents.md dynamic specialist lifecycle
 docs/GUIA_VISUAL_ORQUESTACION.md   eight editable Mermaid diagrams
-docs/OPENCODE_ADAPTER.md           native read-only review subagent and its limits
+docs/OPENCODE_ADAPTER.md           native review and specialized subagent adapters
 templates/agent-work-packet.md    delegate work packet contract
 templates/epic-board.md          optional epic coordination board
-.agents/roles/                   functional, implementation and QA roles
+.agents/roles/                   functional, implementation, QA and infrastructure roles
 .opencode/agents/review.md       OpenCode native read-only audit adapter
+.opencode/agents/{functional,implementation,infrastructure}.md  optional specialized adapters
 .opencode/plugins/review-read/   native review_query tool (structured, no shell)
 scripts/review-read               validated read-only Git and GitHub query interface
 specs/guidelines/{architecture,ui,quality,security}.md
@@ -129,9 +130,11 @@ preflight/operation owners, advance blocking notices, milestone supervision and
 isolated writes/test resources. External workers use verified integrations, user
 relay or the optional repository-local Git relay. The relay is user-triggered transport
 only; no launcher, automatic cross-client control or combined usage collector is installed.
-The optional OpenCode `review` adapter is a read-only native subagent that can inspect local
-Git and consult PR/CI evidence through its `review_query` tool; it is not a launcher or
-controller. See [OpenCode adapter](docs/OPENCODE_ADAPTER.md). Existing progress/testplan
+The optional OpenCode adapters provide a read-only `review` auditor plus specialized
+`functional`, `implementation` and `infrastructure` subagents. The specialized agents use
+OpenCode's default subagent capabilities; their roles and work packets govern behavior, not a
+technical permission matrix. They are not launchers or controllers. See
+[OpenCode adapter](docs/OPENCODE_ADAPTER.md). Existing progress/testplan
 documents hold current state and environment-specific verification. Performance gains must be
 measured, not assumed.
 
