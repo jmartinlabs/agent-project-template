@@ -296,6 +296,12 @@ class ValidationTests(unittest.TestCase):
    self.assertEqual(filtered.returncode,0,extra)
    self.assertIn('Untracked.md',filtered.stdout,extra)
   traces=Path(self.root.parent)/'traces'; traces.mkdir(exist_ok=True)
+  control=traces/'git-trace-control.log'; control.unlink(missing_ok=True)
+  control_env=dict(os.environ); control_env['GIT_TRACE']=str(control)
+  subprocess.run(['git','status','--short'],cwd=root,capture_output=True,
+                 text=True,env=control_env,check=False)
+  self.assertTrue(control.exists(),'GIT_TRACE control did not create a trace')
+  control.unlink()
   for variable in ('GIT_TRACE','GIT_TRACE2','GIT_TRACE2_EVENT','GIT_TRACE2_PERF',
                    'GIT_TRACE_PACKET','GIT_TRACE_PERFORMANCE','GIT_TRACE_SETUP'):
    trace=traces/f'{variable}.log'; trace.unlink(missing_ok=True)
