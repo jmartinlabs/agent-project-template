@@ -153,6 +153,13 @@ class ValidationTests(unittest.TestCase):
   self.change('.opencode/agents/functional.md','mode: subagent',
               'mode: subagent\npermissions:\n  - action: read\n    resource: "*"\n    effect: allow')
   self.assertRule('opencode')
+ def test_opencode_specialized_legacy_permission_rejected(self):
+  self.change('.opencode/agents/functional.md','mode: subagent',
+              'mode: subagent\npermission: read')
+  self.assertRule('opencode')
+ def test_opencode_specialized_malformed_frontmatter(self):
+  self.change('.opencode/agents/functional.md','---\n\nYou are','\nYou are')
+  self.assertRule('opencode')
  def test_opencode_specialized_description_required(self):
   self.change('.opencode/agents/functional.md','description: Native OpenCode functional specialist for approved roadmap and specification work. Read-only by role; returns questions, draft sections and acceptance cases to the coordinator.\n','')
   self.assertRule('opencode')

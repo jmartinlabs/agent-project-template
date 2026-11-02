@@ -73,7 +73,7 @@ A command-prefix allowlist is also not a sufficient sandbox by itself. On OpenCo
 temporary probe showed that a rule allowing `python3 scripts/review-read *` also allowed shell
 redirection (`... > file`), because the pattern matches the complete command text. The shell
 interprets redirection and chaining before the wrapper runs, so the wrapper cannot prevent a
-write. That is why this adapter grants **no `shell` permission at all**.
+write. That is why this review adapter grants **no `shell` permission at all**.
 
 OpenCode V2.1.4 has no built-in read-only Git or GitHub tool with argument validation. The
 minimal alternative is a local plugin tool backed by `scripts/review-read`: the plugin receives

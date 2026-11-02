@@ -210,7 +210,9 @@ def validate(root):
   if not re.search(r'(?m)^mode: subagent$',native): fail('opencode',f'{name} mode must be exactly subagent')
   if not re.search(r'(?m)^description: \S',native): fail('opencode',f'{name} adapter needs a description')
   if re.search(r'(?m)^model:',native): fail('opencode',f'{name} adapter must inherit the coordinator model')
-  if re.search(r'(?m)^permissions:',native): fail('opencode',f'{name} adapter must use OpenCode default permissions')
+  entries,parse_errors=parse_opencode_permissions(native)
+  for message in parse_errors: fail('opencode',f'{name}: {message}')
+  if entries: fail('opencode',f'{name} adapter must use OpenCode default permissions')
  if opencode_installed:
   opencode_doc=read('docs/OPENCODE_ADAPTER.md')
   for token in ('.opencode/agents/review.md','.agents/roles/qa-review.md','read-only','not a launcher','scripts/review-read','review_query','optional','BLOCKED','UNRUN'):
