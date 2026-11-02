@@ -242,8 +242,11 @@ No measured token, cost or quality improvement is claimed.
   `commandcode/deepseek/deepseek-v4.1-flash`; isolated read-only prompts with no tool or
   GitHub actions.
 - **Revision:** `8fb754ecff418f29a172d5d44d54b2a58b46c529` on branch
-  `opencode/review-hardening-01`. Raw subset with client/model/revision metadata:
-  [results](../evals/results/2026-11-02-opencode-plan-spot-checks.json).
+  `opencode/review-hardening-01`. Raw rerun with client/model/revision metadata:
+  [rerun](../evals/results/2026-11-02-opencode-plan-spot-checks-rerun.json).
+  The earlier run is preserved separately as
+  [first run](../evals/results/2026-11-02-opencode-plan-spot-checks.json); its results were
+  not edited in place.
 - **Coverage:** 5 of 137 scenarios: `continuity-01`, `publication-01`, `publication-05`,
   `execution-01`, `execution-07`. The other 132 remain **UNRUN**. This is a spot check,
   not a scored full run: the full scorer requires every scenario.

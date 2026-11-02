@@ -243,6 +243,8 @@ class ValidationTests(unittest.TestCase):
   git('commit','-qm','fixture')
   self.assertEqual(review('git','status').returncode,0)
   redirected=dict(os.environ); redirected['GIT_DIR']=str(root/'missing-git-dir')
+  redirected['GIT_CONFIG_COUNT']='1'
+  redirected['GIT_CONFIG_KEY_0']='invalid.key'; redirected['GIT_CONFIG_VALUE_0']='x'
   self.assertEqual(review('git','status',env=redirected).returncode,0)
   self.assertIn('fixture',review('git','log','--max','1').stdout)
   self.assertEqual(review('git','diff','--base','HEAD').returncode,0)
