@@ -72,7 +72,7 @@ def review_read_policy(root):
  try: source=path.read_text(encoding='utf-8'); tree=ast.parse(source)
  except (OSError,UnicodeError,SyntaxError) as error: return None,f'cannot parse review-read: {error}'
  if 'shell=False' not in source or 'shell=True' in source: return None,'review-read must execute without a shell'
- for token in ('PROTECTED_FILES','PROTECTED_DIRS','build_excludes','EXCLUDES = build_excludes()','.npmrc','.netrc','.pypirc','.git-credentials','*.kdbx','*.jks','*.keystore','id_dsa','*.pem','*credentials.json','*.credentials','*.secret','*.secrets','.envrc','*secret*','*credential*','filter_file_history'):
+ for token in ('PROTECTED_FILES','PROTECTED_DIRS','build_excludes','EXCLUDES = build_excludes()','.npmrc','.netrc','.pypirc','.git-credentials','*.kdbx','*.jks','*.keystore','id_dsa','*.pem','*credentials.json','*.credentials','*.secret','*.secrets','.envrc','*secret*','*credential*','filter_file_history','filter_status'):
   if token not in source: return None,f'review-read protection list missing {token}'
  policy=None
  for node in tree.body:
