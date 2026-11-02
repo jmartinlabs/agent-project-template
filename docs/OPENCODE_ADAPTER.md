@@ -183,6 +183,8 @@ available, report the coordinator session and the child `review` session separat
 - `file-history` cannot combine `--follow` with the protected-path excludes; it filters the
   rendered status lines instead. A commit subject that names a protected path is not rewritten,
   and a path that Git renders with C-style quoting is matched as rendered rather than decoded.
+  Merge commits may not expose rename or copy metadata to `diff-tree`; a combined `show` remains
+  a documented blind spot.
 - A complete removal must remove the agent, plugin directory and wrapper together; a single
   deleted component, including a residual plugin directory, is reported as an incomplete
   adapter.
