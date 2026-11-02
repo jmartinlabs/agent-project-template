@@ -48,6 +48,9 @@ class ValidationTests(unittest.TestCase):
   build_fixture(ROOT,self.root)
  def change(self,name,old,new):
   p=self.root/name; p.write_text(p.read_text().replace(old,new))
+ def add_permission(self,block):
+  p=self.root/'.opencode/agents/review.md'; s=p.read_text(); marker='\n---\n\nYou are'
+  self.assertIn(marker,s); p.write_text(s.replace(marker,'\n'+block+'---\n\nYou are',1))
  def assertRule(self,rule): self.assertTrue(any(e.startswith(rule+':') for e in validate(self.root)),rule)
  def test_valid(self): self.assertEqual(validate(self.root),[])
  def test_claude_adapter_required(self):
@@ -105,6 +108,159 @@ class ValidationTests(unittest.TestCase):
   self.change('.claude/skills/tweak/SKILL.md','adds no rules.','adds no rules. Never treat `dale` as approval.'); self.assertRule('claude')
  def test_claude_md_no_restated_approvals(self):
   self.change('CLAUDE.md','# Claude Code adapter','# Claude Code adapter\n`ok` is not approval.'); self.assertRule('claude')
+ def test_opencode_adapter_optional(self):
+  # A derived project that does not use OpenCode may remove the registration.
+  (self.root/'.opencode/agents/review.md').unlink(); self.assertEqual(validate(self.root),[])
+ def test_opencode_full_removal(self):
+  (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
+  (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertEqual(validate(self.root),[])
+ def test_opencode_complete_removal(self):
+  for name in ('.opencode/agents/review.md','.opencode/plugins/review-read/index.ts',
+               'scripts/review-read','docs/OPENCODE_ADAPTER.md'):
+   (self.root/name).unlink()
+  self.assertEqual(validate(self.root),[])
+ def test_opencode_plugin_required(self):
+  (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertRule('opencode')
+ def test_opencode_plugin_no_shell(self):
+  self.change('.opencode/plugins/review-read/index.ts','shell: false','shell: true'); self.assertRule('opencode')
+ def test_opencode_plugin_single_tool(self):
+  self.change('.opencode/plugins/review-read/index.ts','editor.add({',
+    'editor.add({ // second\n      editor.add({'); self.assertRule('opencode')
+ def test_opencode_plugin_codemode(self):
+  self.change('.opencode/plugins/review-read/index.ts','codemode: false','codemode: true'); self.assertRule('opencode')
+ def test_opencode_plugin_namespace(self):
+  self.change('.opencode/plugins/review-read/index.ts','name: "review"','name: "other"'); self.assertRule('opencode')
+ def test_opencode_plugin_wrapper_path(self):
+  self.change('.opencode/plugins/review-read/index.ts','scripts/review-read','scripts/other'); self.assertRule('opencode')
+ def test_opencode_review_query_scope(self):
+  self.add_permission('  - action: review_query\n    resource: "src/**"\n    effect: allow\n'); self.assertRule('opencode')
+ def test_opencode_doc_required(self):
+  (self.root/'docs/OPENCODE_ADAPTER.md').unlink(); self.assertRule('opencode')
+ def test_opencode_partial_install(self):
+  (self.root/'scripts/review-read').unlink(); self.assertRule('opencode')
+ def test_opencode_adapter_canonical_role(self):
+  self.change('.opencode/agents/review.md','.agents/roles/qa-review.md','README.md'); self.assertRule('opencode')
+ def test_opencode_adapter_no_model(self):
+  self.change('.opencode/agents/review.md','mode: subagent','mode: subagent\nmodel: provider/model'); self.assertRule('opencode')
+ def test_opencode_adapter_env_deny(self):
+  self.change('.opencode/agents/review.md','  - action: read\n    resource: "*.env"\n    effect: deny\n',''); self.assertRule('opencode')
+ def test_opencode_adapter_deny_first(self):
+  p=self.root/'.opencode/agents/review.md'; s=p.read_text()
+  deny='  - action: "*"\n    resource: "*"\n    effect: deny\n'
+  allow='  - action: read\n    resource: "*"\n    effect: allow\n'
+  p.write_text(s.replace(deny,'',1).replace(allow,allow+deny,1)); self.assertRule('opencode')
+ def test_opencode_edit_allow(self):
+  self.add_permission('  - action: edit\n    resource: "*"\n    effect: allow\n'); self.assertRule('opencode')
+ def test_opencode_edit_ask(self):
+  self.add_permission('  - action: edit\n    resource: "*"\n    effect: ask\n'); self.assertRule('opencode')
+ def test_opencode_shell_ask(self):
+  self.add_permission('  - action: shell\n    resource: "*"\n    effect: ask\n'); self.assertRule('opencode')
+ def test_opencode_shell_git_prefix(self):
+  self.add_permission('  - action: shell\n    resource: "git *"\n    effect: allow\n'); self.assertRule('opencode')
+ def test_opencode_second_shell_allow(self):
+  self.add_permission('  - action: shell\n    resource: "python3 scripts/review-read *"\n    effect: allow\n'); self.assertRule('opencode')
+ def test_opencode_env_reopened(self):
+  self.add_permission('  - action: read\n    resource: "*.env"\n    effect: allow\n'); self.assertRule('opencode')
+ def test_opencode_legacy_permission_key(self):
+  self.change('.opencode/agents/review.md','permissions:','permission:'); self.assertRule('opencode')
+ def test_opencode_webfetch_allow(self):
+  self.add_permission('  - action: webfetch\n    resource: "*"\n    effect: allow\n'); self.assertRule('opencode')
+ def test_opencode_grep_allow(self):
+  self.add_permission('  - action: grep\n    resource: "*"\n    effect: allow\n'); self.assertRule('opencode')
+ def test_opencode_review_read_operation_allowlist(self):
+  self.change('scripts/review-read','"status": {"options": {}},',
+    '"status": {"options": {}},\n            "push": {"options": {}},'); self.assertRule('opencode')
+ def test_opencode_review_read_option_allowlist(self):
+  self.change('scripts/review-read','"max": "int", "path": "path", "rev": "rev"',
+    '"max": "int", "path": "path", "rev": "rev", "output": "path"'); self.assertRule('opencode')
+ def test_opencode_review_read_protection_list(self):
+  self.change('scripts/review-read','".git-credentials", ".netrc", ".npmrc", ".pypirc",',
+    '".git-credentials", ".netrc", ".pypirc",'); self.assertRule('opencode')
+ def test_review_read_interface(self):
+  root=self.root
+  def git(*args,check=True):
+   return subprocess.run(['git',*args],cwd=root,capture_output=True,text=True,check=check)
+  def review(*args,env=None):
+   return subprocess.run([sys.executable,str(root/'scripts/review-read'),*args],
+     cwd=root,capture_output=True,text=True,env=env)
+  git('init','-q'); git('config','user.email','review@example.invalid'); git('config','user.name','Review')
+  (root/'app.py').write_text('def setup():\n    return "ok"\n')
+  (root/'.env.example').write_text('EXAMPLE_TOKEN=placeholder\n')
+  secret='PROTECTED_'+'MARKER'
+  protected={
+   '.env':f'{secret}=env\n',
+   '.npmrc':f'{secret}=npm\n',
+   '.netrc':f'{secret}=netrc\n',
+   '.pypirc':f'{secret}=pypi\n',
+   '.git-credentials':f'{secret}=git\n',
+   'vault.kdbx':f'{secret}=kdbx\n',
+   'service.pem':f'{secret}=pem\n',
+   'app.keystore':f'{secret}=keystore\n',
+   'id_dsa':f'{secret}=dsa\n',
+   'service.credentials':f'{secret}=credentials\n',
+   'service.secret':f'{secret}=secret\n',
+   'service.secrets':f'{secret}=secrets\n',
+   '.ssh/.env.example':f'{secret}=ssh\n',
+  }
+  for name,content in protected.items():
+   path=root/name; path.parent.mkdir(parents=True,exist_ok=True); path.write_text(content)
+  git('add','-A')
+  for name in protected: git('add','-f',name)
+  git('commit','-qm','fixture')
+  self.assertEqual(review('git','status').returncode,0)
+  self.assertIn('fixture',review('git','log','--max','1').stdout)
+  self.assertEqual(review('git','diff','--base','HEAD').returncode,0)
+  self.assertEqual(review('git','show','--rev','HEAD').returncode,0)
+  self.assertIn('app.py',review('git','file-history','--path','app.py').stdout)
+  self.assertEqual(review('git','search','--pattern','setup').returncode,0)
+  self.assertEqual(review('git','show','--rev','HEAD','--path','.env.example').returncode,0)
+  for name in protected:
+   self.assertEqual(review('git','show','--rev','HEAD','--path',name).returncode,2,name)
+  for name in protected:
+   (root/name).write_text(f'{secret}=changed\n')
+  for args in (('git','show','--rev','HEAD'),('git','diff','--base','HEAD'),
+               ('git','search','--pattern',secret)):
+   result=review(*args); self.assertEqual(result.returncode,0,args)
+   self.assertNotIn(secret,result.stdout,args)
+  for args in (('git','log','--path','.env'),('git','show','--rev','HEAD:.env'),
+               ('git','show','--rev','app.py'),('git','diff','--base','app.py'),
+               ('git','log','--output','/tmp/x'),('git','push'),
+               ('git','diff','--base','HEAD','--path','../outside')):
+   self.assertEqual(review(*args).returncode,2,args)
+  fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
+  gh=fake/'gh'
+  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
+  gh.write_text(
+   '#!/bin/sh\n'
+   'if [ "$1" = "api" ]; then\n'
+   '  cat <<\'EOF\'\n'
+   + payload + '\n'
+   'EOF\n'
+   '  exit 0\n'
+   'fi\n'
+   'printf "%s\\n" "$@"\n')
+  gh.chmod(0o755)
+  env=dict(os.environ); env['PATH']=str(fake)+os.pathsep+env.get('PATH','')
+  result=review('github','pr','--number','37',env=env)
+  self.assertEqual(result.returncode,0); self.assertIn('pr\nview\n37',result.stdout)
+  diff=review('github','pr-diff','--number','37',env=env)
+  self.assertEqual(diff.returncode,0); self.assertIn('src/app.py',diff.stdout); self.assertIn('src/ok.py',diff.stdout)
+  self.assertIn('[redacted 4 protected file(s)]',diff.stdout); self.assertNotIn(secret,diff.stdout)
+  names=review('github','pr-diff','--number','37','--name-only',env=env)
+  self.assertEqual(names.returncode,0); self.assertIn('src/app.py',names.stdout); self.assertIn('src/ok.py',names.stdout)
+  for name in ('.npmrc','vault.kdbx','.ssh/.env.example','src/renamed.py'):
+   self.assertNotIn(name,names.stdout)
+  for args in (('github','pr','merge'),('github','api','/repos/x'),
+               ('github','pr','--number','37','--repo','other')):
+   self.assertEqual(review(*args,env=env).returncode,2,args)
+ def test_review_read_pr_diff_fails_closed(self):
+  fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
+  gh=fake/'gh'
+  gh.write_text('#!/bin/sh\nprintf "not-json\\n"\n'); gh.chmod(0o755)
+  env=dict(os.environ); env['PATH']=str(fake)+os.pathsep+env.get('PATH','')
+  result=subprocess.run([sys.executable,str(self.root/'scripts/review-read'),
+    'github','pr-diff','--number','37'],cwd=self.root,capture_output=True,text=True,env=env)
+  self.assertEqual(result.returncode,4); self.assertNotIn('not-json',result.stdout)
  def test_hook_orchestrate_required(self):
   self.change('.claude/settings.json','orchestrate/SKILL.md','tweak/SKILL.md'); self.assertRule('hooks')
  def test_hook_rejects_code_execution(self):
@@ -341,7 +497,7 @@ class ValidationTests(unittest.TestCase):
    ('specs/methodology/dynamic-agents.md', 'fresh bounded context by default'),
    ('specs/methodology/dynamic-agents.md', 'not repeated status reminders'),
    ('specs/methodology/dynamic-agents.md', 'QA independently'),
-   ('specs/methodology/dynamic-agents.md', 'No OpenCode adapter is supplied'),
+   ('specs/methodology/dynamic-agents.md', 'repository-local OpenCode'),
    ('specs/methodology/dynamic-agents.md', 'explicit user authorization and supported tools'),
    ('specs/methodology/dynamic-agents.md', 'separate checkouts/worktrees AND non-overlapping ownership'),
    ('specs/methodology/dynamic-agents.md', 'Separate test ports, databases'),
