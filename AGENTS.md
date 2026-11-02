@@ -8,7 +8,7 @@ Both run the same canonical Skill in `.agents/skills/`.
 
 ## Commands
 - Validate template changes: `./scripts/validate-template`. Test the validator: `./scripts/test-validator`.
-- Guides: [Claude adapter](docs/CLAUDE_ADAPTER.md), [agent behavioral evals](docs/AGENT_EVALS.md).
+- Guides: [Claude adapter](docs/CLAUDE_ADAPTER.md), [OpenCode adapter](docs/OPENCODE_ADAPTER.md), [agent behavioral evals](docs/AGENT_EVALS.md).
 
 ## How to work
 - Use orchestrate and [adaptive workflows](specs/methodology/workflows.md) to classify work as Quick, Standard or Full.

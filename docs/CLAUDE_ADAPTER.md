@@ -111,3 +111,7 @@ The QA profile offers `Read, Glob, Grep, Bash`: its read-only instruction is a r
 contract, while Bash remains able to write. If an approved action is blocked, report
 the restriction and resolve it through the authorized client configuration; do not
 silently bypass it. Keep project-specific restrictions and the canonical approval policy.
+
+The separate OpenCode `review` pilot is strictly read-only and cannot run tests; see the
+[OpenCode adapter](OPENCODE_ADAPTER.md). Do not assume the Claude profile has the same
+permission boundary.

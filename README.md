@@ -37,7 +37,7 @@ Start by describing the work, optionally in your client's planning mode, or invo
 
 ## Epic orchestration (v2.3)
 
-For multiple epics, [epic orchestration](specs/methodology/epic-orchestration.md) adds a dependency-aware scheduler, [epic board template](templates/epic-board.md) and [specialist role contracts](.agents/roles/README.md) for functional, implementation and QA tasks. Roles are task instructions, not guaranteed registered subagents.
+For multiple epics, [epic orchestration](specs/methodology/epic-orchestration.md) adds a dependency-aware scheduler, [epic board template](templates/epic-board.md) and [specialist role contracts](.agents/roles/README.md) for functional, implementation and QA tasks. Roles are task instructions, not guaranteed registered subagents; the optional OpenCode `review` adapter is the only native registration in this template.
 
 While E1.6 awaits a financial decision, the functional lane can draft independent E1.7 requirements and QA can prepare provisional tests. E1.6 implementation remains blocked until explicit approval. After approval, `$orchestrate` can route to `$dev` and QA inside the active run without asking you to invoke those Skills manually. Merges and consequential decisions always need your approval. No background continuation after the session closes.
 
@@ -47,7 +47,7 @@ While E1.6 awaits a financial decision, the functional lane can draft independen
 
 The coordinator follows [dynamic agent management](specs/methodology/dynamic-agents.md) to **find independent ready work first, then choose agent count**. [Functional, Developer, QA and Infrastructure profiles](.agents/roles/README.md) are reusable role instructions, not permanent agents. Multiple distinct tasks can use the same role. Default to one executor; add specialists only when a supported runtime and independently useful work justify the overhead, preserving required independent QA. Use [agent work packets](templates/agent-work-packet.md) for scope, ownership and verifiable outcomes.
 
-The template documents orchestration; it **does not itself register or launch workers**. Check the actual subagent tools and isolation of your client. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
+The template registers only one optional OpenCode read-only `review` subagent and documents orchestration; it **does not launch workers automatically**. Check the actual subagent tools and isolation of your client. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
 
 ## Explicit session shutdown and handoff
 
@@ -102,9 +102,11 @@ specs/methodology/model-selection.md advisory model and reasoning recommendation
 specs/methodology/epic-orchestration.md dependency-aware epic scheduler
 specs/methodology/dynamic-agents.md dynamic specialist lifecycle
 docs/GUIA_VISUAL_ORQUESTACION.md   eight editable Mermaid diagrams
+docs/OPENCODE_ADAPTER.md           native read-only review subagent and its limits
 templates/agent-work-packet.md    delegate work packet contract
 templates/epic-board.md          optional epic coordination board
 .agents/roles/                   functional, implementation and QA roles
+.opencode/agents/review.md       OpenCode native read-only documentary audit adapter
 specs/guidelines/{architecture,ui,quality,security}.md
 templates/{brainstorming,specification,roadmap,progress,testplan}.md
 scripts/validate-template          standard-library checks
@@ -124,9 +126,11 @@ runtime subagents and external clients: one coordinator, fresh bounded packets,
 preflight/operation owners, advance blocking notices, milestone supervision and
 isolated writes/test resources. External workers use verified integrations, user
 relay or the optional repository-local Git relay. The relay is user-triggered transport
-only; no launcher, OpenCode adapter, automatic cross-client control or combined usage
-collector is installed. Existing progress/testplan documents hold current state and
-environment-specific verification. Performance gains must be measured, not assumed.
+only; no launcher, automatic cross-client control or combined usage collector is installed.
+The optional OpenCode `review` adapter is a read-only native subagent, not a launcher or
+controller; see [OpenCode adapter](docs/OPENCODE_ADAPTER.md). Existing progress/testplan
+documents hold current state and environment-specific verification. Performance gains must be
+measured, not assumed.
 
 ## Verify and commit
 Optional local token accounting: [Codex usage reports](docs/USAGE_REPORTS.md).
