@@ -193,78 +193,33 @@ def validate(root):
   if policy_error: fail('opencode',policy_error)
  elif opencode_path.exists():
   fail('opencode','review adapter is empty')
- # The specialized agents are optional independently, but each depends on the
- # review adapter's validated review_query file read path.
+ # The specialized agents are optional independently and use OpenCode's default
+ # subagent capabilities. Their role and work packet are behavioral contracts.
+ specialized_present=[]
  for name in ('functional','implementation','infrastructure'):
   native_path=root/f'.opencode/agents/{name}.md'
   if not native_path.exists():
    continue
-  if not opencode_installed:
-   fail('opencode',f'{name} requires the review adapter and review_query file read')
-   continue
+  specialized_present.append(name)
   if not native_path.stat().st_size:
    fail('opencode',f'{name} adapter is empty')
    continue
   native=native_path.read_text(encoding='utf-8')
-  for token in ('mode: subagent',f'.agents/roles/{name}.md','review_query file read',
-                'Required packet','## Return'):
+  for token in ('mode: subagent',f'.agents/roles/{name}.md','Required packet','## Return'):
    if token not in native: fail('opencode',f'{name} adapter missing {token}')
   if not re.search(r'(?m)^mode: subagent$',native): fail('opencode',f'{name} mode must be exactly subagent')
   if not re.search(r'(?m)^description: \S',native): fail('opencode',f'{name} adapter needs a description')
   if re.search(r'(?m)^model:',native): fail('opencode',f'{name} adapter must inherit the coordinator model')
-  entries,parse_errors=parse_opencode_permissions(native)
-  for message in parse_errors: fail('opencode',f'{name}: {message}')
-  if entries is None: continue
-  if not entries or entries[0] != ('*','*','deny'): fail('opencode',f'{name} adapter must start with a deny-all rule')
-  if effective(entries,'read','AGENTS.md')!='deny': fail('opencode',f'{name} adapter must deny native read')
-  if effective(entries,'glob','**/*.py')!='allow': fail('opencode',f'{name} adapter must allow glob discovery')
-  if effective(entries,'review_query','*')!='allow': fail('opencode',f'{name} adapter must allow review_query')
-  if effective(entries,'grep','token')!='deny': fail('opencode',f'{name} adapter must deny grep')
-  for action in ('subagent','webfetch','websearch','question','external_directory'):
-   if effective(entries,action,'*')!='deny': fail('opencode',f'{name} adapter must deny {action}')
-  if sum(1 for action,resource,effect in entries
-         if action=='review_query' and effect=='allow')!=1:
-   fail('opencode',f'{name} adapter needs exactly one review_query allow')
-  if any(action=='read' and effect!='deny' for action,resource,effect in entries):
-   fail('opencode',f'{name} adapter native read rules must deny access')
-  for action,resource,effect in entries:
-   if effect not in ('allow','ask'):
-    continue
-   if action=='edit':
-    if name!='implementation' or resource!='*' or effect!='ask':
-     fail('opencode',f'{name} adapter allows an unexpected edit rule')
-   elif action=='shell':
-    if name!='implementation' or resource!='*' or effect!='ask':
-     fail('opencode',f'{name} adapter allows an unexpected shell rule')
-   elif action=='skill':
-    if effect!='allow' or (name,resource) not in (('functional','spec'),('implementation','dev')):
-     fail('opencode',f'{name} adapter allows an unexpected skill rule')
-   elif (action,resource,effect) not in (('glob','*','allow'),('review_query','*','allow')):
-    fail('opencode',f'{name} adapter allows an unexpected {action} rule')
-  if name=='implementation':
-   if effective(entries,'edit','src/app.py')!='ask': fail('opencode','implementation edit must ask')
-   if effective(entries,'shell','python3 -m unittest')!='ask': fail('opencode','implementation shell must ask')
-   if effective(entries,'shell','git push origin x')!='deny': fail('opencode','implementation must deny git push')
-   if effective(entries,'shell','gh pr create')!='deny': fail('opencode','implementation must deny PR create')
-   if effective(entries,'shell','gh pr edit 1')!='deny': fail('opencode','implementation must deny PR edit')
-   if effective(entries,'shell','gh pr merge 1')!='deny': fail('opencode','implementation must deny PR merge')
-   if effective(entries,'skill','dev')!='allow': fail('opencode','implementation must allow the dev skill')
-   if effective(entries,'skill','other')!='deny': fail('opencode','implementation must deny other skills')
-  else:
-   if effective(entries,'edit','src/app.py')!='deny': fail('opencode',f'{name} adapter must deny edit')
-   if effective(entries,'shell','python3 -m unittest')!='deny': fail('opencode',f'{name} adapter must deny shell')
-   if name=='functional':
-    if effective(entries,'skill','spec')!='allow': fail('opencode','functional must allow the spec skill')
-    if effective(entries,'skill','dev')!='deny': fail('opencode','functional must deny other skills')
-   elif effective(entries,'skill','spec')!='deny': fail('opencode','infrastructure must deny skills')
+  if re.search(r'(?m)^permissions:',native): fail('opencode',f'{name} adapter must use OpenCode default permissions')
  if opencode_installed:
   opencode_doc=read('docs/OPENCODE_ADAPTER.md')
   for token in ('.opencode/agents/review.md','.agents/roles/qa-review.md','read-only','not a launcher','scripts/review-read','review_query','optional','BLOCKED','UNRUN'):
    if token not in opencode_doc: fail('opencode',f'documentation missing {token}')
-  for name in ('functional','implementation','infrastructure'):
-   if (root/f'.opencode/agents/{name}.md').exists():
-    for token in (f'.opencode/agents/{name}.md',f'.agents/roles/{name}.md','file read'):
-     if token not in opencode_doc: fail('opencode',f'documentation missing {name} token {token}')
+ if specialized_present:
+  opencode_doc=read('docs/OPENCODE_ADAPTER.md')
+  for name in specialized_present:
+   for token in (f'.opencode/agents/{name}.md',f'.agents/roles/{name}.md','OpenCode default'):
+    if token not in opencode_doc: fail('opencode',f'documentation missing {name} token {token}')
  # Approval wording lives in approvals.md; adapters link to it instead of restating it.
  for name in ('CLAUDE.md',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS)):
   if re.search(r'`(?:ok|dale|continúa)`',read(name)): fail('claude',f'{name}: restates approval wording; link approvals.md instead')

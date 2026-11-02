@@ -47,7 +47,7 @@ While E1.6 awaits a financial decision, the functional lane can draft independen
 
 The coordinator follows [dynamic agent management](specs/methodology/dynamic-agents.md) to **find independent ready work first, then choose agent count**. [Functional, Developer, QA and Infrastructure profiles](.agents/roles/README.md) are reusable role instructions, not permanent agents. Multiple distinct tasks can use the same role. Default to one executor; add specialists only when a supported runtime and independently useful work justify the overhead, preserving required independent QA. Use [agent work packets](templates/agent-work-packet.md) for scope, ownership and verifiable outcomes.
 
-The template includes optional native OpenCode subagents for `review`, `functional`, `implementation` and `infrastructure`, each a thin wrapper over its canonical role. None is launched automatically; the coordinator selects one dynamically. The specialized agents read through the review adapter's `review_query file read`; implementation edits and shell commands require approval. Check the actual subagent tools and isolation of your client. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
+The template includes optional native OpenCode subagents for `review`, `functional`, `implementation` and `infrastructure`, each a thin wrapper over its canonical role. None is launched automatically; the coordinator selects one dynamically. The specialized agents use OpenCode's default subagent capabilities; the work packet and role contract govern behavior, not a technical permission matrix. `review` remains a separate read-only adapter. Check the actual subagent tools and isolation of your client. Otherwise execute the same ready queue sequentially. Existing unrelated chats contribute checkpoints and Git artifacts; the coordinator cannot control them automatically.
 
 ## Explicit session shutdown and handoff
 
@@ -131,9 +131,9 @@ isolated writes/test resources. External workers use verified integrations, user
 relay or the optional repository-local Git relay. The relay is user-triggered transport
 only; no launcher, automatic cross-client control or combined usage collector is installed.
 The optional OpenCode adapters provide a read-only `review` auditor plus specialized
-`functional`, `implementation` and `infrastructure` subagents. They inspect local Git and
-consult PR/CI evidence through `review_query`; the specialized agents also read project text
-through `review_query file read`. They are not launchers or controllers. See
+`functional`, `implementation` and `infrastructure` subagents. The specialized agents use
+OpenCode's default subagent capabilities; their roles and work packets govern behavior, not a
+technical permission matrix. They are not launchers or controllers. See
 [OpenCode adapter](docs/OPENCODE_ADAPTER.md). Existing progress/testplan
 documents hold current state and environment-specific verification. Performance gains must be
 measured, not assumed.

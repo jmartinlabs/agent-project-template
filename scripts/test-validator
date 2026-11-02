@@ -135,9 +135,9 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(validate(self.root),[])
  def test_opencode_specialized_optional_removal(self):
   self.remove_specialized(); self.assertEqual(validate(self.root),[])
- def test_opencode_specialized_requires_review(self):
+ def test_opencode_specialized_independent_of_review(self):
   (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
-  shutil.rmtree(self.root/'.opencode/plugins/review-read'); self.assertRule('opencode')
+  shutil.rmtree(self.root/'.opencode/plugins/review-read'); self.assertEqual(validate(self.root),[])
  def test_opencode_specialized_empty(self):
   (self.root/'.opencode/agents/functional.md').write_text(''); self.assertRule('opencode')
  def test_opencode_specialized_mode(self):
@@ -149,50 +149,15 @@ class ValidationTests(unittest.TestCase):
  def test_opencode_specialized_model(self):
   self.change('.opencode/agents/infrastructure.md','mode: subagent','mode: subagent\nmodel: provider/model')
   self.assertRule('opencode')
- def test_opencode_specialized_read_allow(self):
-  self.change('.opencode/agents/infrastructure.md','  - action: read\n    resource: "*"\n    effect: deny\n',
-              '  - action: read\n    resource: "*"\n    effect: allow\n')
-  self.assertRule('opencode')
- def test_opencode_specialized_edit_allow(self):
-  self.change('.opencode/agents/functional.md','  - action: edit\n    resource: "*"\n    effect: deny\n',
-              '  - action: edit\n    resource: "*"\n    effect: allow\n')
-  self.assertRule('opencode')
- def test_opencode_specialized_shell_allow(self):
-  self.change('.opencode/agents/infrastructure.md','  - action: shell\n    resource: "*"\n    effect: deny\n',
-              '  - action: shell\n    resource: "*"\n    effect: allow\n')
-  self.assertRule('opencode')
- def test_opencode_specialized_impl_edit_deny(self):
-  self.change('.opencode/agents/implementation.md','  - action: edit\n    resource: "*"\n    effect: ask\n',
-              '  - action: edit\n    resource: "*"\n    effect: deny\n')
-  self.assertRule('opencode')
- def test_opencode_specialized_impl_shell_allow(self):
-  self.change('.opencode/agents/implementation.md','  - action: shell\n    resource: "*"\n    effect: ask\n',
-              '  - action: shell\n    resource: "*"\n    effect: allow\n')
-  self.assertRule('opencode')
- def test_opencode_specialized_impl_push_allow(self):
-  self.change('.opencode/agents/implementation.md','  - action: shell\n    resource: "git push*"\n    effect: deny\n',
-              '  - action: shell\n    resource: "git push*"\n    effect: allow\n')
-  self.assertRule('opencode')
- def test_opencode_specialized_impl_pr_create_allow(self):
-  self.change('.opencode/agents/implementation.md','  - action: shell\n    resource: "gh pr create*"\n    effect: deny\n',
-              '  - action: shell\n    resource: "gh pr create*"\n    effect: allow\n')
-  self.assertRule('opencode')
- def test_opencode_specialized_extra_allow(self):
-  self.change('.opencode/agents/infrastructure.md','  - action: glob\n    resource: "*"\n    effect: allow\n',
-              '  - action: glob\n    resource: "*"\n    effect: allow\n  - action: write\n    resource: "*"\n    effect: allow\n')
+ def test_opencode_specialized_permissions_rejected(self):
+  self.change('.opencode/agents/functional.md','mode: subagent',
+              'mode: subagent\npermissions:\n  - action: read\n    resource: "*"\n    effect: allow')
   self.assertRule('opencode')
  def test_opencode_specialized_description_required(self):
-  self.change('.opencode/agents/functional.md','description: Native OpenCode functional specialist for approved roadmap and specification work. Read-only; returns questions, draft sections and acceptance cases to the coordinator.\n','')
+  self.change('.opencode/agents/functional.md','description: Native OpenCode functional specialist for approved roadmap and specification work. Read-only by role; returns questions, draft sections and acceptance cases to the coordinator.\n','')
   self.assertRule('opencode')
  def test_opencode_specialized_packet_token(self):
   self.change('.opencode/agents/implementation.md','## Required packet','## Packet')
-  self.assertRule('opencode')
- def test_opencode_specialized_skill_wrong(self):
-  self.change('.opencode/agents/functional.md','  - action: skill\n    resource: "spec"\n    effect: allow\n',
-              '  - action: skill\n    resource: "dev"\n    effect: allow\n')
-  self.assertRule('opencode')
- def test_opencode_specialized_review_query_missing(self):
-  self.change('.opencode/agents/infrastructure.md','  - action: review_query\n    resource: "*"\n    effect: allow\n','')
   self.assertRule('opencode')
  def test_opencode_plugin_required(self):
   (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertRule('opencode')
