@@ -936,6 +936,7 @@ class ValidationTests(unittest.TestCase):
    ('specs/methodology/approvals.md','## Post-merge local cleanup'),
    ('specs/methodology/approvals.md','git branch -d <task-branch>'),
    ('specs/methodology/approvals.md','Do not require every commit'),
+   ('specs/methodology/approvals.md','the PR is `MERGED`'),
    ('.agents/skills/handoff/SKILL.md','## Next session and checkpoint retirement'),
    ('.agents/skills/handoff/SKILL.md','tracked by Git'),
    ('specs/README.md','retire after successful restoration'),
