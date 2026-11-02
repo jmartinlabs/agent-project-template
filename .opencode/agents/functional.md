@@ -4,230 +4,43 @@ mode: subagent
 permissions:
   - action: "*"
     resource: "*"
-    effect: "deny"
-  - action: "read"
+    effect: deny
+  - action: glob
     resource: "*"
-    effect: "allow"
-  - action: "glob"
+    effect: allow
+  - action: review_query
     resource: "*"
-    effect: "allow"
-  - action: "read"
-    resource: "*.env"
-    effect: "deny"
-  - action: "read"
-    resource: "*.env.*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.env.example"
-    effect: "deny"
-  - action: "read"
-    resource: ".env.example"
-    effect: "allow"
-  - action: "read"
-    resource: "*/.env.example"
-    effect: "allow"
-  - action: "read"
-    resource: "*.pem"
-    effect: "deny"
-  - action: "read"
-    resource: "*.key"
-    effect: "deny"
-  - action: "read"
-    resource: "*.p12"
-    effect: "deny"
-  - action: "read"
-    resource: "*.pfx"
-    effect: "deny"
-  - action: "read"
-    resource: "*.kdbx"
-    effect: "deny"
-  - action: "read"
-    resource: "*.jks"
-    effect: "deny"
-  - action: "read"
-    resource: "*.keystore"
-    effect: "deny"
-  - action: "read"
-    resource: "*id_rsa*"
-    effect: "deny"
-  - action: "read"
-    resource: "*id_ed25519*"
-    effect: "deny"
-  - action: "read"
-    resource: "*id_ecdsa*"
-    effect: "deny"
-  - action: "read"
-    resource: "*id_dsa*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.git-credentials"
-    effect: "deny"
-  - action: "read"
-    resource: "*.netrc"
-    effect: "deny"
-  - action: "read"
-    resource: "*.npmrc"
-    effect: "deny"
-  - action: "read"
-    resource: "*.pypirc"
-    effect: "deny"
-  - action: "read"
-    resource: "*credentials.json"
-    effect: "deny"
-  - action: "read"
-    resource: "*secrets.json"
-    effect: "deny"
-  - action: "read"
-    resource: "*.credentials"
-    effect: "deny"
-  - action: "read"
-    resource: "*.secret"
-    effect: "deny"
-  - action: "read"
-    resource: "*.secrets"
-    effect: "deny"
-  - action: "read"
-    resource: "*.envrc"
-    effect: "deny"
-  - action: "read"
-    resource: "*.envrc.*"
-    effect: "deny"
-  - action: "read"
-    resource: "*secret*"
-    effect: "deny"
-  - action: "read"
-    resource: "*credential*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.ENV"
-    effect: "deny"
-  - action: "read"
-    resource: "*.ENV.*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.ENVRC"
-    effect: "deny"
-  - action: "read"
-    resource: "*.ENVRC.*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.PEM"
-    effect: "deny"
-  - action: "read"
-    resource: "*.KEY"
-    effect: "deny"
-  - action: "read"
-    resource: "*.P12"
-    effect: "deny"
-  - action: "read"
-    resource: "*.PFX"
-    effect: "deny"
-  - action: "read"
-    resource: "*.KDBX"
-    effect: "deny"
-  - action: "read"
-    resource: "*.JKS"
-    effect: "deny"
-  - action: "read"
-    resource: "*.KEYSTORE"
-    effect: "deny"
-  - action: "read"
-    resource: "*.NPMRC"
-    effect: "deny"
-  - action: "read"
-    resource: "*.NETRC"
-    effect: "deny"
-  - action: "read"
-    resource: "*.PYPIRC"
-    effect: "deny"
-  - action: "read"
-    resource: "*.GIT-CREDENTIALS"
-    effect: "deny"
-  - action: "read"
-    resource: "*CREDENTIALS.JSON"
-    effect: "deny"
-  - action: "read"
-    resource: "*SECRETS.JSON"
-    effect: "deny"
-  - action: "read"
-    resource: "*.CREDENTIALS"
-    effect: "deny"
-  - action: "read"
-    resource: "*.SECRET"
-    effect: "deny"
-  - action: "read"
-    resource: "*.SECRETS"
-    effect: "deny"
-  - action: "read"
-    resource: "*SECRET*"
-    effect: "deny"
-  - action: "read"
-    resource: "*CREDENTIAL*"
-    effect: "deny"
-  - action: "read"
-    resource: "*Secret*"
-    effect: "deny"
-  - action: "read"
-    resource: "*Credential*"
-    effect: "deny"
-  - action: "read"
-    resource: "*Secrets*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.git"
-    effect: "deny"
-  - action: "read"
-    resource: "*.git/*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.GIT"
-    effect: "deny"
-  - action: "read"
-    resource: "*.GIT/*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.ssh/*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.SSH/*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.aws/*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.AWS/*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.gnupg/*"
-    effect: "deny"
-  - action: "read"
-    resource: "*.GNUPG/*"
-    effect: "deny"
-  - action: "grep"
+    effect: allow
+  - action: skill
     resource: "*"
-    effect: "deny"
-  - action: "subagent"
-    resource: "*"
-    effect: "deny"
-  - action: "skill"
-    resource: "*"
-    effect: "deny"
-  - action: "skill"
+    effect: deny
+  - action: skill
     resource: "spec"
-    effect: "allow"
-  - action: "question"
+    effect: allow
+  - action: grep
     resource: "*"
-    effect: "deny"
-  - action: "webfetch"
+    effect: deny
+  - action: edit
     resource: "*"
-    effect: "deny"
-  - action: "websearch"
+    effect: deny
+  - action: shell
     resource: "*"
-    effect: "deny"
-  - action: "external_directory"
+    effect: deny
+  - action: subagent
     resource: "*"
-    effect: "deny"
-
+    effect: deny
+  - action: question
+    resource: "*"
+    effect: deny
+  - action: webfetch
+    resource: "*"
+    effect: deny
+  - action: websearch
+    resource: "*"
+    effect: deny
+  - action: external_directory
+    resource: "*"
+    effect: deny
 ---
 
 You are the native OpenCode `functional` subagent. Your canonical behavioral contract is
@@ -237,6 +50,14 @@ Your job is to prepare requirements, identify ambiguities, draft specification s
 acceptance cases for the coordinator. You are **read-only**: you have no edit, shell, test or
 delegation tool. Return draft text and questions; the coordinator decides what to write and
 what to publish.
+
+## Reading
+
+Use `review_query file read` for project documents and evidence. Native `read` is denied
+because its path matcher is case-sensitive on non-Windows hosts; the query wrapper lowercases
+names and checks path components. Use `glob` only for discovery. `grep` is denied. The
+`review_query` tool is part of the project's review adapter; if that adapter is not installed,
+stop and report the missing dependency rather than trying another read route.
 
 ## Required packet
 
@@ -248,12 +69,9 @@ edit the shared epic board or merge a PR, stop and return the missing decision o
 ## Boundaries
 
 Do not approve your own proposal, treat silence as approval, implement code, run commands,
-modify files, publish, manage other agents or merge. The client permission matrix denies those
-tools; that is a technical control for this adapter, not proof that derived projects or other
-clients enforce the same boundary. `grep` is denied, so use `read` and `glob` rather than
-content search. The canonical `spec` skill is the only allowed skill; load it only when the
-packet requires it. Protected files are denied by name, but the native matcher is case-sensitive
-on non-Windows hosts, so this is not a secrets sandbox.
+modify files, publish, manage other agents or merge. The `review_query` tool is a validated
+read-only interface, not a general secrets sandbox; content outside its protected patterns can
+still be sensitive. The canonical `spec` skill is the only allowed skill.
 
 ## Return
 
