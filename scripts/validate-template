@@ -227,10 +227,26 @@ def validate(root):
    fail('opencode',f'{name} adapter needs exactly one review_query allow')
   if any(action=='read' and effect!='deny' for action,resource,effect in entries):
    fail('opencode',f'{name} adapter native read rules must deny access')
+  for action,resource,effect in entries:
+   if effect not in ('allow','ask'):
+    continue
+   if action=='edit':
+    if name!='implementation' or resource!='*' or effect!='ask':
+     fail('opencode',f'{name} adapter allows an unexpected edit rule')
+   elif action=='shell':
+    if name!='implementation' or resource!='*' or effect!='ask':
+     fail('opencode',f'{name} adapter allows an unexpected shell rule')
+   elif action=='skill':
+    if effect!='allow' or (name,resource) not in (('functional','spec'),('implementation','dev')):
+     fail('opencode',f'{name} adapter allows an unexpected skill rule')
+   elif (action,resource,effect) not in (('glob','*','allow'),('review_query','*','allow')):
+    fail('opencode',f'{name} adapter allows an unexpected {action} rule')
   if name=='implementation':
    if effective(entries,'edit','src/app.py')!='ask': fail('opencode','implementation edit must ask')
    if effective(entries,'shell','python3 -m unittest')!='ask': fail('opencode','implementation shell must ask')
    if effective(entries,'shell','git push origin x')!='deny': fail('opencode','implementation must deny git push')
+   if effective(entries,'shell','gh pr create')!='deny': fail('opencode','implementation must deny PR create')
+   if effective(entries,'shell','gh pr edit 1')!='deny': fail('opencode','implementation must deny PR edit')
    if effective(entries,'shell','gh pr merge 1')!='deny': fail('opencode','implementation must deny PR merge')
    if effective(entries,'skill','dev')!='allow': fail('opencode','implementation must allow the dev skill')
    if effective(entries,'skill','other')!='deny': fail('opencode','implementation must deny other skills')
