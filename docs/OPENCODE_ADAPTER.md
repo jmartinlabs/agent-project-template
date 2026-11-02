@@ -208,6 +208,12 @@ it. The canonical role is the subagent's contract; the coordinator does not need
 full to build the packet. OpenCode records token and cost metrics per session: when telemetry is
 available, report the coordinator session and the child `review` session separately.
 
+For substantial independent work, the coordinator may select **background** when the active
+OpenCode client exposes non-blocking delegation and the benefit justifies it. Announce the task,
+executor, mode, isolation and coordinator availability; continue supervising at milestones. The
+child remains running after the coordinator turn is released, but closing the client or runtime
+may stop it. Do not claim persistence after that close without a new verification.
+
 ## Limits and compatibility
 
 - Verified against OpenCode V2.1.4 on 2026-11-02. Earlier versions or V1 configuration may
@@ -239,7 +245,11 @@ available, report the coordinator session and the child `review` session separat
   single deleted component, including a residual plugin directory, is reported as an incomplete
   adapter. Specialized agents are independent: removing all of them is valid and leaves the
   review adapter independent; removing the review trio is valid while specialized agents remain.
-- Background subagent support and external-session control are not claimed or tested here.
+- OpenCode V2.1.4 supports non-blocking background delegation (owner-verified 2026-11-02). The
+  coordinator may select background for substantial independent work when it verifies the option
+  in the active client. Releasing the coordinator turn does not end the child runtime; closing
+  the client or runtime may stop it, and persistence beyond the active runtime is not claimed.
+  External-session control remains unclaimed.
 - The GitHub route depends on `gh` availability and authentication and is not a substitute for
   reviewing the local candidate revision.
 
