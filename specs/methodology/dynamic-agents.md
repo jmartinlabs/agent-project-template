@@ -25,6 +25,38 @@ spawn further agents unless the coordinator explicitly allows it in a supported 
 6. **Supervise at milestones.** Review the candidate diff and test evidence at handoff or on a material blocker, not after every message. Prevent overlapping edits: concurrent writers need disjoint ownership and authorized isolated checkouts, otherwise serialize. Checkouts follow [the local worktree policy](approvals.md#local-worktrees); the packet records responsibilities, not new consent.
 7. **Close or reassign** when a deliverable completes, blocks or becomes redundant. Require the SHA, real PASS/FAIL/UNRUN evidence, blockers and next safe action. Do not auto-create replacement workers.
 
+## Execution mode: direct, foreground, background
+
+Choose the execution mode per task, before dispatch, with the lowest cost that still delivers the
+required outcome. Do not create a delegate for a trivial task, and do not defer work in background
+when its result is needed to continue.
+
+- **Direct (coordinator).** Small corrections, low-cost operations, functional decisions that need
+  immediate interaction with the user, consolidation, supervision and brief verifications.
+- **Foreground subagent.** The coordinator needs the result immediately, the task is short enough
+  for reasonable synchronous delegation, or dependencies prevent useful work until it returns.
+- **Background subagent.** Substantial specification creation or review, autonomous implementation,
+  bounded investigations and audits, independent QA once a verifiable candidate exists, and other
+  delimited work that needs no continuous supervision.
+
+Background requires **verified client support** for non-blocking subagents in the active client (for
+example a `background` option or an equivalent asynchronous task API) and a benefit that justifies
+its cost. Without that support, use direct or foreground execution and say so; never simulate or
+assume background work. Releasing the coordinator's turn to a background subagent does not finish
+or end the subagent's runtime: the task is still running until it reports or fails. Closing the
+client or the runtime may stop it. Promise no background persistence after that close unless the
+specific client verifies it.
+
+Parallelism is allowed only for authorized, independent tasks with disjoint ownership and real
+isolation. Keep one executor by default and add delegates only when independence and value exceed
+the coordination cost. No universal agent count applies: respect the verified client limit and the
+quota gate.
+
+At the start of each substantial task, state briefly: task and identifier; who executes (coordinator
+or subagent profile); mode (direct, foreground or background); isolation (checkout or worktree when
+applicable); and whether the coordinator stays available. Add no extra report and no repeated status
+messages. Never claim a subagent, a background mode or isolation that was not actually verified.
+
 ## Quota and dispatch gate
 For Codex, query remaining subscription quota when a supported client tool exists:
 execution start and before new assignments after meaningful milestones or quota warnings.
@@ -191,7 +223,7 @@ independent QA still reviews it.
 - Infrastructure work has its own queue; it does not starve functional work unless it is a documented hard prerequisite.
 
 ## Capability boundaries
-This repository holds **instructions and templates**: no subagent registration, always-on scheduler or job queue. Check what the actual client (Codex, Claude Code or another) supports for delegation and isolation before using it. API runtimes configured separately do not describe what an interactive session can do. Nothing keeps running after the active session ends.
+This repository holds **instructions and templates**: no subagent registration, always-on scheduler or job queue. Check what the actual client (Codex, Claude Code or another) supports for delegation, non-blocking execution and isolation before using it, per execution. API runtimes configured separately do not describe what an interactive session can do. Releasing a coordinator turn does not end a running subagent's runtime, but nothing keeps running after the active session or client closes.
 
 ## Result contract
 Each packet returns: packet ID; done/blocked status; changed and read files; commit/revision; real tests and results (passed/failed/unrun); open decisions, collisions or blockers; evidence; next independent action. The coordinator verifies, updates the board and decides on the next packet. No delegate self-approves, merges or edits the board.
