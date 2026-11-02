@@ -29,6 +29,9 @@ EXPECTED_GITHUB={
  'run':({'run-id':'run_id'},('run-id',)),
  'run-list':({'limit':'int','branch':'ref'},()),
 }
+EXPECTED_FILE={
+ 'read':({'path':'path'},('path',)),
+}
 def wildcard(pattern,value):
  return re.fullmatch(''.join('.*' if c=='*' else '.' if c=='?' else re.escape(c) for c in pattern),value,re.S) is not None
 def effective(rules,action,resource):
@@ -72,7 +75,7 @@ def review_read_policy(root):
  try: source=path.read_text(encoding='utf-8'); tree=ast.parse(source)
  except (OSError,UnicodeError,SyntaxError) as error: return None,f'cannot parse review-read: {error}'
  if 'shell=False' not in source or 'shell=True' in source: return None,'review-read must execute without a shell'
- for token in ('PROTECTED_FILES','PROTECTED_DIRS','build_excludes','EXCLUDES = build_excludes()','.npmrc','.netrc','.pypirc','.git-credentials','*.kdbx','*.jks','*.keystore','id_dsa','*.pem','*credentials.json','*.credentials','*.secret','*.secrets','.envrc','*secret*','*credential*','filter_file_history','filter_status','rename_excludes_from'):
+ for token in ('PROTECTED_FILES','PROTECTED_DIRS','build_excludes','EXCLUDES = build_excludes()','.npmrc','.netrc','.pypirc','.git-credentials','*.kdbx','*.jks','*.keystore','id_dsa','*.pem','*credentials.json','*.credentials','*.secret','*.secrets','.envrc','*.env.example','*secret*','*credential*','parse_name_status_z','changed_files_text','file_history_text','filter_status','rename_excludes_from','file_operation'):
   if token not in source: return None,f'review-read protection list missing {token}'
  policy=None
  for node in tree.body:
@@ -80,11 +83,11 @@ def review_read_policy(root):
    try: policy=ast.literal_eval(node.value)
    except (ValueError,TypeError): return None,'POLICY must be a literal'
  if policy is None: return None,'missing POLICY literal'
- if not isinstance(policy,dict) or set(policy)!={'version','max_output_bytes','git','github'}: return None,'unexpected POLICY shape'
+ if not isinstance(policy,dict) or set(policy)!={'version','max_output_bytes','git','github','file'}: return None,'unexpected POLICY shape'
  if policy.get('version')!=1: return None,'POLICY version must be 1'
  limit=policy.get('max_output_bytes')
  if not isinstance(limit,int) or not 1000<=limit<=200000: return None,'max_output_bytes must be 1000..200000'
- for group,expected in (('git',EXPECTED_GIT),('github',EXPECTED_GITHUB)):
+ for group,expected in (('git',EXPECTED_GIT),('github',EXPECTED_GITHUB),('file',EXPECTED_FILE)):
   value=policy.get(group)
   if not isinstance(value,dict) or set(value)!={'operations'} or not isinstance(value.get('operations'),dict):
    return None,f'{group} policy must contain only operations'
@@ -161,28 +164,27 @@ def validate(root):
   for message in parse_errors: fail('opencode',message)
   if entries is not None:
    if not entries or entries[0] != ('*','*','deny'): fail('opencode','review adapter must start with a deny-all rule')
-   if effective(entries,'read','AGENTS.md')!='allow' or effective(entries,'read','src/main.py')!='allow': fail('opencode','review adapter must allow project reads')
+   if effective(entries,'read','AGENTS.md')!='deny' or effective(entries,'read','src/main.py')!='deny': fail('opencode','review adapter must deny the native read tool')
    if effective(entries,'glob','**/*.py')!='allow': fail('opencode','review adapter must allow glob discovery')
-   for path in ('.env','config/.env','.env.local','.ssh/.env.example','secrets/id_rsa','id_dsa','.git/config','credentials.json','app.pem','.npmrc','.netrc','.pypirc','.git-credentials','vault.kdbx','app.jks','app.keystore','service.credentials','service.secret','service.secrets','secrets.yaml','config/credentials.yml','src/.envrc','.NPMRC','SERVICE.KDBX','Secrets.yaml','secrets/api-key.txt','credentials/config.yaml','secret.env.example','credential.env.example','config/secret.env.example'):
+   for path in ('.env','config/.env','.env.local','.ssh/.env.example','secrets/id_rsa','id_dsa','.git/config','vendor/.git/config','credentials.json','app.pem','.npmrc','.netrc','.pypirc','.git-credentials','vault.kdbx','app.jks','app.keystore','service.credentials','service.secret','service.secrets','secrets.yaml','config/credentials.yml','src/.envrc','.NPMRC','SERVICE.KDBX','Secrets.yaml', '.eNv','foo.env.example','prod.env.example','config/foo.env.example','secrets/api-key.txt','credentials/config.yaml','secret.env.example','credential.env.example','config/secret.env.example'):
     if effective(entries,'read',path)!='deny': fail('opencode',f'review adapter must deny protected read: {path}')
-   if effective(entries,'read','.env.example')!='allow': fail('opencode','review adapter must allow .env.example')
-   if effective(entries,'read','config/.env.example')!='allow': fail('opencode','review adapter must allow nested .env.example outside protected directories')
+   if effective(entries,'read','.env.example')!='deny': fail('opencode','review adapter must deny native read even for .env.example; use review_query file read')
+   if effective(entries,'read','config/.env.example')!='deny': fail('opencode','review adapter must deny native read for nested .env.example')
    for action in ('edit','subagent','skill','webfetch','websearch','question','execute','external_directory','browser','shell'):
     if effective(entries,action,'*')!='deny': fail('opencode',f'review adapter must deny {action}')
    if effective(entries,'review_query','*')!='allow': fail('opencode','review adapter must allow the read-only query tool')
    for action,resource,effect in entries:
     if effect in ('allow','ask'):
-     if action not in ('read','glob','review_query'): fail('opencode',f'non-read-only permission {effect}: {action}')
+     if action not in ('glob','review_query'): fail('opencode',f'non-read-only permission {effect}: {action}')
      if action=='review_query' and (resource!='*' or effect!='allow'): fail('opencode','review tool permission must be a single allow for the query tool')
-     if action=='read' and effect=='ask': fail('opencode','read permissions must not ask')
    if sum(1 for action,resource,effect in entries if action=='review_query' and effect=='allow')!=1: fail('opencode','exactly one review_query allow rule is required')
-   if any(action=='read' and effect=='allow' and resource not in ('*','*.env.example') for action,resource,effect in entries): fail('opencode','read allow must cover the workspace')
+   if any(action=='read' and effect!='deny' for action,resource,effect in entries): fail('opencode','native read rules must deny access')
    if any(action=='glob' and effect=='allow' and resource!='*' for action,resource,effect in entries): fail('opencode','glob allow must cover the workspace')
   for helper in ('scripts/review-read','.opencode/plugins/review-read/index.ts'):
    helper_path=root/helper
    if not helper_path.is_file() or not helper_path.stat().st_size: fail('opencode',f'adapter requires {helper}')
   plugin=read('.opencode/plugins/review-read/index.ts')
-  for token in ('namespace({','name: "review"','name: "query"','codemode: false','scripts/review-read','shell: false','spawn("python3"','Number.isSafeInteger'):
+  for token in ('namespace({','name: "review"','name: "query"','codemode: false','["git", "github", "file", "describe"]','scripts/review-read','shell: false','spawn("python3"','Number.isSafeInteger','exit 2\\nINVALID:'):
    if token not in plugin: fail('opencode',f'review query plugin missing {token}')
   if plugin.count('editor.add(')!=1: fail('opencode','review query plugin must register exactly one tool')
   if re.search(r'\b(?:exec|execSync|spawnSync|eval|Function|fetch)\s*\(',plugin): fail('opencode','review query plugin must not execute arbitrary code or fetch')
