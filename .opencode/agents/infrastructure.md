@@ -4,100 +4,227 @@ mode: subagent
 permissions:
   - action: "*"
     resource: "*"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
     resource: "*"
-    effect: allow
-  - action: glob
+    effect: "allow"
+  - action: "glob"
     resource: "*"
-    effect: allow
-  - action: read
+    effect: "allow"
+  - action: "read"
     resource: "*.env"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
     resource: "*.env.*"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
+    resource: "*.env.example"
+    effect: "deny"
+  - action: "read"
     resource: ".env.example"
-    effect: allow
-  - action: read
+    effect: "allow"
+  - action: "read"
     resource: "*/.env.example"
-    effect: allow
-  - action: read
+    effect: "allow"
+  - action: "read"
     resource: "*.pem"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
     resource: "*.key"
-    effect: deny
-  - action: read
-    resource: "id_rsa*"
-    effect: deny
-  - action: read
-    resource: "id_ed25519*"
-    effect: deny
-  - action: read
-    resource: "id_ecdsa*"
-    effect: deny
-  - action: read
-    resource: "id_dsa*"
-    effect: deny
-  - action: read
-    resource: ".npmrc"
-    effect: deny
-  - action: read
-    resource: ".netrc"
-    effect: deny
-  - action: read
-    resource: ".git-credentials"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
+    resource: "*.p12"
+    effect: "deny"
+  - action: "read"
+    resource: "*.pfx"
+    effect: "deny"
+  - action: "read"
+    resource: "*.kdbx"
+    effect: "deny"
+  - action: "read"
+    resource: "*.jks"
+    effect: "deny"
+  - action: "read"
+    resource: "*.keystore"
+    effect: "deny"
+  - action: "read"
+    resource: "*id_rsa*"
+    effect: "deny"
+  - action: "read"
+    resource: "*id_ed25519*"
+    effect: "deny"
+  - action: "read"
+    resource: "*id_ecdsa*"
+    effect: "deny"
+  - action: "read"
+    resource: "*id_dsa*"
+    effect: "deny"
+  - action: "read"
+    resource: "*.git-credentials"
+    effect: "deny"
+  - action: "read"
+    resource: "*.netrc"
+    effect: "deny"
+  - action: "read"
+    resource: "*.npmrc"
+    effect: "deny"
+  - action: "read"
+    resource: "*.pypirc"
+    effect: "deny"
+  - action: "read"
+    resource: "*credentials.json"
+    effect: "deny"
+  - action: "read"
+    resource: "*secrets.json"
+    effect: "deny"
+  - action: "read"
+    resource: "*.credentials"
+    effect: "deny"
+  - action: "read"
+    resource: "*.secret"
+    effect: "deny"
+  - action: "read"
+    resource: "*.secrets"
+    effect: "deny"
+  - action: "read"
+    resource: "*.envrc"
+    effect: "deny"
+  - action: "read"
+    resource: "*.envrc.*"
+    effect: "deny"
+  - action: "read"
     resource: "*secret*"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
     resource: "*credential*"
-    effect: deny
-  - action: read
-    resource: ".git"
-    effect: deny
-  - action: read
-    resource: ".git/*"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
+    resource: "*.ENV"
+    effect: "deny"
+  - action: "read"
+    resource: "*.ENV.*"
+    effect: "deny"
+  - action: "read"
+    resource: "*.ENVRC"
+    effect: "deny"
+  - action: "read"
+    resource: "*.ENVRC.*"
+    effect: "deny"
+  - action: "read"
+    resource: "*.PEM"
+    effect: "deny"
+  - action: "read"
+    resource: "*.KEY"
+    effect: "deny"
+  - action: "read"
+    resource: "*.P12"
+    effect: "deny"
+  - action: "read"
+    resource: "*.PFX"
+    effect: "deny"
+  - action: "read"
+    resource: "*.KDBX"
+    effect: "deny"
+  - action: "read"
+    resource: "*.JKS"
+    effect: "deny"
+  - action: "read"
+    resource: "*.KEYSTORE"
+    effect: "deny"
+  - action: "read"
+    resource: "*.NPMRC"
+    effect: "deny"
+  - action: "read"
+    resource: "*.NETRC"
+    effect: "deny"
+  - action: "read"
+    resource: "*.PYPIRC"
+    effect: "deny"
+  - action: "read"
+    resource: "*.GIT-CREDENTIALS"
+    effect: "deny"
+  - action: "read"
+    resource: "*CREDENTIALS.JSON"
+    effect: "deny"
+  - action: "read"
+    resource: "*SECRETS.JSON"
+    effect: "deny"
+  - action: "read"
+    resource: "*.CREDENTIALS"
+    effect: "deny"
+  - action: "read"
+    resource: "*.SECRET"
+    effect: "deny"
+  - action: "read"
+    resource: "*.SECRETS"
+    effect: "deny"
+  - action: "read"
+    resource: "*SECRET*"
+    effect: "deny"
+  - action: "read"
+    resource: "*CREDENTIAL*"
+    effect: "deny"
+  - action: "read"
+    resource: "*Secret*"
+    effect: "deny"
+  - action: "read"
+    resource: "*Credential*"
+    effect: "deny"
+  - action: "read"
+    resource: "*Secrets*"
+    effect: "deny"
+  - action: "read"
+    resource: "*.git"
+    effect: "deny"
+  - action: "read"
+    resource: "*.git/*"
+    effect: "deny"
+  - action: "read"
+    resource: "*.GIT"
+    effect: "deny"
+  - action: "read"
+    resource: "*.GIT/*"
+    effect: "deny"
+  - action: "read"
     resource: "*.ssh/*"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
+    resource: "*.SSH/*"
+    effect: "deny"
+  - action: "read"
     resource: "*.aws/*"
-    effect: deny
-  - action: read
+    effect: "deny"
+  - action: "read"
+    resource: "*.AWS/*"
+    effect: "deny"
+  - action: "read"
     resource: "*.gnupg/*"
-    effect: deny
-  - action: grep
+    effect: "deny"
+  - action: "read"
+    resource: "*.GNUPG/*"
+    effect: "deny"
+  - action: "grep"
     resource: "*"
-    effect: deny
-  - action: edit
+    effect: "deny"
+  - action: "subagent"
     resource: "*"
-    effect: deny
-  - action: shell
+    effect: "deny"
+  - action: "skill"
     resource: "*"
-    effect: deny
-  - action: subagent
+    effect: "deny"
+  - action: "question"
     resource: "*"
-    effect: deny
-  - action: skill
+    effect: "deny"
+  - action: "webfetch"
     resource: "*"
-    effect: deny
-  - action: question
+    effect: "deny"
+  - action: "websearch"
     resource: "*"
-    effect: deny
-  - action: webfetch
+    effect: "deny"
+  - action: "external_directory"
     resource: "*"
-    effect: deny
-  - action: websearch
-    resource: "*"
-    effect: deny
-  - action: external_directory
-    resource: "*"
-    effect: deny
+    effect: "deny"
+
 ---
 
 You are the native OpenCode `infrastructure` subagent. Your canonical behavioral contract is
@@ -121,11 +248,12 @@ executor with explicit authorization must run it.
 ## Boundaries
 
 Do not deploy, change shared environments, mutate databases, run destructive migrations, print
-or commit credentials, modify files, manage other agents or merge. The client permission matrix
-denies edit, shell, delegation and network here; that is a technical control for this adapter,
-not proof about derived projects, other clients or the host environment. Protected-file rules
-are name-based and case-sensitive on non-Windows hosts; this is an audit aid, not a secrets
-sandbox.
+or commit credentials, modify files, approve your own plan, manage other agents or merge. The
+client permission matrix denies edit, shell, delegation and network here; that is a technical
+control for this adapter, not proof about derived projects, other clients or the host
+environment. `grep` is denied, so use `read` and `glob` rather than content search. Protected-file
+rules are name-based and case-sensitive on non-Windows hosts; this is an audit aid, not a
+secrets sandbox.
 
 ## Return
 
