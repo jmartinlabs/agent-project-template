@@ -112,6 +112,7 @@ contract, while Bash remains able to write. If an approved action is blocked, re
 the restriction and resolve it through the authorized client configuration; do not
 silently bypass it. Keep project-specific restrictions and the canonical approval policy.
 
-The separate OpenCode `review` pilot is strictly read-only and cannot run tests; see the
-[OpenCode adapter](OPENCODE_ADAPTER.md). Do not assume the Claude profile has the same
-permission boundary.
+The separate OpenCode `review` pilot is strictly read-only. It can inspect local Git and
+consult existing PR/CI evidence through its native `review_query` tool, backed by
+`scripts/review-read`, but it cannot run tests; see the [OpenCode adapter](OPENCODE_ADAPTER.md).
+Do not assume the Claude profile has the same permission boundary.
