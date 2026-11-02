@@ -10,7 +10,7 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/agent-relay','scripts/test-agent-relay','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','specs/methodology/coordinator-communication.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/OPENCODE_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/agent-relay','scripts/test-agent-relay','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','specs/methodology/coordinator-communication.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
 EXPECTED_GIT={
  'status':({},()),
  'branches':({},()),
@@ -72,6 +72,8 @@ def review_read_policy(root):
  try: source=path.read_text(encoding='utf-8'); tree=ast.parse(source)
  except (OSError,UnicodeError,SyntaxError) as error: return None,f'cannot parse review-read: {error}'
  if 'shell=False' not in source or 'shell=True' in source: return None,'review-read must execute without a shell'
+ for token in ('PROTECTED_FILES','PROTECTED_DIRS','build_excludes','EXCLUDES = build_excludes()','.npmrc','.netrc','.pypirc','.git-credentials','*.kdbx','*.jks','*.keystore','id_dsa','*.pem','*credentials.json','*.credentials','*.secret','*.secrets'):
+  if token not in source: return None,f'review-read protection list missing {token}'
  policy=None
  for node in tree.body:
   if isinstance(node,ast.Assign) and any(isinstance(target,ast.Name) and target.id=='POLICY' for target in node.targets):
@@ -101,6 +103,8 @@ def validate(root):
   return p.read_text(encoding='utf-8') if p.is_file() else ''
  for name in REQUIRED:
   if not (root/name).is_file() or not (root/name).stat().st_size: fail('structure',f'missing or empty {name}')
+ opencode_installed=(root/'.opencode/agents/review.md').is_file()
+ optional_opencode_doc=(root/'docs/OPENCODE_ADAPTER.md').resolve()
  docs=[root/n for n in ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','docs/OPENCODE_ADAPTER.md') if (root/n).is_file()]
  for folder in ('specs','templates','.agents/skills','.claude/skills','.claude/agents'):
   docs.extend((root/folder).rglob('*.md'))
@@ -110,6 +114,7 @@ def validate(root):
    dest=dest.strip().split(' "',1)[0].strip('<>'); u=urlsplit(dest)
    if u.scheme or dest.startswith('#'): continue
    target=(p.parent/unquote(u.path)).resolve()
+   if not opencode_installed and target==optional_opencode_doc: continue
    if not target.is_relative_to(root) or not target.exists(): fail('links',f'{p.relative_to(root)} -> {dest}')
  agents=read('AGENTS.md')
  for n in ('architecture','ui','quality','security'):
@@ -137,7 +142,7 @@ def validate(root):
  # OpenCode's native review adapter is optional. When installed it must be complete and
  # read-only; when intentionally absent, derived projects keep passing general validation.
  opencode_path=root/'.opencode/agents/review.md'
- if opencode_path.is_file() and opencode_path.stat().st_size:
+ if opencode_installed and opencode_path.stat().st_size:
   opencode=opencode_path.read_text(encoding='utf-8')
   for token in ('mode: subagent','.agents/roles/qa-review.md','work packet','Applicable rules','read-only','BLOCKED','UNRUN','scripts/review-read','review_query'):
    if token not in opencode: fail('opencode',f'review adapter missing {token}')
@@ -149,7 +154,7 @@ def validate(root):
    if not entries or entries[0] != ('*','*','deny'): fail('opencode','review adapter must start with a deny-all rule')
    if effective(entries,'read','AGENTS.md')!='allow' or effective(entries,'read','src/main.py')!='allow': fail('opencode','review adapter must allow project reads')
    if effective(entries,'glob','**/*.py')!='allow': fail('opencode','review adapter must allow glob discovery')
-   for path in ('.env','config/.env','.env.local','secrets/id_rsa','.git/config','credentials.json','app.pem'):
+   for path in ('.env','config/.env','.env.local','.ssh/.env.example','secrets/id_rsa','id_dsa','.git/config','credentials.json','app.pem','.npmrc','.netrc','.pypirc','.git-credentials','vault.kdbx','app.jks','app.keystore','service.credentials','service.secret','service.secrets'):
     if effective(entries,'read',path)!='deny': fail('opencode',f'review adapter must deny protected read: {path}')
    if effective(entries,'read','.env.example')!='allow': fail('opencode','review adapter must allow .env.example')
    for action in ('edit','subagent','skill','webfetch','websearch','question','execute','external_directory','browser','shell'):
@@ -176,9 +181,10 @@ def validate(root):
   if policy_error: fail('opencode',policy_error)
  elif opencode_path.exists():
   fail('opencode','review adapter is empty')
- opencode_doc=read('docs/OPENCODE_ADAPTER.md')
- for token in ('.opencode/agents/review.md','.agents/roles/qa-review.md','read-only','not a launcher','scripts/review-read','review_query','optional','BLOCKED','UNRUN'):
-  if token not in opencode_doc: fail('opencode',f'documentation missing {token}')
+ if opencode_installed:
+  opencode_doc=read('docs/OPENCODE_ADAPTER.md')
+  for token in ('.opencode/agents/review.md','.agents/roles/qa-review.md','read-only','not a launcher','scripts/review-read','review_query','optional','BLOCKED','UNRUN'):
+   if token not in opencode_doc: fail('opencode',f'documentation missing {token}')
  # Approval wording lives in approvals.md; adapters link to it instead of restating it.
  for name in ('CLAUDE.md',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS)):
   if re.search(r'`(?:ok|dale|continúa)`',read(name)): fail('claude',f'{name}: restates approval wording; link approvals.md instead')

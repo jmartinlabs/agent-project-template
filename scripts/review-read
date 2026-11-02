@@ -5,10 +5,12 @@ The review agent has no general shell access. It may call this command with the
 operations declared in POLICY below. The wrapper validates every operation and
 argument, then runs a fixed argv without a shell. It never exposes an option
 that writes, executes an external program through Git, or prints a protected
-file. The template validator checks this policy and the matching plugin and
-tool permission.
+file. Protected names feed both local checks and Git exclusions, and PR diffs
+are filtered per file before output. The template validator checks this policy,
+the plugin and the tool permission.
 """
 from pathlib import Path
+import fnmatch
 import json
 import os
 import re
@@ -54,39 +56,35 @@ ROOT = Path(__file__).resolve().parents[1]
 GIT = ["git", "--no-pager", "--no-optional-locks",
        "-c", "core.pager=cat", "-c", "core.fsmonitor=false",
        "-c", "core.hooksPath=/dev/null", "-c", "diff.external="]
+# One protected-name list feeds local path checks and Git pathspec exclusions.
+# `.env.example` is the only read exception, and it is still excluded from Git
+# output. Directories are protected regardless of the file name inside them.
+PROTECTED_FILES = (
+    ".env", ".env.*",
+    "*.pem", "*.key", "*.p12", "*.pfx", "*.kdbx", "*.jks", "*.keystore",
+    "id_rsa*", "id_ed25519*", "id_ecdsa*", "id_dsa*",
+    ".git-credentials", ".netrc", ".npmrc", ".pypirc",
+    "*credentials.json", "*secrets.json",
+    "*.credentials", "*.secret", "*.secrets",
+)
+PROTECTED_DIRS = (".git", ".ssh", ".aws", ".gnupg")
+
+
+def build_excludes():
+    result = []
+    for pattern in PROTECTED_FILES:
+        result.append(f":(exclude,glob){pattern}")
+        result.append(f":(exclude,glob)**/{pattern}")
+    for directory in PROTECTED_DIRS:
+        result.append(f":(exclude,glob){directory}/**")
+        result.append(f":(exclude,glob)**/{directory}/**")
+    return result
+
+
+EXCLUDES = build_excludes()
 # Pathspecs exclude protected files from diffs, history and search. Both the
 # bare and nested forms are needed because `*` crosses path separators only in
 # permission rules, not in Git's glob magic.
-EXCLUDES = [
-    ":(exclude,glob).env",
-    ":(exclude,glob).env.*",
-    ":(exclude,glob)**/.env",
-    ":(exclude,glob)**/.env.*",
-    ":(exclude,glob)*.pem",
-    ":(exclude,glob)**/*.pem",
-    ":(exclude,glob)*.key",
-    ":(exclude,glob)**/*.key",
-    ":(exclude,glob)*.p12",
-    ":(exclude,glob)**/*.p12",
-    ":(exclude,glob)*.pfx",
-    ":(exclude,glob)**/*.pfx",
-    ":(exclude,glob)**/id_rsa*",
-    ":(exclude,glob)**/id_ed25519*",
-    ":(exclude,glob)**/id_ecdsa*",
-    ":(exclude,glob)**/.git/**",
-    ":(exclude,glob)**/.ssh/**",
-    ":(exclude,glob)**/.aws/**",
-    ":(exclude,glob)**/.gnupg/**",
-    ":(exclude,glob)**/credentials.json",
-    ":(exclude,glob)**/secrets.json",
-]
-PROTECTED_NAMES = {
-    ".netrc", ".npmrc", ".pypirc", ".git-credentials",
-    "credentials.json", "secrets.json",
-}
-PROTECTED_DIRS = {".git", ".ssh", ".aws", ".gnupg"}
-PROTECTED_SUFFIXES = (".pem", ".key", ".p12", ".pfx", ".kdbx")
-
 
 class Invalid(Exception):
     pass
@@ -111,20 +109,12 @@ def is_protected(path):
     parts = [part for part in normalized.split("/") if part not in ("", ".")]
     if not parts:
         return True
-    name = parts[-1].lower()
-    if name == ".env.example" or name.endswith(".env.example"):
-        return False
-    if name == ".env" or name.startswith(".env.") or name in PROTECTED_NAMES:
-        return True
-    if name.endswith(PROTECTED_SUFFIXES):
-        return True
-    if name.startswith(("id_rsa", "id_ed25519", "id_ecdsa", "id_dsa")):
-        return True
     if any(part in PROTECTED_DIRS for part in parts):
         return True
-    if "credential" in name or "secret" in name:
-        return True
-    return False
+    name = parts[-1]
+    if name == ".env.example" or name.endswith(".env.example"):
+        return False
+    return any(fnmatch.fnmatchcase(name, pattern) for pattern in PROTECTED_FILES)
 
 
 def check_path(value):
@@ -265,8 +255,7 @@ def run(argv, allowed=(0,)):
     return 0, completed
 
 
-def emit(completed):
-    text = completed.stdout or ""
+def emit_text(text):
     limit = POLICY["max_output_bytes"]
     data = text.encode("utf-8", "replace")
     if len(data) > limit:
@@ -274,6 +263,10 @@ def emit(completed):
         text += f"\n[review-read truncated output at {limit} bytes]\n"
     sys.stdout.write(text)
     return 0
+
+
+def emit(completed):
+    return emit_text(completed.stdout or "")
 
 
 def git_operation(operation, options):
@@ -345,9 +338,6 @@ def github_operation(operation, options):
                 "number,title,state,isDraft,headRefName,baseRefName,mergeable,"
                 "mergeStateStatus,url,author,createdAt,updatedAt,reviewDecision,"
                 "statusCheckRollup,commits,body"]
-    if operation == "pr-diff":
-        argv = ["gh", "pr", "diff", str(number), "--color", "never"]
-        return argv + (["--name-only"] if options.get("name-only") else ["--patch"])
     if operation == "pr-checks":
         return ["gh", "pr", "checks", str(number)]
     if operation == "pr-list":
@@ -365,6 +355,64 @@ def github_operation(operation, options):
             argv.extend(["--branch", options["branch"]])
         return argv
     raise Invalid(f"unhandled github operation: {operation}")
+
+
+def github_pr_diff(options):
+    """Filter protected paths from per-file PR data instead of returning a raw patch."""
+    number = options["number"]
+    endpoint = f"repos/{{owner}}/{{repo}}/pulls/{number}/files?per_page=100"
+    status, completed = run(
+        ["gh", "api", "--paginate", "--slurp", "-H",
+         "Accept: application/vnd.github+json", endpoint],
+        allowed=(0,),
+    )
+    if completed is None:
+        return status
+    try:
+        payload = json.loads(completed.stdout or "[]")
+    except ValueError:
+        print("ERROR: GitHub returned invalid JSON for PR files", file=sys.stderr)
+        return 4
+    if not isinstance(payload, list):
+        print("ERROR: unexpected GitHub PR files response", file=sys.stderr)
+        return 4
+    files = []
+    for page in payload:
+        if isinstance(page, list):
+            files.extend(page)
+        elif isinstance(page, dict):
+            files.append(page)
+    lines = []
+    redacted = 0
+    for item in files:
+        if not isinstance(item, dict):
+            continue
+        filename = item.get("filename")
+        previous = item.get("previous_filename")
+        if not isinstance(filename, str) or not filename:
+            continue
+        names = [filename] + ([previous] if isinstance(previous, str) else [])
+        if any(is_protected(name) for name in names):
+            redacted += 1
+            continue
+        if options.get("name-only"):
+            lines.append(f"{previous} -> {filename}" if previous else filename)
+            continue
+        additions = item.get("additions", 0)
+        deletions = item.get("deletions", 0)
+        header = f"=== {item.get('status', 'modified')} {filename} (+{additions}/-{deletions})"
+        if previous:
+            header += f" (from {previous})"
+        lines.append(header)
+        patch = item.get("patch")
+        lines.append(patch if isinstance(patch, str) and patch
+                     else "(no textual patch; binary or truncated)")
+    if redacted:
+        lines.insert(0, f"[redacted {redacted} protected file(s)]")
+    text = "\n".join(lines)
+    if text:
+        text += "\n"
+    return emit_text(text)
 
 
 def main(argv):
@@ -388,6 +436,8 @@ def main(argv):
         if shutil.which("gh") is None:
             print("UNAVAILABLE: GitHub CLI (gh) is not installed", file=sys.stderr)
             return 3
+        if operation == "pr-diff":
+            return github_pr_diff(options)
         allowed = (0, 1) if operation == "pr-checks" else (0,)
         status, completed = run(github_operation(operation, options), allowed=allowed)
         return status if completed is None else emit(completed)
