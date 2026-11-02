@@ -82,9 +82,10 @@ Git pathspec exclusions, which are case-insensitive: `.env` and `.env.*`, `*.pem
 `secret`/`secrets`/`credential`/`credentials`, and any name containing `secret` or
 `credential`. `.git`, `.ssh`, `.aws`, `.gnupg`, `secrets` and `credentials` are protected
 directories.
-`.env.example` is the only read exception, but only outside a protected directory; it is
+Only the exact name `.env.example`, outside a protected directory, is a read exception; it is
 still excluded from local Git output, while `pr-diff` does not treat it as protected because it
-is the declared read exception.
+is the declared read exception. Names such as `secret.env.example` or
+`credential.env.example` are protected by the sensitive-name patterns.
 
 The wrapper, Git exclusions and PR filtering match names case-insensitively. The agent's
 static read-deny matrix mirrors the sensitive names and is checked by representative paths,

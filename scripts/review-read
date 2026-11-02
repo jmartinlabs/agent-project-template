@@ -119,7 +119,7 @@ def is_protected(path):
     if any(part.lower() in PROTECTED_DIRS for part in parts):
         return True
     name = parts[-1].lower()
-    if name == ".env.example" or name.endswith(".env.example"):
+    if name == ".env.example":
         return False
     return any(fnmatch.fnmatchcase(name, pattern) for pattern in PROTECTED_FILES)
 
