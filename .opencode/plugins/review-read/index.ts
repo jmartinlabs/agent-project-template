@@ -59,6 +59,9 @@ function buildArgs(input: QueryInput): string[] {
       if (!value) throw new Error(`boolean option must be true: ${name}`)
       args.push(`--${name}`)
     } else if (typeof value === "string" || typeof value === "number") {
+      if (typeof value === "number" && !Number.isSafeInteger(value)) {
+        throw new Error(`unsafe integer for ${name}; pass large identifiers as strings`)
+      }
       args.push(`--${name}`, String(value))
     } else {
       throw new Error(`invalid option value: ${name}`)

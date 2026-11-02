@@ -108,16 +108,26 @@ class ValidationTests(unittest.TestCase):
   self.change('.claude/skills/tweak/SKILL.md','adds no rules.','adds no rules. Never treat `dale` as approval.'); self.assertRule('claude')
  def test_claude_md_no_restated_approvals(self):
   self.change('CLAUDE.md','# Claude Code adapter','# Claude Code adapter\n`ok` is not approval.'); self.assertRule('claude')
- def test_opencode_adapter_optional(self):
-  # A derived project that does not use OpenCode may remove the registration.
-  (self.root/'.opencode/agents/review.md').unlink(); self.assertEqual(validate(self.root),[])
- def test_opencode_full_removal(self):
+ def test_opencode_agent_removed_only(self):
+  # The functional adapter is a trio: removing only the agent leaves orphans.
+  (self.root/'.opencode/agents/review.md').unlink(); self.assertRule('opencode')
+ def test_opencode_orphan_plugin(self):
   (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
-  (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertEqual(validate(self.root),[])
+  self.assertRule('opencode')
+ def test_opencode_orphan_wrapper(self):
+  (self.root/'.opencode/agents/review.md').unlink()
+  (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertRule('opencode')
+ def test_opencode_orphan_plugin_dir(self):
+  (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
+  (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertRule('opencode')
+ def test_opencode_full_removal(self):
+  # Removing the functional trio is a complete, intentional removal; the doc may remain.
+  (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
+  shutil.rmtree(self.root/'.opencode/plugins/review-read'); self.assertEqual(validate(self.root),[])
  def test_opencode_complete_removal(self):
-  for name in ('.opencode/agents/review.md','.opencode/plugins/review-read/index.ts',
-               'scripts/review-read','docs/OPENCODE_ADAPTER.md'):
-   (self.root/name).unlink()
+  (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
+  shutil.rmtree(self.root/'.opencode/plugins/review-read')
+  (self.root/'docs/OPENCODE_ADAPTER.md').unlink()
   self.assertEqual(validate(self.root),[])
  def test_opencode_plugin_required(self):
   (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertRule('opencode')
@@ -126,6 +136,9 @@ class ValidationTests(unittest.TestCase):
  def test_opencode_plugin_single_tool(self):
   self.change('.opencode/plugins/review-read/index.ts','editor.add({',
     'editor.add({ // second\n      editor.add({'); self.assertRule('opencode')
+ def test_opencode_plugin_safe_integer(self):
+  self.change('.opencode/plugins/review-read/index.ts','Number.isSafeInteger','Number.isInteger')
+  self.assertRule('opencode')
  def test_opencode_plugin_codemode(self):
   self.change('.opencode/plugins/review-read/index.ts','codemode: false','codemode: true'); self.assertRule('opencode')
  def test_opencode_plugin_namespace(self):
@@ -176,6 +189,12 @@ class ValidationTests(unittest.TestCase):
  def test_opencode_review_read_protection_list(self):
   self.change('scripts/review-read','".git-credentials", ".netrc", ".npmrc", ".pypirc",',
     '".git-credentials", ".netrc", ".pypirc",'); self.assertRule('opencode')
+ def test_opencode_review_read_secret_names(self):
+  self.change('scripts/review-read','".env", ".env.*", ".envrc", ".envrc.*",',
+    '".env", ".env.*",'); self.assertRule('opencode')
+ def test_opencode_review_read_run_id_type(self):
+  self.change('scripts/review-read','"run": {"options": {"run-id": "run_id"}, "required": ["run-id"]},',
+    '"run": {"options": {"run-id": "int"}, "required": ["run-id"]},'); self.assertRule('opencode')
  def test_review_read_interface(self):
   root=self.root
   def git(*args,check=True):
@@ -200,6 +219,12 @@ class ValidationTests(unittest.TestCase):
    'service.credentials':f'{secret}=credentials\n',
    'service.secret':f'{secret}=secret\n',
    'service.secrets':f'{secret}=secrets\n',
+   'secrets.yaml':f'{secret}=root-secret\n',
+   'AppSecrets.yaml':f'{secret}=case-secret\n',
+   'config/credentials.yml':f'{secret}=nested-credential\n',
+   'src/.envrc':f'{secret}=direnv\n',
+   'secrets/api-key.txt':f'{secret}=secret-dir\n',
+   'credentials/config.yaml':f'{secret}=credential-dir\n',
    '.ssh/.env.example':f'{secret}=ssh\n',
   }
   for name,content in protected.items():
@@ -225,11 +250,13 @@ class ValidationTests(unittest.TestCase):
   for args in (('git','log','--path','.env'),('git','show','--rev','HEAD:.env'),
                ('git','show','--rev','app.py'),('git','diff','--base','app.py'),
                ('git','log','--output','/tmp/x'),('git','push'),
-               ('git','diff','--base','HEAD','--path','../outside')):
+               ('git','diff','--base','HEAD','--path','../outside'),
+               ('git','show','--rev','HEAD','--path','.NPMRC'),
+               ('git','show','--rev','HEAD','--path','SERVICE.KDBX')):
    self.assertEqual(review(*args).returncode,2,args)
   fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
   gh=fake/'gh'
-  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
+  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"secrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/credentials.yml","status":"modified","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/.envrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed-config.py","previous_filename":"secrets.yaml","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"AppSecrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secrets/api-key.txt","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credentials/config.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
   gh.write_text(
    '#!/bin/sh\n'
    'if [ "$1" = "api" ]; then\n'
@@ -245,14 +272,33 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(result.returncode,0); self.assertIn('pr\nview\n37',result.stdout)
   diff=review('github','pr-diff','--number','37',env=env)
   self.assertEqual(diff.returncode,0); self.assertIn('src/app.py',diff.stdout); self.assertIn('src/ok.py',diff.stdout)
-  self.assertIn('[redacted 4 protected file(s)]',diff.stdout); self.assertNotIn(secret,diff.stdout)
+  self.assertIn('[redacted 11 protected file(s)]',diff.stdout); self.assertNotIn(secret,diff.stdout)
   names=review('github','pr-diff','--number','37','--name-only',env=env)
   self.assertEqual(names.returncode,0); self.assertIn('src/app.py',names.stdout); self.assertIn('src/ok.py',names.stdout)
-  for name in ('.npmrc','vault.kdbx','.ssh/.env.example','src/renamed.py'):
+  for name in ('.npmrc','vault.kdbx','.ssh/.env.example','src/renamed.py',
+               'secrets.yaml','config/credentials.yml','src/.envrc','src/renamed-config.py',
+               'AppSecrets.yaml','secrets/api-key.txt','credentials/config.yaml'):
    self.assertNotIn(name,names.stdout)
   for args in (('github','pr','merge'),('github','api','/repos/x'),
                ('github','pr','--number','37','--repo','other')):
    self.assertEqual(review(*args,env=env).returncode,2,args)
+  # H-1: real GitHub run identifiers are not bounded nine-digit counters.
+  for value in ('41443377507','9999999999999999999'):
+   result=review('github','run','--run-id',value,env=env)
+   self.assertEqual(result.returncode,0,value); self.assertIn('run\nview\n'+value,result.stdout,value)
+  for value in ('0','-1','abc','0123','12345678901234567890'):
+   self.assertEqual(review('github','run','--run-id',value,env=env).returncode,2,value)
+  self.assertEqual(review('git','log','--max','101').returncode,2)
+  self.assertEqual(review('git','file-history','--path','app.py','--max','101').returncode,2)
+  # H-4: a historical rename through a protected name must not print that name.
+  (root/'src').mkdir(exist_ok=True)
+  git('mv','secrets.yaml','src/config.yaml')
+  git('commit','-qm','rename protected history')
+  history=review('git','file-history','--path','src/config.yaml')
+  self.assertEqual(history.returncode,0); self.assertNotIn('secrets.yaml',history.stdout)
+  self.assertEqual(review('git','file-history','--path','secrets.yaml').returncode,2)
+  normal=review('git','file-history','--path','app.py')
+  self.assertEqual(normal.returncode,0); self.assertIn('app.py',normal.stdout)
  def test_review_read_pr_diff_fails_closed(self):
   fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
   gh=fake/'gh'
