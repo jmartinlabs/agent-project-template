@@ -113,15 +113,15 @@ class ValidationTests(unittest.TestCase):
   self.change('CLAUDE.md','# Claude Code adapter','# Claude Code adapter\n`ok` is not approval.'); self.assertRule('claude')
  def test_opencode_agent_removed_only(self):
   # The functional adapter is a trio: removing only the agent leaves orphans.
-  (self.root/'.opencode/agents/review.md').unlink(); self.assertRule('opencode')
+  self.remove_specialized(); (self.root/'.opencode/agents/review.md').unlink(); self.assertRule('opencode')
  def test_opencode_orphan_plugin(self):
-  (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
+  self.remove_specialized(); (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
   self.assertRule('opencode')
  def test_opencode_orphan_wrapper(self):
-  (self.root/'.opencode/agents/review.md').unlink()
+  self.remove_specialized(); (self.root/'.opencode/agents/review.md').unlink()
   (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertRule('opencode')
  def test_opencode_orphan_plugin_dir(self):
-  (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
+  self.remove_specialized(); (self.root/'.opencode/agents/review.md').unlink(); (self.root/'scripts/review-read').unlink()
   (self.root/'.opencode/plugins/review-read/index.ts').unlink(); self.assertRule('opencode')
  def test_opencode_full_removal(self):
   # Removing the functional trio plus specialized agents is a complete, intentional removal.
@@ -173,6 +173,20 @@ class ValidationTests(unittest.TestCase):
   self.change('.opencode/agents/implementation.md','  - action: shell\n    resource: "git push*"\n    effect: deny\n',
               '  - action: shell\n    resource: "git push*"\n    effect: allow\n')
   self.assertRule('opencode')
+ def test_opencode_specialized_impl_pr_create_allow(self):
+  self.change('.opencode/agents/implementation.md','  - action: shell\n    resource: "gh pr create*"\n    effect: deny\n',
+              '  - action: shell\n    resource: "gh pr create*"\n    effect: allow\n')
+  self.assertRule('opencode')
+ def test_opencode_specialized_extra_allow(self):
+  self.change('.opencode/agents/infrastructure.md','  - action: glob\n    resource: "*"\n    effect: allow\n',
+              '  - action: glob\n    resource: "*"\n    effect: allow\n  - action: write\n    resource: "*"\n    effect: allow\n')
+  self.assertRule('opencode')
+ def test_opencode_specialized_description_required(self):
+  self.change('.opencode/agents/functional.md','description: Native OpenCode functional specialist for approved roadmap and specification work. Read-only; returns questions, draft sections and acceptance cases to the coordinator.\n','')
+  self.assertRule('opencode')
+ def test_opencode_specialized_packet_token(self):
+  self.change('.opencode/agents/implementation.md','## Required packet','## Packet')
+  self.assertRule('opencode')
  def test_opencode_specialized_skill_wrong(self):
   self.change('.opencode/agents/functional.md','  - action: skill\n    resource: "spec"\n    effect: allow\n',
               '  - action: skill\n    resource: "dev"\n    effect: allow\n')
@@ -201,7 +215,7 @@ class ValidationTests(unittest.TestCase):
  def test_opencode_doc_required(self):
   (self.root/'docs/OPENCODE_ADAPTER.md').unlink(); self.assertRule('opencode')
  def test_opencode_partial_install(self):
-  (self.root/'scripts/review-read').unlink(); self.assertRule('opencode')
+  self.remove_specialized(); (self.root/'scripts/review-read').unlink(); self.assertRule('opencode')
  def test_opencode_adapter_canonical_role(self):
   self.change('.opencode/agents/review.md','.agents/roles/qa-review.md','README.md'); self.assertRule('opencode')
  def test_opencode_adapter_no_model(self):
