@@ -5,6 +5,9 @@ permissions:
   - action: "*"
     resource: "*"
     effect: deny
+  - action: read
+    resource: "*"
+    effect: deny
   - action: glob
     resource: "*"
     effect: allow
@@ -55,8 +58,14 @@ deployment access in this adapter.
 Use `review_query file read` for project documents and evidence. Native `read` is denied because
 its matcher is case-sensitive on non-Windows hosts; the query wrapper applies the
 case-insensitive, component-aware boundary. Use `glob` only for discovery; `grep` is denied.
-The query tool is part of the project's review adapter; if it is absent, stop and report the
-missing dependency rather than trying another read route.
+The query tool is part of the project's review adapter. If the adapter is absent, or if it does
+not expose the `file read` operation (an `INVALID`/exit-2 response for `group:file`), stop and
+report the missing dependency rather than trying another read route. `file read` is text-only,
+UTF-8 and bounded.
+
+This adapter intentionally narrows the canonical infrastructure role to investigation and
+preparation; execution, writes, Docker, databases and deployment require a separate authorized
+executor.
 
 ## Required packet
 
