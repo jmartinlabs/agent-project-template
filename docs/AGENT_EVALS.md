@@ -73,7 +73,10 @@ advance escalation notice, permissions, milestone waits, environment mapping, in
 QA, current-state closure, mixed-client isolation, manual relay and honest missing usage.
 CI tests the scorer and reference fixtures only. Live Codex/Claude/OpenCode trials and
 performance comparisons for these additions are UNRUN; historical results below apply
-to their dated scenario sets, not these new cases. No OpenCode adapter is supplied.
+to their dated scenario sets, not these new cases. The optional OpenCode `review` adapter
+was smoke-tested manually against OpenCode V2.1.4 on 2026-11-02 for registration,
+delegation, local Git/PR reads, filtered PR diffs and denied writes. That smoke test does not
+satisfy these behavioral evaluation scenarios, which remain UNRUN.
 
 The `comms-01..16` cases cover the [coordinator communication](../specs/methodology/coordinator-communication.md)
 contract: full return after the first delegation (01), correction that re-requests it (02),
