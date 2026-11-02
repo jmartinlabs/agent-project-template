@@ -129,8 +129,10 @@ that states task, executor, mode, isolation and coordinator availability.
 
 CI scores the reference fixtures and mutates each required marker; it does not call an LLM or
 create a real subagent. Passing these fixtures does not prove real non-blocking delegation,
-isolation, or persistence, and no token saving is claimed. Live Codex, Claude Code and OpenCode
-runs for these cases are UNRUN.
+isolation, or persistence, and no token saving is claimed. OpenCode V2.1.4 non-blocking
+background delegation itself is **owner-verified on 2026-11-02**; the `execution-*` scenarios
+remain **UNRUN**, and persistence after the client/runtime closes is not claimed. Live Codex,
+Claude Code and full OpenCode scenario runs remain UNRUN.
 
 ## Recorded results
 
