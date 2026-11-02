@@ -245,8 +245,9 @@ No measured token, cost or quality improvement is claimed.
   `opencode/review-hardening-01`. Raw rerun with client/model/revision metadata:
   [rerun](../evals/results/2026-11-02-opencode-plan-spot-checks-rerun.json).
   The earlier run is preserved separately as
-  [first run](../evals/results/2026-11-02-opencode-plan-spot-checks.json); its results were
-  not edited in place.
+  [first run](../evals/results/2026-11-02-opencode-plan-spot-checks.json). That file was
+  restored to its original content after an intermediate edit; the rerun is a separate
+  artifact, not an in-place rewrite of the first-run evidence.
 - **Coverage:** 5 of 137 scenarios: `continuity-01`, `publication-01`, `publication-05`,
   `execution-01`, `execution-07`. The other 132 remain **UNRUN**. This is a spot check,
   not a scored full run: the full scorer requires every scenario.

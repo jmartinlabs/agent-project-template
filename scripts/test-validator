@@ -243,8 +243,6 @@ class ValidationTests(unittest.TestCase):
   git('commit','-qm','fixture')
   self.assertEqual(review('git','status').returncode,0)
   redirected=dict(os.environ); redirected['GIT_DIR']=str(root/'missing-git-dir')
-  redirected['GIT_CONFIG_COUNT']='1'
-  redirected['GIT_CONFIG_KEY_0']='invalid.key'; redirected['GIT_CONFIG_VALUE_0']='x'
   self.assertEqual(review('git','status',env=redirected).returncode,0)
   self.assertIn('fixture',review('git','log','--max','1').stdout)
   self.assertEqual(review('git','diff','--base','HEAD').returncode,0)
@@ -287,6 +285,16 @@ class ValidationTests(unittest.TestCase):
   st=review('git','status')
   self.assertEqual(st.returncode,0); self.assertIn('Untracked.md',st.stdout)
   self.assertNotIn('UntrackedSecrets.yaml',st.stdout)
+  ignore=root/'ignore-file'; ignore.write_text('Untracked.md\n')
+  injected=({
+    'GIT_CONFIG_COUNT':'1','GIT_CONFIG_KEY_0':'core.excludesFile',
+    'GIT_CONFIG_VALUE_0':str(ignore),
+  }, {'GIT_CONFIG_PARAMETERS':f"'core.excludesFile={ignore}'"})
+  for extra in injected:
+   env=dict(os.environ); env.update(extra)
+   filtered=review('git','status',env=env)
+   self.assertEqual(filtered.returncode,0,extra)
+   self.assertIn('Untracked.md',filtered.stdout,extra)
   for args in (('git','log','--path','.env'),('git','show','--rev','HEAD:.env'),
                ('git','show','--rev','app.py'),('git','diff','--base','app.py'),
                ('git','changed-files','--base','app.py','--head','HEAD'),
