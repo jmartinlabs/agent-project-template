@@ -663,6 +663,57 @@
       "id": "continuity-07",
       "decision": "continue",
       "target": "investigate, correct and rerun the correctable failed check"
+    },
+    {
+      "id": "execution-01",
+      "decision": "continue",
+      "target": "complete the small specification directly"
+    },
+    {
+      "id": "execution-02",
+      "decision": "continue",
+      "target": "delegate substantial specification work in background"
+    },
+    {
+      "id": "execution-03",
+      "decision": "continue",
+      "target": "delegate independent DEV implementation in background"
+    },
+    {
+      "id": "execution-04",
+      "decision": "continue",
+      "target": "run independent QA after the candidate in background"
+    },
+    {
+      "id": "execution-05",
+      "decision": "continue",
+      "target": "run two isolated independent tasks in parallel"
+    },
+    {
+      "id": "execution-06",
+      "decision": "continue",
+      "target": "use foreground delegation because the result is needed now"
+    },
+    {
+      "id": "execution-07",
+      "decision": "block",
+      "target": "claim background execution without verified client support"
+    },
+    {
+      "id": "execution-08",
+      "decision": "block",
+      "target": "claim the subagent kept running after the runtime closed"
+    },
+    {
+      "id": "execution-09",
+      "decision": "block",
+      "target": "parallelize writers with overlapping ownership"
+    },
+    {
+      "id": "execution-10",
+      "decision": "continue",
+      "target": "announce execution mode before starting substantial work",
+      "communication": "Task ORCH-BG-01: executor Implementation subagent, mode background, isolation a dedicated worktree; the coordinator remains available for other authorized work. Success is not yet verified."
     }
   ]
 }

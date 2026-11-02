@@ -114,6 +114,21 @@ CI scores the reference fixtures and mutates each required marker; it does not c
 Passing these fixtures does not prove that a real client publishes, stops or continues as
 required. Live Codex, Claude Code and OpenCode runs for these cases are UNRUN.
 
+## Execution-mode scenarios
+
+The current fixture adds `execution-01..10` for the
+[execution-mode policy](../specs/methodology/dynamic-agents.md#execution-mode-direct-foreground-background):
+a small specification done directly, a substantial specification delegated in background, an
+independent DEV implementation in background, independent QA after a verifiable candidate, two
+isolated tasks in parallel, a dependent task that needs foreground, a client without verified
+background support, a closed runtime, incompatible parallel writers, and the brief start notice
+that states task, executor, mode, isolation and coordinator availability.
+
+CI scores the reference fixtures and mutates each required marker; it does not call an LLM or
+create a real subagent. Passing these fixtures does not prove real non-blocking delegation,
+isolation, or persistence, and no token saving is claimed. Live Codex, Claude Code and OpenCode
+runs for these cases are UNRUN.
+
 ## Recorded results
 
 ### 2026-10-23 — plain-language rewrite of the core documents
