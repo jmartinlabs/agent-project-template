@@ -69,6 +69,75 @@ permissions:
     resource: "*.pypirc"
     effect: deny
   - action: read
+    resource: "*.envrc"
+    effect: deny
+  - action: read
+    resource: "*.envrc.*"
+    effect: deny
+  - action: read
+    resource: "*secret*"
+    effect: deny
+  - action: read
+    resource: "*credential*"
+    effect: deny
+  - action: read
+    resource: "*SECRET*"
+    effect: deny
+  - action: read
+    resource: "*Secret*"
+    effect: deny
+  - action: read
+    resource: "*CREDENTIAL*"
+    effect: deny
+  - action: read
+    resource: "*Credential*"
+    effect: deny
+  - action: read
+    resource: ".ENV"
+    effect: deny
+  - action: read
+    resource: ".ENV.*"
+    effect: deny
+  - action: read
+    resource: ".NPMRC"
+    effect: deny
+  - action: read
+    resource: ".NETRC"
+    effect: deny
+  - action: read
+    resource: ".PYPIRC"
+    effect: deny
+  - action: read
+    resource: ".GIT-CREDENTIALS"
+    effect: deny
+  - action: read
+    resource: "*.ENVRC"
+    effect: deny
+  - action: read
+    resource: "*.ENVRC.*"
+    effect: deny
+  - action: read
+    resource: "*.PEM"
+    effect: deny
+  - action: read
+    resource: "*.KEY"
+    effect: deny
+  - action: read
+    resource: "*.P12"
+    effect: deny
+  - action: read
+    resource: "*.PFX"
+    effect: deny
+  - action: read
+    resource: "*.KDBX"
+    effect: deny
+  - action: read
+    resource: "*.JKS"
+    effect: deny
+  - action: read
+    resource: "*.KEYSTORE"
+    effect: deny
+  - action: read
     resource: "*credentials.json"
     effect: deny
   - action: read

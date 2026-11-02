@@ -6,10 +6,12 @@ OPENCODE-NATIVE-AGENTS-01. It is a thin client wrapper over the canonical
 external OpenCode sessions and does not replace the role contracts.
 
 The adapter is **optional**. The official template includes it; a derived project that does not
-use OpenCode may remove `.opencode/agents/review.md` and keep passing general validation. If
-the adapter file is present, the validator requires the complete read-only interface and rejects
-a partial installation. When it is absent, OpenCode-specific checks are skipped and the adapter
-document may be removed too; links to that document are then treated as optional.
+use OpenCode may remove the agent, plugin and wrapper together and keep passing general
+validation. The functional installation is the trio `.opencode/agents/review.md`,
+`.opencode/plugins/review-read/index.ts` and `scripts/review-read`: if any one is present, all
+three are required, so an orphan plugin or wrapper fails validation. When all three are absent,
+OpenCode-specific checks are skipped and the adapter document may be removed too; links to that
+document are then treated as optional.
 
 ## Registration
 
@@ -72,13 +74,24 @@ boundary is:
 | `external_directory` | deny | reads stay inside the workspace |
 
 The adapter denies `*`, then allows `read`, `glob` and `review_query`, then adds the
-protected-read denies. One protected-name list feeds both the local path check and the Git
-pathspec exclusions: `.env` and `.env.*`, `*.pem`, `*.key`, `*.p12`, `*.pfx`, `*.kdbx`,
-`*.jks`, `*.keystore`, `id_rsa*`, `id_ed25519*`, `id_ecdsa*`, `id_dsa*`, `.git-credentials`,
-`.netrc`, `.npmrc`, `.pypirc`, `*credentials.json`, `*secrets.json`, `*.credentials`,
-`*.secret` and `*.secrets`. `.git`, `.ssh`, `.aws` and `.gnupg` are protected directories.
-`.env.example` is the only read exception, but only outside a protected directory; it is
-still excluded from Git output.
+protected-read denies. The wrapper's protected-name list feeds the local path check and the
+Git pathspec exclusions, which are case-insensitive: `.env` and `.env.*`, `*.pem`, `*.key`,
+`*.p12`, `*.pfx`, `*.kdbx`, `*.jks`, `*.keystore`, `id_rsa*`, `id_ed25519*`, `id_ecdsa*`,
+`id_dsa*`, `.git-credentials`, `.netrc`, `.npmrc`, `.pypirc`, `*credentials.json`,
+`*secrets.json`, `*.credentials`, `*.secret`, `*.secrets`, `.envrc`, `.envrc.*`, bare
+`secret`/`secrets`/`credential`/`credentials`, and any name containing `secret` or
+`credential`. `.git`, `.ssh`, `.aws`, `.gnupg`, `secrets` and `credentials` are protected
+directories.
+Only the exact name `.env.example`, outside a protected directory, is a read exception; it is
+still excluded from local Git output, while `pr-diff` does not treat it as protected because it
+is the declared read exception. Names such as `secret.env.example` or
+`credential.env.example` are protected by the sensitive-name patterns.
+
+The wrapper, Git exclusions and PR filtering match names case-insensitively. The agent's
+static read-deny matrix mirrors the sensitive names and is checked by representative paths,
+not by equality; it is case-sensitive, so mixed-case variants beyond its listed rules are not
+guaranteed to be blocked by the `read` tool. The query interface remains the authoritative
+filtered path.
 
 This is an audit boundary, not a general secrets sandbox. Files committed outside the protected
 patterns can still contain sensitive data, and GitHub evidence is untrusted content. Report
@@ -105,12 +118,21 @@ review_query {"group":"git","operation":"file-history","options":{"path":"src/ap
 review_query {"group":"git","operation":"search","options":{"pattern":"acceptance","path":"specs"}}
 review_query {"group":"github","operation":"pr","options":{"number":37}}
 review_query {"group":"github","operation":"pr-checks","options":{"number":37}}
+review_query {"group":"github","operation":"run","options":{"run-id":41443377507}}
 ```
+
+`run-id` is validated as a positive decimal GitHub identifier (up to 19 digits), separately
+from bounded counters such as `max`, `limit` and PR `number`. Pass a `run-id` above 2^53 as a
+string; JavaScript numbers cannot represent it exactly. `file-history` follows the target path
+and omits name-status entries whose old or new path is protected; `git log --follow` accepts
+only one pathspec, so the normal exclusions cannot be passed directly.
 
 The wrapper rejects unknown groups, operations, options, duplicate options, malformed
 revisions, non-commit revisions, absolute or traversing paths, protected paths and
 pathspec/glob magic. It disables Git paging, external diff, text conversion, hooks, prompts and
-optional index locks; diffs, history and search exclude the protected file patterns. A result
+optional index locks; diffs, history, search and changed-files exclude the protected file
+patterns, `status` filters its rendered short output, and rename/copy metadata also excludes the
+allowed side of a pair whose other side is protected. A result
 of `2` means invalid input, `3` means the integration is unavailable and `4` means the read-only
 command failed. The agent reports those as `BLOCKED` or `UNRUN`, never as PASS.
 
@@ -137,6 +159,19 @@ not become a second developer. Executable QA, test runs, edits, installs, deploy
 protected actions still need an authorized executor; the agent returns findings and the exact
 blocked operation to the coordinator.
 
+## Coordinator delegation
+
+For a read-only audit, select the native `review` subagent directly. The coordinator's preflight
+is limited to authorization and Task ID, ownership, hard dependencies, the candidate revision
+(branch and SHA) and the PR number when applicable, and the applicable rules and return schema
+in the work packet. Commits, diffs, file history, PR data and existing CI belong to the subagent;
+do not pre-run those queries or repeat its audit during consolidation.
+
+The `review_query` signature is in this document, so the coordinator does not need to rediscover
+it. The canonical role is the subagent's contract; the coordinator does not need to load it in
+full to build the packet. OpenCode records token and cost metrics per session: when telemetry is
+available, report the coordinator session and the child `review` session separately.
+
 ## Limits and compatibility
 
 - Verified against OpenCode V2.1.4 on 2026-11-02. Earlier versions or V1 configuration may
@@ -146,6 +181,14 @@ blocked operation to the coordinator.
   still offers `Bash` for a client-level QA task; it is not this read-only OpenCode agent.
 - The agent cannot edit files, run arbitrary commands, launch child agents, load Skills or
   fetch arbitrary URLs. It cannot execute the test suite; it can only consult existing results.
+- `file-history` cannot combine `--follow` with the protected-path excludes; it filters the
+  rendered status lines instead. A commit subject that names a protected path is not rewritten,
+  and a path that Git renders with C-style quoting is matched as rendered rather than decoded.
+  Merge commits may not expose rename or copy metadata to `diff-tree`; a combined `show` remains
+  a documented blind spot.
+- A complete removal must remove the agent, plugin directory and wrapper together; a single
+  deleted component, including a residual plugin directory, is reported as an incomplete
+  adapter.
 - Background subagent support and external-session control are not claimed or tested here.
 - The GitHub route depends on `gh` availability and authentication and is not a substitute for
   reviewing the local candidate revision.
@@ -161,7 +204,7 @@ opencode debug agents | jq -r '.[] | select(.id=="review")'
 The validator checks the effective permission matrix (last matching rule), protected reads,
 the single `review_query` allow, the absence of `shell`, the plugin registration and
 `shell: false`, the `review-read` operation/option policy, the shared protection list, and the
-canonical-role link. It skips OpenCode-specific checks only when the adapter file is
-intentionally absent; a partial installation fails, and a complete removal also permits the
-adapter document and its links to be absent. Live registration, delegation and allowed or
+canonical-role link. It skips OpenCode-specific checks only when the agent, plugin directory and
+wrapper are all intentionally absent; a partial installation fails, and a complete removal also
+permits the adapter document and its links to be absent. Live registration, delegation and allowed or
 denied operations are separate checks and must not be claimed from file presence alone.
