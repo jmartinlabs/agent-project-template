@@ -261,7 +261,7 @@ class ValidationTests(unittest.TestCase):
    self.assertEqual(review(*args).returncode,2,args)
   fake=Path(self.root.parent)/'fakebin'; fake.mkdir(exist_ok=True)
   gh=fake/'gh'
-  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"secrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/credentials.yml","status":"modified","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/.envrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed-config.py","previous_filename":"secrets.yaml","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"AppSecrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secrets/api-key.txt","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credentials/config.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
+  payload=f'[[{{"filename":"src/app.py","status":"modified","additions":1,"deletions":0,"patch":"@@ -1 +1 @@\\n-old\\n+ok"}},{{"filename":".npmrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"vault.kdbx","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".ssh/.env.example","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed.py","previous_filename":".npmrc","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"secrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"config/credentials.yml","status":"modified","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/.envrc","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"src/renamed-config.py","previous_filename":"secrets.yaml","status":"renamed","additions":0,"deletions":0,"patch":""}},{{"filename":"AppSecrets.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"secrets/api-key.txt","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":"credentials/config.yaml","status":"added","additions":1,"deletions":0,"patch":"+{secret}"}},{{"filename":".env.example","status":"added","additions":1,"deletions":0,"patch":"+EXAMPLE_TOKEN"}},{{"filename":"src/ok.py","status":"added","additions":1,"deletions":0,"patch":"+ok"}}]]'
   gh.write_text(
    '#!/bin/sh\n'
    'if [ "$1" = "api" ]; then\n'
@@ -279,7 +279,8 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(diff.returncode,0); self.assertIn('src/app.py',diff.stdout); self.assertIn('src/ok.py',diff.stdout)
   self.assertIn('[redacted 11 protected file(s)]',diff.stdout); self.assertNotIn(secret,diff.stdout)
   names=review('github','pr-diff','--number','37','--name-only',env=env)
-  self.assertEqual(names.returncode,0); self.assertIn('src/app.py',names.stdout); self.assertIn('src/ok.py',names.stdout)
+  self.assertEqual(names.returncode,0); self.assertIn('src/app.py',names.stdout)
+  self.assertIn('src/ok.py',names.stdout); self.assertIn('.env.example',names.stdout)
   for name in ('.npmrc','vault.kdbx','.ssh/.env.example','src/renamed.py',
                'secrets.yaml','config/credentials.yml','src/.envrc','src/renamed-config.py',
                'AppSecrets.yaml','secrets/api-key.txt','credentials/config.yaml'):
@@ -311,6 +312,14 @@ class ValidationTests(unittest.TestCase):
   self.assertNotIn(secret,patch.stdout)
   shown=review('git','show','--rev','HEAD')
   self.assertEqual(shown.returncode,0); self.assertNotIn(secret,shown.stdout)
+  (root/'secrets-copy.yaml').write_text(f'{secret}=copy-source\n')
+  git('add','secrets-copy.yaml'); git('commit','-qm','add protected copy source')
+  (root/'src/copied.yaml').write_text(f'{secret}=copy-source\n')
+  git('add','src/copied.yaml'); git('commit','-qm','copy protected content')
+  copied_diff=review('git','diff','--base','HEAD~1','--head','HEAD')
+  self.assertEqual(copied_diff.returncode,0); self.assertNotIn(secret,copied_diff.stdout)
+  copied_show=review('git','show','--rev','HEAD')
+  self.assertEqual(copied_show.returncode,0); self.assertNotIn(secret,copied_show.stdout)
   normal=review('git','file-history','--path','app.py')
   self.assertEqual(normal.returncode,0); self.assertIn('app.py',normal.stdout)
  def test_review_read_pr_diff_fails_closed(self):

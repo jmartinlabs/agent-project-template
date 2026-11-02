@@ -129,8 +129,9 @@ only one pathspec, so the normal exclusions cannot be passed directly.
 The wrapper rejects unknown groups, operations, options, duplicate options, malformed
 revisions, non-commit revisions, absolute or traversing paths, protected paths and
 pathspec/glob magic. It disables Git paging, external diff, text conversion, hooks, prompts and
-optional index locks; diffs, history, search, changed-files and status exclude the protected file
-patterns. A result
+optional index locks; diffs, history, search and changed-files exclude the protected file
+patterns, `status` filters its rendered short output, and rename/copy metadata also excludes the
+allowed side of a pair whose other side is protected. A result
 of `2` means invalid input, `3` means the integration is unavailable and `4` means the read-only
 command failed. The agent reports those as `BLOCKED` or `UNRUN`, never as PASS.
 
