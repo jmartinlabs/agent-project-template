@@ -528,7 +528,7 @@ def validate(root):
    if token not in read(name): fail('publication',f'{name}: missing {token}')
  # Local lifecycle cleanup and handoff retirement are canonical in approvals/handoff.
  for name,tokens in {
-  'specs/methodology/approvals.md':('## Post-merge local cleanup','ordinary authorized closure','git worktree remove <task-worktree>','git branch -d <task-branch>','without `--force`','without `-D`','Do not require every commit','preserve the branch','git reset --hard','git clean -fd','remote branch deletion','other task'),
+  'specs/methodology/approvals.md':('## Post-merge local cleanup','ordinary authorized closure','the PR is `MERGED`','git worktree remove <task-worktree>','git branch -d <task-branch>','without `--force`','without `-D`','Do not require every commit','preserve the branch','git reset --hard','git clean -fd','remote branch deletion','other task'),
   '.agents/skills/handoff/SKILL.md':('## Next session and checkpoint retirement','successful restoration','tracked by Git','standalone PR','preserve','never remove permanent'),
   'specs/README.md':('retire after successful restoration','same task change','standalone PR'),
   '.agents/skills/orchestrate/SKILL.md':('post-merge-local-cleanup','next-session-and-checkpoint-retirement','Preserve dirty, unknown or other-task resources'),
