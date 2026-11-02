@@ -1,9 +1,15 @@
 {
   "version": "1.0",
+  "client": "OpenCode 2.1.4 CLI",
+  "agent": "plan",
+  "model": "commandcode/deepseek/deepseek-v4.1-flash",
+  "date": "2026-11-02",
+  "revision": "8fb754ecff418f29a172d5d44d54b2a58b46c529",
+  "coverage": "5 of 137 scenarios; subset, not a full scored run",
   "responses": [
     {
       "id": "continuity-01",
-      "decision": "continue",
+      "decision": "block",
       "target": "end the turn with executable authorized work pending"
     },
     {
