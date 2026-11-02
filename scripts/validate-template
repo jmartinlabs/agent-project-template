@@ -65,7 +65,10 @@ def parse_opencode_permissions(text):
   if field and current is not None and field[1] not in current:
    current[field[1]]=scalar(field[2]); continue
   errors.append(f'unexpected permission line: {line.strip()}')
- if set(keys)-{'description','mode','permissions'}: errors.append('unexpected frontmatter fields: '+', '.join(sorted(set(keys)-{'description','mode','permissions'})))
+ allowed_fields={'description','mode','permissions','color'}
+ if set(keys)-allowed_fields: errors.append('unexpected frontmatter fields: '+', '.join(sorted(set(keys)-allowed_fields)))
+ if 'color' in keys and not re.fullmatch(r'"#[0-9A-Fa-f]{6}"', keys['color']):
+  errors.append('color must be a quoted six-digit hex value')
  for index,rule in enumerate(rules,1):
   if set(rule)!={'action','resource','effect'}: errors.append(f'permission rule {index} must contain only action, resource and effect')
   if rule.get('effect') not in ('allow','ask','deny'): errors.append(f'permission rule {index} has invalid effect')
@@ -193,10 +196,35 @@ def validate(root):
   if policy_error: fail('opencode',policy_error)
  elif opencode_path.exists():
   fail('opencode','review adapter is empty')
+ # The specialized agents are optional independently and use OpenCode's default
+ # subagent capabilities. Their role and work packet are behavioral contracts.
+ specialized_present=[]
+ for name in ('functional','implementation','infrastructure'):
+  native_path=root/f'.opencode/agents/{name}.md'
+  if not native_path.exists():
+   continue
+  specialized_present.append(name)
+  if not native_path.stat().st_size:
+   fail('opencode',f'{name} adapter is empty')
+   continue
+  native=native_path.read_text(encoding='utf-8')
+  for token in ('mode: subagent',f'.agents/roles/{name}.md','Required packet','## Return'):
+   if token not in native: fail('opencode',f'{name} adapter missing {token}')
+  if not re.search(r'(?m)^mode: subagent$',native): fail('opencode',f'{name} mode must be exactly subagent')
+  if not re.search(r'(?m)^description: \S',native): fail('opencode',f'{name} adapter needs a description')
+  if re.search(r'(?m)^model:',native): fail('opencode',f'{name} adapter must inherit the coordinator model')
+  entries,parse_errors=parse_opencode_permissions(native)
+  for message in parse_errors: fail('opencode',f'{name}: {message}')
+  if entries: fail('opencode',f'{name} adapter must use OpenCode default permissions')
  if opencode_installed:
   opencode_doc=read('docs/OPENCODE_ADAPTER.md')
   for token in ('.opencode/agents/review.md','.agents/roles/qa-review.md','read-only','not a launcher','scripts/review-read','review_query','optional','BLOCKED','UNRUN'):
    if token not in opencode_doc: fail('opencode',f'documentation missing {token}')
+ if specialized_present:
+  opencode_doc=read('docs/OPENCODE_ADAPTER.md')
+  for name in specialized_present:
+   for token in (f'.opencode/agents/{name}.md',f'.agents/roles/{name}.md','OpenCode default'):
+    if token not in opencode_doc: fail('opencode',f'documentation missing {name} token {token}')
  # Approval wording lives in approvals.md; adapters link to it instead of restating it.
  for name in ('CLAUDE.md',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS)):
   if re.search(r'`(?:ok|dale|continúa)`',read(name)): fail('claude',f'{name}: restates approval wording; link approvals.md instead')
@@ -248,7 +276,7 @@ def validate(root):
  for token in ('execution mode adaptively','background only with verified client support','coordinator availability','background persistence'):
   if token not in orchestrator: fail('execution-mode',f'orchestrator missing {token}')
  packet=read('templates/agent-work-packet.md')
- for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema'):
+ for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema', 'Never ask the user directly from a subagent'):
   if token.lower() not in packet.lower(): fail('dynamic-agents',f'agent work packet missing {token}')
  guide=read('docs/GUIA_VISUAL_ORQUESTACION.md')
  diagrams=re.findall(r'(?ms)^\x60{3}mermaid\r?\n(.*?)^\x60{3}[ \t]*$',guide)
