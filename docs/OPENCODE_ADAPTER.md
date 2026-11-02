@@ -83,7 +83,8 @@ Git pathspec exclusions, which are case-insensitive: `.env` and `.env.*`, `*.pem
 `credential`. `.git`, `.ssh`, `.aws`, `.gnupg`, `secrets` and `credentials` are protected
 directories.
 `.env.example` is the only read exception, but only outside a protected directory; it is
-still excluded from Git output.
+still excluded from local Git output, while `pr-diff` does not treat it as protected because it
+is the declared read exception.
 
 The wrapper, Git exclusions and PR filtering match names case-insensitively. The agent's
 static read-deny matrix mirrors the sensitive names and is checked by representative paths,
@@ -128,7 +129,8 @@ only one pathspec, so the normal exclusions cannot be passed directly.
 The wrapper rejects unknown groups, operations, options, duplicate options, malformed
 revisions, non-commit revisions, absolute or traversing paths, protected paths and
 pathspec/glob magic. It disables Git paging, external diff, text conversion, hooks, prompts and
-optional index locks; diffs, history and search exclude the protected file patterns. A result
+optional index locks; diffs, history, search, changed-files and status exclude the protected file
+patterns. A result
 of `2` means invalid input, `3` means the integration is unavailable and `4` means the read-only
 command failed. The agent reports those as `BLOCKED` or `UNRUN`, never as PASS.
 
@@ -158,10 +160,10 @@ blocked operation to the coordinator.
 ## Coordinator delegation
 
 For a read-only audit, select the native `review` subagent directly. The coordinator's preflight
-is limited to authorization and Task ID, the candidate revision (branch and SHA) and the PR
-number when applicable, and the applicable rules copied into the work packet. Commits, diffs,
-file history, PR data and existing CI belong to the subagent; do not pre-run those queries or
-repeat its audit during consolidation.
+is limited to authorization and Task ID, ownership, hard dependencies, the candidate revision
+(branch and SHA) and the PR number when applicable, and the applicable rules and return schema
+in the work packet. Commits, diffs, file history, PR data and existing CI belong to the subagent;
+do not pre-run those queries or repeat its audit during consolidation.
 
 The `review_query` signature is in this document, so the coordinator does not need to rediscover
 it. The canonical role is the subagent's contract; the coordinator does not need to load it in

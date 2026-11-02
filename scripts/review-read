@@ -280,6 +280,20 @@ def emit(completed):
     return emit_text(completed.stdout or "")
 
 
+def rename_excludes_from(completed):
+    """Exclude the allowed side of any rename/copy paired with a protected path."""
+    extras = []
+    for line in (completed.stdout or "").splitlines():
+        fields = line.split("\t")
+        if len(fields) >= 3 and fields[0][:1] in ("R", "C"):
+            old, new = fields[1], fields[2]
+            if is_protected(old) or is_protected(new):
+                for path in (old, new):
+                    if path and not is_protected(path):
+                        extras.append(f":(exclude,icase,literal){path}")
+    return extras
+
+
 def git_operation(operation, options):
     if "rev" in options:
         resolve_rev(options["rev"], allow_range=operation == "log")
@@ -287,11 +301,12 @@ def git_operation(operation, options):
         if name in options:
             resolve_rev(options[name])
 
-    def pathspec():
+    def pathspec(extra=()):
         result = ["--"]
         if "path" in options:
             result.append(options["path"])
         result.extend(EXCLUDES)
+        result.extend(extra)
         return result
 
     if operation == "status":
@@ -310,21 +325,31 @@ def git_operation(operation, options):
             argv.append(options["rev"])
         return argv + pathspec()
     if operation == "show":
+        status, completed = run(GIT + ["diff-tree", "--no-commit-id",
+                                       "--name-status", "-r", "-M", options["rev"]])
+        if completed is None:
+            raise Invalid("cannot inspect commit rename metadata")
         argv = GIT + ["show", "--no-color", "--no-ext-diff", "--no-textconv",
                       "--format=fuller"]
         argv.append("--stat" if options.get("stat") else "--patch")
         argv.append(options["rev"])
-        return argv + pathspec()
+        return argv + pathspec(rename_excludes_from(completed))
     if operation == "diff":
         if "head" in options and "base" not in options:
             raise Invalid("--head requires --base")
+        diff_args = []
+        if "base" in options:
+            diff_args.append(options["base"])
+        if "head" in options:
+            diff_args.append(options["head"])
+        status, completed = run(GIT + ["diff", "--name-status", "--no-ext-diff",
+                                       "--no-textconv"] + diff_args)
+        if completed is None:
+            raise Invalid("cannot inspect diff rename metadata")
         argv = GIT + ["diff", "--no-color", "--no-ext-diff", "--no-textconv"]
         argv.append("--stat" if options.get("stat") else "--patch")
-        if "base" in options:
-            argv.append(options["base"])
-        if "head" in options:
-            argv.append(options["head"])
-        return argv + pathspec()
+        argv.extend(diff_args)
+        return argv + pathspec(rename_excludes_from(completed))
     if operation == "changed-files":
         return GIT + ["diff", "--name-status", "--no-ext-diff", "--no-textconv",
                       options["base"], options["head"], "--"] + EXCLUDES
@@ -358,6 +383,24 @@ def filter_file_history(text):
         if len(fields) > 1 and re.fullmatch(r"[AMDRCTUX][0-9]{0,3}", fields[0]):
             if any(is_protected(path) for path in fields[1:] if path):
                 continue
+        result.append(line)
+    return "\n".join(result) + ("\n" if text.endswith("\n") else "")
+
+
+def filter_status(text):
+    """Omit short-status lines whose path is protected.
+
+    `git status` does not accept pathspec exclusions, so filter its rendered
+    output. Status shows names only, never content.
+    """
+    result = []
+    for line in text.splitlines():
+        if line.startswith("## ") or len(line) < 4:
+            result.append(line)
+            continue
+        paths = [part.strip().strip('"') for part in line[3:].split(" -> ")]
+        if any(is_protected(path) for path in paths if path):
+            continue
         result.append(line)
     return "\n".join(result) + ("\n" if text.endswith("\n") else "")
 
@@ -461,6 +504,11 @@ def main(argv):
     group, operation, rest = argv[0], argv[1], argv[2:]
     options = parse(group, operation, rest)
     if group == "git":
+        if operation == "status":
+            status, completed = run(git_operation(operation, options))
+            if completed is None:
+                return status
+            return emit_text(filter_status(completed.stdout or ""))
         if operation == "file-history":
             status, completed = run(file_history_operation(options))
             if completed is None:

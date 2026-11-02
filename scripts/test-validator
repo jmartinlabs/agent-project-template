@@ -247,6 +247,11 @@ class ValidationTests(unittest.TestCase):
                ('git','search','--pattern',secret)):
    result=review(*args); self.assertEqual(result.returncode,0,args)
    self.assertNotIn(secret,result.stdout,args)
+  (root/'Untracked.md').write_text('ok\n')
+  (root/'UntrackedSecrets.yaml').write_text(f'{secret}=untracked\n')
+  st=review('git','status')
+  self.assertEqual(st.returncode,0); self.assertIn('Untracked.md',st.stdout)
+  self.assertNotIn('UntrackedSecrets.yaml',st.stdout)
   for args in (('git','log','--path','.env'),('git','show','--rev','HEAD:.env'),
                ('git','show','--rev','app.py'),('git','diff','--base','app.py'),
                ('git','log','--output','/tmp/x'),('git','push'),
@@ -293,10 +298,19 @@ class ValidationTests(unittest.TestCase):
   # H-4: a historical rename through a protected name must not print that name.
   (root/'src').mkdir(exist_ok=True)
   git('mv','secrets.yaml','src/config.yaml')
+  st=review('git','status')
+  self.assertEqual(st.returncode,0); self.assertNotIn('secrets.yaml',st.stdout)
   git('commit','-qm','rename protected history')
   history=review('git','file-history','--path','src/config.yaml')
   self.assertEqual(history.returncode,0); self.assertNotIn('secrets.yaml',history.stdout)
   self.assertEqual(review('git','file-history','--path','secrets.yaml').returncode,2)
+  changed=review('git','changed-files','--base','HEAD~1','--head','HEAD')
+  self.assertEqual(changed.returncode,0); self.assertNotIn('secrets.yaml',changed.stdout)
+  patch=review('git','diff','--base','HEAD~1','--head','HEAD')
+  self.assertEqual(patch.returncode,0); self.assertNotIn('secrets.yaml',patch.stdout)
+  self.assertNotIn(secret,patch.stdout)
+  shown=review('git','show','--rev','HEAD')
+  self.assertEqual(shown.returncode,0); self.assertNotIn(secret,shown.stdout)
   normal=review('git','file-history','--path','app.py')
   self.assertEqual(normal.returncode,0); self.assertIn('app.py',normal.stdout)
  def test_review_read_pr_diff_fails_closed(self):
