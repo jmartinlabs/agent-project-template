@@ -5,6 +5,9 @@ permissions:
   - action: "*"
     resource: "*"
     effect: deny
+  - action: read
+    resource: "*"
+    effect: deny
   - action: glob
     resource: "*"
     effect: allow
@@ -56,8 +59,11 @@ what to publish.
 Use `review_query file read` for project documents and evidence. Native `read` is denied
 because its path matcher is case-sensitive on non-Windows hosts; the query wrapper lowercases
 names and checks path components. Use `glob` only for discovery. `grep` is denied. The
-`review_query` tool is part of the project's review adapter; if that adapter is not installed,
-stop and report the missing dependency rather than trying another read route.
+`review_query` tool is part of the project's review adapter. If the adapter is not installed,
+or if it does not expose the `file read` operation (an `INVALID`/exit-2 response for
+`group:file`), stop and report the missing dependency rather than falling back to native reads.
+`file read` is text-only, UTF-8 and bounded; it cannot serve images, binary files or arbitrary
+external content.
 
 ## Required packet
 

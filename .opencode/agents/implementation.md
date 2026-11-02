@@ -5,6 +5,9 @@ permissions:
   - action: "*"
     resource: "*"
     effect: deny
+  - action: read
+    resource: "*"
+    effect: deny
   - action: glob
     resource: "*"
     effect: allow
@@ -85,8 +88,12 @@ general sandbox. Do not use shell to bypass the edit gate, and do not claim an u
 command passed.
 
 The canonical `dev` skill is the only allowed skill. The query tool is part of the project's
-review adapter; if it is absent, stop and report the missing dependency rather than falling
-back to native reads.
+review adapter. If the adapter is absent, or if it does not expose the `file read` operation
+(an `INVALID`/exit-2 response for `group:file`), stop and report the missing dependency rather
+than falling back to native reads. `file read` is text-only, UTF-8 and bounded.
+
+This adapter intentionally narrows the canonical implementation role for this template phase:
+publication and merge are coordinator actions, and every edit or command requires approval.
 
 ## Return
 
