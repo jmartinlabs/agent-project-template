@@ -31,7 +31,9 @@ OpenCode V2 discovers Markdown agents under `.opencode/agents/<name>.md` and plu
   `.opencode/agents/infrastructure.md`, each optional and linked to its canonical role.
 
 No model is pinned. OpenCode inherits the parent session model for a subagent without a model;
-these adapters do not configure a provider or model.
+these adapters do not configure a provider or model. UI colors: `functional` blue (`#3B82F6`),
+`implementation` green (`#22C55E`), `infrastructure` orange (`#F59E0B`) and `review` purple
+(`#A855F7`). Colors do not change tool permissions or behavior.
 
 Check registration on the installed client:
 
@@ -52,7 +54,9 @@ permission matrix and do not require the review adapter. The default client may 
 search, edit, shell and delegation; those capabilities are not an ownership or security
 boundary. The work packet, the canonical role and the project policies govern what the agent
 may do. Functional and infrastructure are read-only by contract; implementation is bounded by
-its approved specification and packet ownership. None may self-approve, publish or merge.
+its approved specification and packet ownership. None may self-approve, publish or merge. Per the shared work packet, subagents return clarification
+and approval needs to the coordinator rather than invoking the user-facing question tool.
+This is a behavioral rule, not a technical denial under the default tool policy.
 
 `review` remains a separate, independently registered read-only audit adapter with its own
 permission matrix. The specialized agents do not depend on it and do not inherit its restrictive
