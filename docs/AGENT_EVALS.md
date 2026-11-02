@@ -73,7 +73,8 @@ advance escalation notice, permissions, milestone waits, environment mapping, in
 QA, current-state closure, mixed-client isolation, manual relay and honest missing usage.
 CI tests the scorer and reference fixtures only. Live Codex/Claude/OpenCode trials and
 performance comparisons for these additions are UNRUN; historical results below apply
-to their dated scenario sets, not these new cases. No OpenCode adapter is supplied.
+to their dated scenario sets, not these new cases. The optional OpenCode `review` adapter
+is not covered by a live OpenCode trial here.
 
 The `comms-01..16` cases cover the [coordinator communication](../specs/methodology/coordinator-communication.md)
 contract: full return after the first delegation (01), correction that re-requests it (02),
