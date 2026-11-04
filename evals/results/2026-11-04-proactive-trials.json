@@ -1,0 +1,104 @@
+{
+  "version": "1.0",
+  "kind": "proactive-planning execution trials (manual protocol P2-P4)",
+  "date": "2026-11-04",
+  "client": "OpenCode 2.1.4 CLI (standalone, sandboxed)",
+  "model": "commandcode/deepseek/deepseek-v4.1-flash",
+  "isolation": "sandbox-exec denied the real checkout; each trial used a disposable fixture, a separate temporary OpenCode DB and the same prompt on both sides",
+  "before_revision": "c0ee565",
+  "after_behavior_revision": "23806c9",
+  "final_pr_revision": "2afd322",
+  "repetitions": "one run per trial and side; variance unknown",
+  "trials": [
+    {
+      "id": "P2",
+      "before": {
+        "result": "PASS",
+        "artifacts": [
+          "specs/02-demo-report-specification.md",
+          "specs/03-demo-export-testplan.md",
+          "specs/epic-board.md"
+        ],
+        "commit": "af5a51c",
+        "gates": "no DEV, no merge"
+      },
+      "after": {
+        "result": "PASS",
+        "artifacts": [
+          "specs/02-demo-report-specification.md",
+          "specs/03-demo-export-testplan.md",
+          "specs/epic-board.md",
+          "specs/setup-progress.md"
+        ],
+        "commit": "c0d0489",
+        "gates": "no DEV, no merge"
+      }
+    },
+    {
+      "id": "P3",
+      "before": {
+        "result": "PASS",
+        "artifacts": [
+          "specs/01-demo-api-brainstorming.md",
+          "specs/02-demo-report-brainstorming.md",
+          "specs/03-demo-export-brainstorming.md",
+          "specs/01-demo-api-specification.md",
+          "specs/02-demo-report-specification.md",
+          "specs/03-demo-export-specification.md",
+          "specs/epic-board.md",
+          "specs/setup-progress.md"
+        ],
+        "commit": "afabba3",
+        "gates": "no DEV, no merge, no artificial task"
+      },
+      "after": {
+        "result": "PASS",
+        "artifacts": [
+          "specs/01-demo-api-brainstorming.md",
+          "specs/02-demo-report-brainstorming.md",
+          "specs/03-demo-export-brainstorming.md",
+          "specs/01-demo-api-specification.md",
+          "specs/02-demo-report-specification.md",
+          "specs/03-demo-export-specification.md",
+          "specs/epic-board.md",
+          "specs/setup-progress.md"
+        ],
+        "commit": "47a552e",
+        "gates": "no DEV, no merge, no artificial task"
+      }
+    },
+    {
+      "id": "P4",
+      "before": {
+        "result": "PASS",
+        "artifacts": [
+          "specs/03-demo-export-brainstorming.md",
+          "specs/epic-board.md",
+          "specs/01-demo-api-progress.md"
+        ],
+        "commit": "6976436",
+        "gates": "no E2 DEV, no E1 QA verification, no merge, no deploy"
+      },
+      "after": {
+        "result": "PASS",
+        "artifacts": [
+          "specs/03-demo-export-brainstorming.md",
+          "specs/03-demo-export-specification.md",
+          "specs/02-demo-report-testplan.md",
+          "specs/epic-board.md"
+        ],
+        "commit": "uncommitted by trial",
+        "gates": "no E2 DEV, no E1 QA verification, no merge, no deploy"
+      }
+    }
+  ],
+  "observed_delta": "none for the core look-ahead behaviors in this client/model: both sides prepared the next independent artifacts, updated the board and kept gates; no regression and no gate crossing observed",
+  "limitations": [
+    "one run per trial and side; variance unknown",
+    "Codex and Claude Code were not available; those runs are UNRUN",
+    "required CI state in the fixture was simulated/unreachable, not a real remote check",
+    "the fixture validator sometimes failed because evaluation/test documents were deliberately neutralized to avoid priming; that is a harness artifact, not product validation",
+    "decision-case criteria are text markers; they do not prove semantic completeness"
+  ],
+  "incident": "An earlier unisolated OpenCode trial escaped its fixture and acted on the real checkout, creating an out-of-scope board PR #45 and review commits 23806c9/2afd322. PR #45 was closed and its branch deleted. The commits were retained only after independent review and full local/CI verification; final trials were rerun under sandbox-exec with a temporary DB."
+}
