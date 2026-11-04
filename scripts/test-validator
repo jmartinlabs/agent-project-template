@@ -1081,9 +1081,12 @@ class ValidationTests(unittest.TestCase):
    ('specs/methodology/epic-orchestration.md', 'Do not wait for an unnecessary instruction'),
    ('specs/methodology/epic-orchestration.md', 'Preparation never promotes a draft'),
    ('specs/methodology/epic-orchestration.md', 'no artificial task'),
+   ('specs/methodology/epic-orchestration.md', 'no second scheduler'),
+   ('specs/methodology/epic-orchestration.md', 'Replan when a task completes'),
    ('specs/methodology/epic-orchestration.md', 'advance the next independent ready item instead of idling'),
    ('.agents/skills/orchestrate/SKILL.md', 'Never create busywork'),
-   ('.agents/skills/orchestrate/SKILL.md', 'prepare independent SPEC, investigation, DEV-packet or QA-design work'),
+   ('.agents/skills/orchestrate/SKILL.md', 'next roadmap work and dependencies identified'),
+   ('.agents/skills/orchestrate/SKILL.md', 'a work packet for already authorized DEV, or QA test design'),
    ('AGENTS.md', 'leave a verifiable next action'),
   )
   for name, token in cases:
