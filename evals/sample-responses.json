@@ -719,7 +719,7 @@
       "id": "proactive-01",
       "decision": "continue",
       "target": "draft the E2.2 specification and update the board while E2.1 DEV continues",
-      "communication": "Draft the E2.2 specification and update the board while E2.1 DEV continues. Keep E2.2 in SPEC=drafting with its open question and record the next independent action as preparing QA test design for E2.1. No E2.2 implementation is authorized and no merge is requested."
+      "communication": "Draft the E2.2 specification and update the board while E2.1 DEV continues. Keep E2.2 in SPEC=drafting with its pending decisions recorded, and record the next independent action as preparing QA test design for E2.1. No E2.2 implementation is authorized and no merge is requested."
     },
     {
       "id": "proactive-02",

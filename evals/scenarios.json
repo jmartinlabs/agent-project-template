@@ -1790,8 +1790,8 @@
             ]
           ],
           "must_not_include": [
-            "start E2.2 DEV",
-            "merge E2.1"
+            "I will start E2.2 DEV",
+            "E2.2 DEV is authorized"
           ]
         }
       }
@@ -1842,8 +1842,8 @@
             "E2.1"
           ],
           "must_not_include": [
-            "SPEC approved",
-            "approve E2.2"
+            "E2.2 is approved",
+            "I approve E2.2"
           ]
         }
       }
@@ -1896,9 +1896,9 @@
             ]
           ],
           "must_not_include": [
-            "create a task",
-            "assign a worker",
-            "spawn"
+            "I will create a task",
+            "I will assign a worker",
+            "I will spawn"
           ]
         }
       }

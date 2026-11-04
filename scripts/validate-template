@@ -271,7 +271,7 @@ def validate(root):
  if '(dynamic-agents.md)' not in workflows: fail('dynamic-agents','workflows missing dynamic management link')
  if '(infrastructure.md)' not in read('.agents/roles/README.md'): fail('dynamic-agents','infrastructure specialist not linked')
  # Proactive look-ahead prepares ready work; it never promotes a draft or crosses a gate.
- for token in ('## Proactive planning (look-ahead)','Do not wait for an unnecessary instruction','Preparation never promotes a draft','Replan when','no artificial task','no second scheduler'):
+ for token in ('## Proactive planning (look-ahead)','Do not wait for an unnecessary instruction','Preparation never promotes a draft','authorizes DEV','starts QA verification','merges or deploys','Replan when','no artificial task','no second scheduler'):
   if token not in epic: fail('proactive-planning',f'epic look-ahead missing {token}')
  for token in ('next roadmap work and dependencies identified','a work packet for already authorized DEV, or QA test design','Never create busywork'):
   if token not in orchestrator: fail('proactive-planning',f'orchestrator look-ahead missing {token}')
