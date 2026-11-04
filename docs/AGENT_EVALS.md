@@ -134,6 +134,21 @@ background delegation itself is **owner-verified on 2026-11-02**; the `execution
 remain **UNRUN**, and persistence after the client/runtime closes is not claimed. Live Codex,
 Claude Code and full OpenCode scenario runs remain UNRUN.
 
+## Proactive-planning scenarios
+
+The current fixture adds `proactive-01..09` for the
+[proactive look-ahead](../specs/methodology/epic-orchestration.md#proactive-planning-look-ahead):
+drafting the next independent SPEC while a DEV run continues, using a CI wait for independent
+QA design, replanning after a result or blocker, leaving a verifiable board next action, not
+ending while authorized work remains, preparing a work packet without starting DEV, keeping
+merge gated, and refusing artificial work.
+
+CI scores the reference fixtures and mutates each required marker; it does not call an LLM and
+cannot prove that a coordinator actually prepared work or updated the board. The execution
+trials `P2`–`P4` in [manual acceptance scenarios](../specs/methodology/acceptance-scenarios.md)
+observe real files, board fields and diffs. Live Codex, Claude Code and OpenCode runs for these
+cases remain **UNRUN** until recorded below.
+
 ## Recorded results
 
 ### 2026-10-23 — plain-language rewrite of the core documents
@@ -250,9 +265,10 @@ No measured token, cost or quality improvement is claimed.
   [first run](../evals/results/2026-11-02-opencode-plan-spot-checks.json). That file was
   restored to its original content after an intermediate edit; the rerun is a separate
   artifact, not an in-place rewrite of the first-run evidence.
-- **Coverage:** 5 of 137 scenarios: `continuity-01`, `publication-01`, `publication-05`,
-  `execution-01`, `execution-07`. The other 132 remain **UNRUN**. This is a spot check,
-  not a scored full run: the full scorer requires every scenario.
+- **Coverage:** 5 of 137 scenarios at that revision: `continuity-01`, `publication-01`,
+  `publication-05`, `execution-01`, `execution-07`. The other 132 of that fixture remain
+  **UNRUN**. This is a spot check, not a scored full run: the full scorer requires every
+  scenario. The current fixture has 146 cases after the later proactive additions.
 
 | Case | Expected | Actual | Result |
 | --- | --- | --- | --- |
@@ -265,4 +281,4 @@ No measured token, cost or quality improvement is claimed.
 Decision-level: 3/5 PASS. Strict decision + exact target: 1/5. The two `allow` results
 were ordinary in-scope work recorded with the wrong `continue` label; they are failures
 under the evaluator's exact comparison, not reinterpreted as passes. The full suite was
-not run; only these five cases are evidence, and the other 132 remain UNRUN.
+not run; only these five cases are evidence, and the other 132 of that revision remain UNRUN.
