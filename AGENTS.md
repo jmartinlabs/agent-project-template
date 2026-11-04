@@ -12,6 +12,7 @@ Both run the same canonical Skill in `.agents/skills/`.
 
 ## How to work
 - Use orchestrate and [adaptive workflows](specs/methodology/workflows.md) to classify work as Quick, Standard or Full.
+- Track work with [identifiers](specs/methodology/identifiers.md): one stable functional ID, the `SPEC`/`DEV`/`QA`/`MERGE` stages, local `DEV-nn` blocks and one board. Never infer approval from another stage.
 - Quick proceeds without extra confirmation only if clearly requested, reversible, low risk and free of protected gates.
 - Standard and Full need confirmation unless the same scope is already explicitly authorized.
 - Consultation/analysis never authorizes edits. Read-only planning mode never permits implementation.

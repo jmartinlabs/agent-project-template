@@ -8,10 +8,15 @@ Coordinator next action: Inspect canonical spec/roadmap/progress before assignin
 Current summary owner/link: this board or the existing progress document; no competing statuses.
 External clients / IDs / start-stop owners / notification routes: NONE VERIFIED.
 
-| Item | Priority | Spec status / approval evidence | Dev status | QA status | Hard dependencies | Owner / isolated branch | Blocker / decision needed | Next independent action | Evidence / last verified |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| E1.6 (EXAMPLE ONLY) | P1 | awaiting-approval / none | not-ready | test-design | user approves E1.6 | functional / none | unresolved financial rule | draft decision options; do not code | unverified |
-| E1.7 (EXAMPLE ONLY) | P2 | drafting / none | not-ready | planned | clarify E1.6 contract if required | functional / none | pending dependency review | prepare independent brainstorming | unverified |
+| Functional ID | Priority | SPEC status / approval evidence | DEV status / blocks | QA status | MERGE status | Functional acceptance | Hard dependencies | Owner / isolated branch | Blocker / decision needed | Next independent action | Evidence / last verified |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| E1.6 (EXAMPLE ONLY) | P1 | awaiting-approval / none | not-ready / none | test-design | not-ready | pending | user approves E1.6 | functional / none | unresolved financial rule | draft decision options; do not code | unverified |
+| E1.7 (EXAMPLE ONLY) | P2 | drafting / none | not-ready / `DEV-01 — <name>` planned | planned | not-ready | pending | clarify E1.6 contract if required | functional / none | pending dependency review | prepare independent brainstorming | unverified |
+
+DEV blocks are local to each functional ID and carry a descriptive name. `DEV-01`, `DEV-02`, …
+are sequential; historical A/B/C labels map to blocks in the project's identifier index and are
+never renamed. A block number does not imply completion. `MERGE` states are `not-ready`,
+`PR-open`, `ready-for-review`, `authorization-pending`, `approved`, `merged` or `closed`.
 
 ## Approvals needed
 
