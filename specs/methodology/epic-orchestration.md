@@ -21,7 +21,9 @@ are `SPEC`, `DEV`, `QA` and `MERGE`, each with independent state, and functional
 a separate verdict. Development blocks are local to the ID (`DEV-01`, `DEV-02`, …) with a
 descriptive name; numbering never implies completion and historical A/B/C labels remain valid
 aliases. One board row per ID carries the four stage states, its blocks, ownership, evidence and
-links. Do not create a second tracker or infer merge approval from a green DEV or QA.
+links. PR titles follow `<type>(<scope>): <STAGE>[-<BLOCK>] — <description>`; `MERGE` is a
+tracking stage, not a PR type. Do not create a second tracker or infer merge approval from a
+green DEV or QA.
 
 ## Stages and gates
 

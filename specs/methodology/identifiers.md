@@ -77,10 +77,38 @@ do not copy their status. Historical records stay available behind links.
 
 - Work packet ID: `<functional-id> · <STAGE>-<NN>`, for example `E4.10 · DEV-02`.
 - A packet names one stage and, for DEV, one block. Corrections keep the same packet ID.
-- Branches may keep project conventions; the PR title carries the functional identifier and
-  the result, for example `feat(e4.10): reopen last closure`.
 - Commit messages and PR descriptions reference the functional identifier and stage; they do
   not invent new tracking IDs.
+
+### Pull request titles
+
+Recommended format:
+
+```text
+<type>(<scope>): <STAGE>[-<BLOCK>] — <description>
+```
+
+- `<type>` is a conventional type: `feat`, `fix`, `test`, `docs`, `chore`, `refactor`.
+- `<scope>` is the stable functional ID as a lowercase slug without separators that break
+  parsing (`E4.10` → `e410`). Cross-cutting work uses a documented slug such as `theme` or
+  `ci`.
+- `<STAGE>` is `SPEC`, `DEV` or `QA`. `MERGE` is a tracking stage and never needs its own PR.
+- `<BLOCK>` is `DEV-01`, `DEV-02`, … when the PR covers one block. If it covers several,
+  use `DEV` and list the included blocks in the description.
+- Keep the GitHub `#NNN` number; never renumber or mass-rename historical PRs.
+- Keep titles short and descriptive; they must remain valid under the project's existing
+  conventions and validators.
+
+Examples:
+
+```text
+docs(e410): SPEC — reapertura de cierres
+feat(e410): DEV-01 — modelo de reapertura
+feat(e410): DEV-02 — API y controles
+test(e410): QA — pruebas de reapertura
+fix(e410): DEV-02 — corrección del bloqueo histórico
+feat(theme): DEV-01 — sistema de temas y shell
+```
 
 ## 6. Compatibility and validation
 

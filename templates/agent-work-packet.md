@@ -5,6 +5,7 @@
 - **Packet ID:** `<functional-id> · <STAGE>-<NN>` (TASK-UNSET until assigned)
 - **Functional ID / stage:** UNSET
 - **DEV block:** NONE | `DEV-01 — <descriptive name>` (only for the DEV stage)
+- **PR title:** `<type>(<scope>): <STAGE>[-<BLOCK>] — <description>` when publication is authorized
 - **Epic / stream:** UNSET
 - **Profile:** Functional | Implementation | QA | Infrastructure | bounded custom
 - **Client / version / session ID:** <client and verified version> or UNVERIFIED; runtime-controlled | external. Technical session ID only if known; otherwise a stable functional reference. Never invent an ID. Corrections keep the same packet ID and session.
