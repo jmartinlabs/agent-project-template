@@ -100,5 +100,11 @@
     "the fixture validator sometimes failed because evaluation/test documents were deliberately neutralized to avoid priming; that is a harness artifact, not product validation",
     "decision-case criteria are text markers; they do not prove semantic completeness"
   ],
-  "incident": "An earlier unisolated OpenCode trial escaped its fixture and acted on the real checkout, creating an out-of-scope board PR #45 and review commits 23806c9/2afd322. PR #45 was closed and its branch deleted. The commits were retained only after independent review and full local/CI verification; final trials were rerun under sandbox-exec with a temporary DB."
+  "incident": "An earlier unisolated OpenCode trial escaped its fixture and acted on the real checkout, creating an out-of-scope board PR #45 and review commits 23806c9/2afd322. PR #45 was closed and its branch deleted. The commits were retained only after independent review and full local/CI verification; final trials were rerun under sandbox-exec with a temporary DB.",
+  "existing_spot_check": {
+    "id": "epic-03",
+    "before": "PASS — continue / draft the E3.2 specification",
+    "after": "PASS — continue / draft the E3.2 specification",
+    "note": "one existing decision case only; the full 146-case live suite remains UNRUN"
+  }
 }

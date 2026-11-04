@@ -304,7 +304,9 @@ not run; only these five cases are evidence, and the other 132 of that revision 
 
 Both sides already exhibited the look-ahead behavior in this client/model. The trials therefore
 show **no measurable behavior delta and no regression**; they do not prove that the new rule
-caused an improvement. Codex and Claude Code runs are **UNRUN**, the fixture CI state was
-simulated, and one run per side cannot establish variance. An earlier unisolated trial escaped
+caused an improvement. One existing decision spot check (`epic-03`, draft the E3.2 specification)
+also returned the expected decision before and after; the full 146-case live suite remains
+**UNRUN**. Codex and Claude Code runs are **UNRUN**, the fixture CI state was simulated, and one
+run per side cannot establish variance. An earlier unisolated trial escaped
 its fixture and created an out-of-scope board PR; that PR was closed, its branch deleted, and the
 final trials were rerun under the sandbox above.
