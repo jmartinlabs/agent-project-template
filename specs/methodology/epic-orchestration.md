@@ -14,6 +14,17 @@ For Full work, or Standard work with several independent workstreams. It extends
 - Each row: unique feature ID, stage, scope and hard dependencies, approval, assigned role, isolated branch/checkout, blockers, evidence link, next action, last verification.
 - A ready task is not an approved spec. An open PR is not a merge.
 
+## Identifiers and traceability
+
+Follow [identifiers](identifiers.md). A functional ID names a capability, not a phase; stages
+are `SPEC`, `DEV`, `QA` and `MERGE`, each with independent state, and functional acceptance is
+a separate verdict. Development blocks are local to the ID (`DEV-01`, `DEV-02`, …) with a
+descriptive name; numbering never implies completion and historical A/B/C labels remain valid
+aliases. One board row per ID carries the four stage states, its blocks, ownership, evidence and
+links. PR titles follow `<type>(<scope>): <STAGE>[-<BLOCK>] — <description>`; `MERGE` is a
+tracking stage, not a PR type. Do not create a second tracker or infer merge approval from a
+green DEV or QA.
+
 ## Stages and gates
 
 - **spec:** planned → drafting → awaiting-approval → approved. Drafts and brainstorming may be prepared autonomously; **only the user approves** functional or financial decisions and the final spec.
