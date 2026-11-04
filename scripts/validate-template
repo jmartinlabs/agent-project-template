@@ -273,7 +273,7 @@ def validate(root):
  # Proactive look-ahead prepares ready work; it never promotes a draft or crosses a gate.
  for token in ('## Proactive planning (look-ahead)','Do not wait for an unnecessary instruction','Preparation never promotes a draft','Replan when','no artificial task','no second scheduler'):
   if token not in epic: fail('proactive-planning',f'epic look-ahead missing {token}')
- for token in ('next roadmap work and dependencies identified','prepare independent SPEC, investigation, DEV-packet or QA-design work','Never create busywork'):
+ for token in ('next roadmap work and dependencies identified','a work packet for already authorized DEV, or QA test design','Never create busywork'):
   if token not in orchestrator: fail('proactive-planning',f'orchestrator look-ahead missing {token}')
  if 'leave a verifiable next action' not in agents: fail('proactive-planning','AGENTS.md missing the look-ahead next action')
  if 'advance the next independent ready item instead of idling' not in epic: fail('proactive-planning','scheduler must advance ready work while waiting')
