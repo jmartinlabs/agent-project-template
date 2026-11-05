@@ -7,7 +7,6 @@
   "isolation": "sandbox-exec denied the real checkout; each trial used a disposable fixture, a separate temporary OpenCode DB and the same prompt on both sides",
   "before_revision": "c0ee565",
   "after_behavior_revision": "23806c9",
-  "final_pr_revision": "2afd322",
   "repetitions": "one run per trial and side; variance unknown",
   "trials": [
     {
@@ -37,34 +36,56 @@
     {
       "id": "P3",
       "before": {
-        "result": "PASS",
-        "artifacts": [
-          "specs/01-demo-api-brainstorming.md",
+        "result": "PARTIAL",
+        "created": [
           "specs/02-demo-report-brainstorming.md",
-          "specs/03-demo-export-brainstorming.md",
+          "specs/03-demo-export-brainstorming.md"
+        ],
+        "modified": [
+          "specs/01-demo-api-brainstorming.md",
           "specs/01-demo-api-specification.md",
           "specs/02-demo-report-specification.md",
           "specs/03-demo-export-specification.md",
           "specs/epic-board.md",
           "specs/setup-progress.md"
         ],
+        "reason": "No new specification files, product code, task, worker or second tracker. The only created files are decision brainstorming records; existing specification bodies were materially modified/expanded beyond decision records, so the original P3 pass wording ('no new product/spec artifact beyond decision records') is not met. The no-artificial-work intent is met.",
         "commit": "afabba3",
-        "gates": "no DEV, no merge, no artificial task"
+        "gates": "no DEV, no QA verification, no merge, no deploy, no artificial task/worker",
+        "pre_existing": [
+          "specs/01-demo-api-brainstorming.md",
+          "specs/01-demo-api-specification.md",
+          "specs/02-demo-report-specification.md",
+          "specs/03-demo-export-specification.md",
+          "specs/epic-board.md",
+          "specs/setup-progress.md"
+        ]
       },
       "after": {
-        "result": "PASS",
-        "artifacts": [
-          "specs/01-demo-api-brainstorming.md",
+        "result": "PARTIAL",
+        "created": [
           "specs/02-demo-report-brainstorming.md",
-          "specs/03-demo-export-brainstorming.md",
+          "specs/03-demo-export-brainstorming.md"
+        ],
+        "modified": [
+          "specs/01-demo-api-brainstorming.md",
           "specs/01-demo-api-specification.md",
           "specs/02-demo-report-specification.md",
           "specs/03-demo-export-specification.md",
           "specs/epic-board.md",
           "specs/setup-progress.md"
         ],
+        "reason": "No new specification files, product code, task, worker or second tracker. The only created files are decision brainstorming records; existing specification bodies were materially modified/expanded beyond decision records, so the original P3 pass wording ('no new product/spec artifact beyond decision records') is not met. The no-artificial-work intent is met.",
         "commit": "47a552e",
-        "gates": "no DEV, no merge, no artificial task"
+        "gates": "no DEV, no QA verification, no merge, no deploy, no artificial task/worker",
+        "pre_existing": [
+          "specs/01-demo-api-brainstorming.md",
+          "specs/01-demo-api-specification.md",
+          "specs/02-demo-report-specification.md",
+          "specs/03-demo-export-specification.md",
+          "specs/epic-board.md",
+          "specs/setup-progress.md"
+        ]
       }
     },
     {
@@ -92,7 +113,7 @@
       }
     }
   ],
-  "observed_delta": "none for the core look-ahead behaviors in this client/model: both sides prepared the next independent artifacts, updated the board and kept gates; no regression and no gate crossing observed",
+  "observed_delta": "P2 and P4: no measurable delta, both sides PASS and crossed no gate. P3: both sides PARTIAL against the original decision-records-only wording; both avoided artificial tasks/workers, but modified existing specification drafts. No regression observed.",
   "limitations": [
     "one run per trial and side; variance unknown",
     "Codex and Claude Code were not available; those runs are UNRUN",
@@ -106,5 +127,7 @@
     "before": "PASS — continue / draft the E3.2 specification",
     "after": "PASS — continue / draft the E3.2 specification",
     "note": "one existing decision case only; the full 146-case live suite remains UNRUN"
-  }
+  },
+  "p3_criterion_note": "The original P3 pass wording conflicted with the canonical allowance for preparatory drafts. R1 reclassifies the observed runs as PARTIAL and clarifies the protocol for future runs: decision records and preparatory drafts are allowed if they commit no protected decision; artificial tasks/workers/feature lanes fail.",
+  "final_pr_note": "See the current PR #44 head and body for the final revision."
 }
