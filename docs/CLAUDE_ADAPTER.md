@@ -20,7 +20,9 @@ they do not replace canonical rules.
   file is not a running worker or a license to delegate without checks. The
   `functional` profile may create and edit only the brainstorming, DRAFT
   specification and acceptance-criteria files assigned by its packet; it never
-  approves its own spec, implements code or edits the shared board.
+  approves its own spec, implements code or edits the shared board. It has
+  `Read`, `Glob`, `Grep`, `Edit` and `Write` but no shell; the assigned-path
+  restriction is a behavioral packet rule, not a technical path sandbox.
 - Manual client communication (identity, states, full return block and status) is the same
   [coordinator communication](../specs/methodology/coordinator-communication.md) contract for Claude Code.
   Only the client name changes: `HANDOFF → CLAUDE CODE`. Nothing is sent to OpenCode automatically.

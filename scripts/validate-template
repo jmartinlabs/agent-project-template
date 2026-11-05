@@ -155,7 +155,7 @@ def validate(root):
    fail('claude',f'{name}: missing canonical role reference or manifest name')
   if 'Applicable rules' not in s: fail('claude',f'{name}: profile must rely on the packet Applicable rules')
  # The functional profile may edit authorized draft documents; review stays read-only.
- for name, required, forbidden in (('functional',('Edit','Write'),()),('qa-review',(),('Bash','Edit','Write'))):
+ for name, required, forbidden in (('functional',('Edit','Write'),('Bash',)),('qa-review',(),('Bash','Edit','Write'))):
   s=read(f'.claude/agents/{name}.md'); match=re.search(r'(?m)^tools:\s*(.+)$',s)
   tools={tool.strip() for tool in match[1].split(',')} if match else set()
   if not match or any(tool not in tools for tool in required) or any(tool in tools for tool in forbidden):

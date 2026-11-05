@@ -26,7 +26,7 @@ Both run the same canonical Skill in `.agents/skills/`.
   - [coordinator communication](specs/methodology/coordinator-communication.md) for manual client packets, returns, feedback and status.
 - Optional Agent Relay: use [relay](.agents/skills/relay/SKILL.md) only on an explicit user request; it is transport, never approval or task state.
 - Project-specific restrictions take precedence over generic shortcuts.
-- Keep one executor per task; prefer delegating substantial autonomous work and required independent QA, using background when supported.
+- Keep one executor per task; delegate substantial autonomous work, prefer background when supported, and keep required independent QA.
 
 ## Approvals and safety
 - Protected actions need an explicit, identifiable approval per [approvals](specs/methodology/approvals.md). Generic assent never counts; QA, CI or development approval never implies merge.
