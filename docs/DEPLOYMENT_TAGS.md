@@ -141,8 +141,10 @@ that a deployment happened or that recovery works.
 
 ## References
 
-- MyFinanzas `DEPLOY-TAGS-01` (application-side design, documentation PR in review)
-- `vps-infra` deployment contract (host-side design, documentation PR in review)
+- MyFinanzas [`DEPLOY-TAGS-01`](https://github.com/jmartinlabs/myfinanzas-app/pull/233)
+  (application-side design, documentation PR in review)
+- [`vps-infra` deployment contract](https://github.com/jmartinlabs/vps-infra/pull/18)
+  (host-side design, documentation PR in review)
 - [Approvals](https://github.com/jmartinlabs/agent-project-template/blob/main/specs/methodology/approvals.md)
 - [CI policy](https://github.com/jmartinlabs/agent-project-template/blob/main/specs/methodology/ci-policy.md)
 - [Security guidelines](../specs/guidelines/security.md)
