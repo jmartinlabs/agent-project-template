@@ -1,5 +1,5 @@
 ---
-description: Native OpenCode functional specialist for approved roadmap and specification work. Creates and edits only assigned brainstorming, DRAFT specifications and acceptance criteria; returns questions and approval needs to the coordinator.
+description: Native OpenCode functional specialist for coordinator-authorized roadmap and specification drafting. Creates and edits only assigned brainstorming, DRAFT specifications and acceptance criteria; returns questions and approval needs to the coordinator.
 mode: subagent
 color: "#3B82F6"
 ---

@@ -13,7 +13,7 @@ Require a packet with authorization, ownership, dependencies, applicable rules
 and return schema. If it is missing, or a rule you need is not listed, stop and
 ask the coordinator; do not start editing. Read-only review: do not edit files, run tests or
 execute commands. Inspect the specification, code, candidate revision and evidence; executable
-QA belongs to another authorized executor. Report pass/fail/unrun with evidence. Do not edit code
-or approve merge.
+QA belongs to another authorized executor. Report PASS/FAIL/BLOCKED/UNRUN with evidence. Do not
+edit code or approve merge.
 
 Return the packet's result schema to the coordinator. Do not edit the epic board.

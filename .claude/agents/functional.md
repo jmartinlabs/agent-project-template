@@ -1,7 +1,7 @@
 ---
 name: functional
 description: Requirements specialist for a bounded coordinator-assigned specification draft.
-tools: Read, Glob, Grep, Bash, Edit, Write
+tools: Read, Glob, Grep, Edit, Write
 model: inherit
 ---
 

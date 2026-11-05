@@ -107,8 +107,12 @@ class ValidationTests(unittest.TestCase):
   self.change('.claude/agents/implementation.md','Applicable rules','policy list'); self.assertRule('claude')
  def test_claude_qa_profile_read_only(self):
   self.change('.claude/agents/qa-review.md','tools: Read, Glob, Grep','tools: Read, Glob, Grep, Bash'); self.assertRule('claude')
+ def test_claude_qa_profile_no_edit(self):
+  self.change('.claude/agents/qa-review.md','tools: Read, Glob, Grep','tools: Read, Glob, Grep, Edit'); self.assertRule('claude')
  def test_claude_functional_profile_draft_edits(self):
-  self.change('.claude/agents/functional.md','tools: Read, Glob, Grep, Bash, Edit, Write','tools: Read, Glob, Grep'); self.assertRule('claude')
+  self.change('.claude/agents/functional.md','tools: Read, Glob, Grep, Edit, Write','tools: Read, Glob, Grep'); self.assertRule('claude')
+ def test_claude_functional_profile_no_shell(self):
+  self.change('.claude/agents/functional.md','tools: Read, Glob, Grep, Edit, Write','tools: Read, Glob, Grep, Bash, Edit, Write'); self.assertRule('claude')
  def test_packet_subagent_questions_route(self):
   self.change('templates/agent-work-packet.md','Never ask the user directly from a subagent','Ask the user directly from a subagent')
   self.assertRule('dynamic-agents')
@@ -596,7 +600,9 @@ class ValidationTests(unittest.TestCase):
    ('specs/methodology/dynamic-agents.md','one executor per task'),
    ('specs/methodology/dynamic-agents.md','Never create artificial agents'),
    ('.agents/skills/orchestrate/SKILL.md','Prefer a specialist for substantial'),
+   ('.agents/skills/orchestrate/SKILL.md','one executor per task'),
    ('.agents/skills/orchestrate/SKILL.md','never invent agents'),
+   ('specs/methodology/epic-orchestration.md','one executor per task'),
   )
   for name, token in cases:
    with self.subTest(name=name, token=token):
