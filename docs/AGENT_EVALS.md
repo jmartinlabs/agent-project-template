@@ -294,19 +294,24 @@ not run; only these five cases are evidence, and the other 132 of that revision 
   a separate temporary OpenCode database and the same prompt on both sides.
 - **Revisions:** *before* `c0ee565`; *after behavior docs* `23806c9`; the final PR also contains
   review/test commits after that revision. One run per trial and side; variance unknown.
-- **Raw record:** [2026-11-04 proactive trials](../evals/results/2026-11-04-proactive-trials.json).
+- **Structured summary:** [2026-11-04 proactive trials](../evals/results/2026-11-04-proactive-trials.json).
+  Transcripts, full diffs and the isolation probe remain in the local evaluation workspace and
+  are not committed; this section records the artifact classification, not reproducible raw evidence.
 
 | Trial | Before `c0ee565` | After `23806c9` | Observed |
 | --- | --- | --- | --- |
 | P2 — DEV/CI wait | PASS | PASS | Both prepared the E2 draft and E3 QA test design, updated the board and crossed no DEV/MERGE gate. |
-| P3 — all gated | PASS | PASS | Both prepared the pending decision drafts, updated the board and created no artificial task. |
+| P3 — all gated | PARTIAL | PARTIAL | Both avoided artificial tasks/workers and updated the board, but modified existing specification drafts. The original "decision records only" pass wording was therefore not met. |
 | P4 — preparation vs gates | PASS | PASS | Both prepared independent E3 material, asked for separate E2 approval and kept E1 MERGE/QA gates closed. |
 
-Both sides already exhibited the look-ahead behavior in this client/model. The trials therefore
-show **no measurable behavior delta and no regression**; they do not prove that the new rule
-caused an improvement. One existing decision spot check (`epic-03`, draft the E3.2 specification)
-also returned the expected decision before and after; the full 146-case live suite remains
-**UNRUN**. Codex and Claude Code runs are **UNRUN**, the fixture CI state was simulated, and one
-run per side cannot establish variance. An earlier unisolated trial escaped
+Both sides already exhibited the look-ahead behavior in this client/model. P2 and P4 show
+**no measurable behavior delta and no regression**; they do not prove that the new rule caused an
+improvement. P3 is **PARTIAL** on both sides: the no-artificial-work intent passed and only decision
+brainstorming files were created, but existing specification drafts were modified, so the
+original "decision records only" pass wording was not met. That wording conflicted with the canonical allowance for preparatory drafts; the protocol
+now distinguishes allowed preparatory drafts from artificial work. One existing decision spot
+check (`epic-03`, draft the E3.2 specification) returned the expected decision before and after;
+the full 146-case live suite remains **UNRUN**. Codex and Claude Code runs are **UNRUN**, the
+fixture CI state was simulated, and one run per side cannot establish variance. An earlier unisolated trial escaped
 its fixture and created an out-of-scope board PR; that PR was closed, its branch deleted, and the
 final trials were rerun under the sandbox above.
