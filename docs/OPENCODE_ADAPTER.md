@@ -47,15 +47,17 @@ opencode debug agents | jq -r '.[] | select(.id=="review" or .id=="functional" o
 | --- | --- | --- |
 | `functional` | [functional](../.agents/roles/functional.md) | creates and edits authorized brainstorming, DRAFT specifications and acceptance criteria; no self-approval, code or board edits |
 | `implementation` | [implementation](../.agents/roles/implementation.md) | implements an approved bounded specification using only the packet's ownership, runs authorized checks and returns evidence |
-| `infrastructure` | [infrastructure](../.agents/roles/infrastructure.md) | read-only investigation and safe preparation; execution or mutation requires a separately authorized executor |
+| `infrastructure` | [infrastructure](../.agents/roles/infrastructure.md) | OpenCode adapter: read-only investigation and safe preparation; the canonical role also covers bounded reviewed changes, but execution or mutation requires a separately authorized executor |
 
 These adapters use the **OpenCode default** subagent tool capabilities. They do not define a
 permission matrix and do not require the review adapter. The default client may expose read,
 search, edit, shell and delegation; those capabilities are not an ownership or security
 boundary. The work packet, the canonical role and the project policies govern what the agent
-may do. Functional may edit only the draft documents assigned in its packet; infrastructure is
-read-only by contract; implementation is bounded by its approved specification and packet
-ownership. None may self-approve, publish or merge. Per the shared work packet, subagents return clarification
+may do. Functional may edit only the draft documents assigned in its packet; implementation is
+bounded by its approved specification and packet ownership. The OpenCode infrastructure adapter is
+read-only by contract; the canonical role also covers bounded reviewed changes, but this adapter
+does not execute or mutate them. None may self-approve, publish or merge. Per the shared work
+packet, subagents return clarification
 and approval needs to the coordinator rather than invoking the user-facing question tool.
 This is a behavioral rule, not a technical denial under the default tool policy. Each specialized
 adapter is intentionally thin: client frontmatter, the canonical-role link and the minimum
