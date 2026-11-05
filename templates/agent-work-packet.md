@@ -7,11 +7,12 @@
 - **DEV block:** NONE | `DEV-01 — <descriptive name>` (only for the DEV stage)
 - **PR title:** `<type>(<scope>): <STAGE>[-<BLOCK>] — <description>` when publication is authorized
 - **Epic / stream:** UNSET
-- **Profile:** Functional | Implementation | QA | Infrastructure | bounded custom
+- **Profile:** Functional | Implementation | QA/Review | Infrastructure | bounded custom
 - **Client / version / session ID:** <client and verified version> or UNVERIFIED; runtime-controlled | external. Technical session ID only if known; otherwise a stable functional reference. Never invent an ID. Corrections keep the same packet ID and session.
 - **Start/stop owner and permitted communication route:** UNSET; manual user relay or an explicitly used repository-local Git relay; no verified client control
 - **Instruction entry points / capability check:** UNVERIFIED; confirm canonical rules are readable
 - **Context:** fresh bounded context by default | inherited with concrete reason | unsupported/disclosed
+- **Execution mode:** direct coordinator | foreground subagent | background subagent | manual external; verified client support, reason and coordinator availability
 - **Objective and done criteria:** UNSET
 - **Source documents / links:** UNSET
 - **Spec approval:** approved with source and date | draft (read-only/preparation only) | not applicable

@@ -17,7 +17,10 @@ they do not replace canonical rules.
   relay wrapper adds no hook and never reads or publishes automatically.
 - `.claude/agents/` exposes optional task-limited profiles for
   functional, implementation, QA/review and infrastructure work. A profile
-  file is not a running worker or a license to delegate without checks.
+  file is not a running worker or a license to delegate without checks. The
+  `functional` profile may create and edit only the brainstorming, DRAFT
+  specification and acceptance-criteria files assigned by its packet; it never
+  approves its own spec, implements code or edits the shared board.
 - Manual client communication (identity, states, full return block and status) is the same
   [coordinator communication](../specs/methodology/coordinator-communication.md) contract for Claude Code.
   Only the client name changes: `HANDOFF → CLAUDE CODE`. Nothing is sent to OpenCode automatically.
@@ -32,7 +35,7 @@ All `.claude/agents/` profiles keep `model: inherit` on purpose:
 | Profile | Model | Why |
 |---|---|---|
 | implementation | inherit | routine approved work is fine on the session model (balanced tier) |
-| qa-review | inherit | independent critical review is the **advanced** tier in [model selection](../specs/methodology/model-selection.md); a cheaper fixed model would weaken QA |
+| qa-review | inherit | independent critical review is the **advanced** tier in [model selection](../specs/methodology/model-selection.md); a cheaper fixed model would weaken QA. The profile is read-only; executable QA is a separate authorized task |
 | functional | inherit | specs carry ambiguity and approval questions |
 | infrastructure | inherit | operational risk; keep the user's chosen model |
 
@@ -107,12 +110,16 @@ applies. Derived projects should add their own deployment commands to `ask` once
 the stack is chosen. No live Claude session has verified these prompts for this change;
 check effective permissions in the actual client (for example `/permissions`).
 
-The QA profile offers `Read, Glob, Grep, Bash`: its read-only instruction is a role
-contract, while Bash remains able to write. If an approved action is blocked, report
-the restriction and resolve it through the authorized client configuration; do not
-silently bypass it. Keep project-specific restrictions and the canonical approval policy.
+The QA profile offers `Read, Glob, Grep`: it is read-only and cannot edit files or run
+tests. The coordinator supplies the candidate revision, diff and existing CI evidence when no
+read-only Git tool is available; executable QA belongs to another authorized executor. If an
+approved action is blocked, report the restriction and resolve it through the authorized client
+configuration; do not silently bypass it. Keep project-specific restrictions and the canonical
+approval policy.
 
-The separate OpenCode `review` pilot is strictly read-only. It can inspect local Git and
-consult existing PR/CI evidence through its native `review_query` tool, backed by
-`scripts/review-read`, but it cannot run tests; see the [OpenCode adapter](OPENCODE_ADAPTER.md).
-Do not assume the Claude profile has the same permission boundary.
+Both the Claude `qa-review` profile and the OpenCode `review` adapter are read-only review
+surfaces, but their evidence tools differ: Claude uses `Read`, `Glob` and `Grep` plus
+coordinator-supplied Git/CI evidence; OpenCode uses its native `review_query` tool, backed by
+`scripts/review-read`, for local Git and existing PR/CI evidence. Neither runs tests; see the
+[OpenCode adapter](OPENCODE_ADAPTER.md). Do not assume either profile has the same technical
+permission boundary as the other.
