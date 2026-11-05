@@ -33,9 +33,10 @@ deploy-test-vMAJOR.MINOR.PATCH   → TEST
 deploy-prod-vMAJOR.MINOR.PATCH   → PRODUCTION
 ```
 
-- A published tag is **immutable**: do not move, delete or reuse it. A retry after a
-  failed validation uses the same tag only if the SHA and artifact are unchanged;
-  otherwise publish a new patch version after a new TEST cycle.
+- A published tag is **immutable**: do not move, delete or reuse it for a different commit
+  or artifact. A retry of the same failed validation may re-run the same tag without moving
+  it only if the SHA and artifact are unchanged; otherwise publish a new patch version after
+  a new TEST cycle.
 - The tag points to a concrete commit, never to a short branch name or a mutable
   merge ref.
 - The commit must be reachable from the origin branch the project authorizes for
