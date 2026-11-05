@@ -29,7 +29,7 @@ Start by describing the work, optionally in your client's planning mode, or invo
 - Standard: `$task` for bounded features, brief plan and acceptance checks.
 - Full: existing `$init-project`, `$bootstrap`, `$roadmap`, `$spec`, `$dev`, using only necessary phases.
 
-[Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is optional and environment-dependent; scripts and CI remain the portable enforcement layer. [Manual behavioral acceptance scenarios](specs/methodology/acceptance-scenarios.md) cover Quick, Standard, Full, escalation and resume. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
+[Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is preferred for substantial autonomous work when the client supports it and remains environment-dependent; scripts and CI remain the portable enforcement layer. [Manual behavioral acceptance scenarios](specs/methodology/acceptance-scenarios.md) cover Quick, Standard, Full, escalation and resume. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
 
 ## Adaptive model selection (v2.2)
 
