@@ -45,7 +45,7 @@ opencode debug agents | jq -r '.[] | select(.id=="review" or .id=="functional" o
 
 | Agent | Canonical role | Role behavior |
 | --- | --- | --- |
-| `functional` | [functional](../.agents/roles/functional.md) | prepares requirements, questions, draft sections and acceptance cases; read-only by contract |
+| `functional` | [functional](../.agents/roles/functional.md) | creates and edits authorized brainstorming, DRAFT specifications and acceptance criteria; no self-approval, code or board edits |
 | `implementation` | [implementation](../.agents/roles/implementation.md) | implements an approved bounded specification using only the packet's ownership, runs authorized checks and returns evidence |
 | `infrastructure` | [infrastructure](../.agents/roles/infrastructure.md) | read-only investigation and safe preparation; execution or mutation requires a separately authorized executor |
 
@@ -53,8 +53,9 @@ These adapters use the **OpenCode default** subagent tool capabilities. They do 
 permission matrix and do not require the review adapter. The default client may expose read,
 search, edit, shell and delegation; those capabilities are not an ownership or security
 boundary. The work packet, the canonical role and the project policies govern what the agent
-may do. Functional and infrastructure are read-only by contract; implementation is bounded by
-its approved specification and packet ownership. None may self-approve, publish or merge. Per the shared work packet, subagents return clarification
+may do. Functional may edit only the draft documents assigned in its packet; infrastructure is
+read-only by contract; implementation is bounded by its approved specification and packet
+ownership. None may self-approve, publish or merge. Per the shared work packet, subagents return clarification
 and approval needs to the coordinator rather than invoking the user-facing question tool.
 This is a behavioral rule, not a technical denial under the default tool policy.
 
@@ -190,18 +191,20 @@ The role's mission is not copied into the adapter.
 
 The agent may investigate independently: documents, specifications, acceptance criteria, code,
 local Git state, diffs, commits, file history, Pull Requests and existing CI results. Text file
-contents are read through `review_query file read`, not the native `read` tool. It must not
-become a second developer. Executable QA, test runs, edits, installs, deployments and other
-protected actions still need an authorized executor; the agent returns findings and the exact
-blocked operation to the coordinator.
+contents are read through `review_query file read`, not the native `read` tool. It is a review
+surface, not an executable-QA executor, and must not become a second developer. Executable QA,
+test runs, edits, installs, deployments and other protected actions still need an authorized
+executor; the agent returns findings and the exact blocked operation to the coordinator.
 
 ## Coordinator delegation
 
-For a read-only audit, select the native `review` subagent directly. The coordinator's preflight
-is limited to authorization and Task ID, ownership, hard dependencies, the candidate revision
-(branch and SHA) and the PR number when applicable, and the applicable rules and return schema
-in the work packet. Commits, diffs, file history, PR data and existing CI belong to the subagent;
-do not pre-run those queries or repeat its audit during consolidation.
+For a substantial SPEC review or a DEV candidate review, select the native `review` subagent
+directly. Reserve it for material independent audits; a trivial check does not justify a delegate.
+The coordinator's preflight is limited to authorization and Task ID, ownership, hard dependencies,
+the candidate revision (branch and SHA) and the PR number when applicable, and the applicable
+rules and return schema in the work packet. Commits, diffs, file history, PR data and existing CI
+belong to the subagent; do not pre-run those queries or repeat its audit during consolidation.
+The agent cannot edit or run tests; executable QA belongs to another authorized executor.
 
 The `review_query` signature is in this document, so the coordinator does not need to rediscover
 it. The canonical role is the subagent's contract; the coordinator does not need to load it in
@@ -224,8 +227,9 @@ may stop it. Do not claim persistence after that close without a new verificatio
   `.env.example` basename remains readable. These are live fixture observations, not a general
   secrets guarantee.
 - The adapter is project-local; it does not alter global OpenCode configuration.
-- Codex and Claude Code are unaffected. The existing `.claude/agents/qa-review.md` profile
-  still offers `Bash` for a client-level QA task; it is not this read-only OpenCode agent.
+- Codex and Claude Code are unaffected. The `.claude/agents/qa-review.md` profile is also
+  read-only (`Read, Glob, Grep`) and cannot run tests; executable QA belongs to another authorized
+  executor. It is not this OpenCode agent, and its evidence tools differ.
 - The `review` agent cannot edit files, run arbitrary commands, launch child agents, load Skills
   or fetch arbitrary URLs. It cannot execute the test suite; it can only consult existing results.
   The specialized agents instead use the default OpenCode capabilities; their role and work packet

@@ -154,12 +154,18 @@ def validate(root):
   if f'.agents/roles/{name}.md' not in s or f'name: {name}' not in s:
    fail('claude',f'{name}: missing canonical role reference or manifest name')
   if 'Applicable rules' not in s: fail('claude',f'{name}: profile must rely on the packet Applicable rules')
+ # The functional profile may edit authorized draft documents; review stays read-only.
+ for name, required, forbidden in (('functional',('Edit','Write'),()),('qa-review',(),('Bash','Edit','Write'))):
+  s=read(f'.claude/agents/{name}.md'); match=re.search(r'(?m)^tools:\s*(.+)$',s)
+  tools={tool.strip() for tool in match[1].split(',')} if match else set()
+  if not match or any(tool not in tools for tool in required) or any(tool in tools for tool in forbidden):
+   fail('claude',f'{name}: unexpected tool boundary')
  # OpenCode's native review adapter is optional. When installed it must be complete and
  # read-only; when intentionally absent, derived projects keep passing general validation.
  opencode_path=root/'.opencode/agents/review.md'
  if opencode_installed and opencode_path.stat().st_size:
   opencode=opencode_path.read_text(encoding='utf-8')
-  for token in ('mode: subagent','.agents/roles/qa-review.md','work packet','Applicable rules','read-only','BLOCKED','UNRUN','scripts/review-read','review_query'):
+  for token in ('mode: subagent','.agents/roles/qa-review.md','work packet','Applicable rules','read-only','Prioritize **substantial SPEC reviews**','**DEV candidate reviews**','test execution','BLOCKED','UNRUN','scripts/review-read','review_query'):
    if token not in opencode: fail('opencode',f'review adapter missing {token}')
   if not re.search(r'(?m)^mode: subagent$',opencode): fail('opencode','review adapter mode must be exactly subagent')
   if not re.search(r'(?m)^description: \S',opencode): fail('opencode','review adapter needs a description')
@@ -216,6 +222,10 @@ def validate(root):
   entries,parse_errors=parse_opencode_permissions(native)
   for message in parse_errors: fail('opencode',f'{name}: {message}')
   if entries: fail('opencode',f'{name} adapter must use OpenCode default permissions')
+ if (root/'.opencode/agents/functional.md').is_file():
+  functional_native=read('.opencode/agents/functional.md')
+  for token in ('create and edit only the draft documents','DRAFT specification','acceptance criteria','Do not implement code','shared epic board'):
+   if token not in functional_native: fail('opencode',f'functional adapter missing {token}')
  if opencode_installed:
   opencode_doc=read('docs/OPENCODE_ADAPTER.md')
   for token in ('.opencode/agents/review.md','.agents/roles/qa-review.md','read-only','not a launcher','scripts/review-read','review_query','optional','BLOCKED','UNRUN'):
@@ -225,6 +235,8 @@ def validate(root):
   for name in specialized_present:
    for token in (f'.opencode/agents/{name}.md',f'.agents/roles/{name}.md','OpenCode default'):
     if token not in opencode_doc: fail('opencode',f'documentation missing {name} token {token}')
+  if 'functional' in specialized_present and 'creates and edits authorized brainstorming' not in opencode_doc:
+   fail('opencode','documentation must allow authorized functional draft edits')
  # Approval wording lives in approvals.md; adapters link to it instead of restating it.
  for name in ('CLAUDE.md',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS)):
   if re.search(r'`(?:ok|dale|continúa)`',read(name)): fail('claude',f'{name}: restates approval wording; link approvals.md instead')
@@ -259,14 +271,19 @@ def validate(root):
   if token.lower() not in board.lower(): fail('epic-scheduling',f'board missing {token}')
  if 'specs/methodology/epic-orchestration.md' not in orchestrator: fail('epic-scheduling','coordinator not linked to epic scheduling')
  if '(specs/methodology/epic-orchestration.md)' not in agents: fail('epic-scheduling','AGENTS.md missing epic scheduling link')
- for role, tokens in {'functional':('approval','brainstorming'),'implementation':('approved','dependencies'),'qa-review':('independent','pass/fail')}.items():
+ for role, tokens in {'functional':('approval','brainstorming','draft specifications','acceptance criteria','never approve your own spec'),'implementation':('approved','dependencies'),'qa-review':('independent','pass/fail','this is a **read-only review role**','prioritize substantial spec reviews','dev candidate reviews','executable qa')}.items():
   text=read(f'.agents/roles/{role}.md').lower()
   for token in tokens:
    if token not in text: fail('epic-scheduling',f'role {role} missing {token}')
  dynamic=read('specs/methodology/dynamic-agents.md')
  for token in ('profiles', 'one executor', 'parallel', 'quota', 'supported', 'sequential', 'financial', 'close', 'work-packet', 'independent qa', 'applicable rules'):
   if token.lower() not in dynamic.lower(): fail('dynamic-agents',f'dynamic policy missing {token}')
+ for token in ('delegation preference', 'one executor per task', 'never create artificial agents'):
+  if token.lower() not in dynamic.lower(): fail('delegation-preference',f'dynamic policy missing {token}')
  if 'specs/methodology/dynamic-agents.md' not in orchestrator: fail('dynamic-agents','orchestrator not wired to dynamic management')
+ for token in ('Prefer a specialist for substantial','one executor per task','never invent agents'):
+  if token not in orchestrator: fail('delegation-preference',f'orchestrator missing {token}')
+ if 'one executor per task' not in epic.lower(): fail('delegation-preference','epic scheduler missing one executor per task')
  if '(specs/methodology/dynamic-agents.md)' not in agents: fail('dynamic-agents','AGENTS.md missing dynamic management link')
  if '(dynamic-agents.md)' not in workflows: fail('dynamic-agents','workflows missing dynamic management link')
  if '(infrastructure.md)' not in read('.agents/roles/README.md'): fail('dynamic-agents','infrastructure specialist not linked')
@@ -283,7 +300,7 @@ def validate(root):
  for token in ('execution mode adaptively','background only with verified client support','coordinator availability','background persistence'):
   if token not in orchestrator: fail('execution-mode',f'orchestrator missing {token}')
  packet=read('templates/agent-work-packet.md')
- for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema', 'Never ask the user directly from a subagent'):
+ for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema', 'Execution mode', 'Never ask the user directly from a subagent'):
   if token.lower() not in packet.lower(): fail('dynamic-agents',f'agent work packet missing {token}')
  guide=read('docs/GUIA_VISUAL_ORQUESTACION.md')
  diagrams=re.findall(r'(?ms)^\x60{3}mermaid\r?\n(.*?)^\x60{3}[ \t]*$',guide)

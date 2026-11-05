@@ -11,6 +11,8 @@ packet's **Applicable rules** instead of rereading every policy.
 
 Require a packet with authorization, ownership, dependencies, applicable rules
 and return schema. If it is missing, or a rule you need is not listed, stop and
-ask the coordinator; do not start editing. Write only assigned draft specification/brainstorming files. Do not accept your own specification or start implementation.
+ask the coordinator; do not start editing. Create or edit only the brainstorming, DRAFT
+specification and acceptance-criteria files assigned by the packet. Do not mark a draft approved,
+implement code or edit the epic board. Never approve your own specification.
 
 Return the packet's result schema to the coordinator. Do not edit the epic board.
