@@ -41,6 +41,13 @@ For multiple epics, [epic orchestration](specs/methodology/epic-orchestration.md
 
 While E1.6 awaits a financial decision, the functional lane can draft independent E1.7 requirements and QA can prepare provisional tests. E1.6 implementation remains blocked until explicit approval. After approval, `$orchestrate` can route to `$dev` and QA inside the active run without asking you to invoke those Skills manually. Merges and consequential decisions always need your approval. No background continuation after the session closes.
 
+## Optional deployment tags pattern
+
+Projects that need immutable releases and a separate production approval may reuse the
+[deployment by tags pattern](docs/DEPLOYMENT_TAGS.md). It is **optional**: it does not
+change `$orchestrate`, Skills, approvals or CI, is not installed by this template, and
+must not be imposed on other repositories. Each adopter decides and authorizes its phases.
+
 ## Dynamic agent management (v2.3.1)
 
 **Start with the [visual orchestration guide](docs/GUIA_VISUAL_ORQUESTACION.md)** (Spanish): eight editable Mermaid diagrams illustrate agent roles, dynamic pool selection, parallel epics, worker lifecycle, approval gates, branch isolation, migration from two chats and model selection.
@@ -103,6 +110,7 @@ specs/methodology/epic-orchestration.md dependency-aware epic scheduler
 specs/methodology/dynamic-agents.md dynamic specialist lifecycle
 docs/GUIA_VISUAL_ORQUESTACION.md   eight editable Mermaid diagrams
 docs/OPENCODE_ADAPTER.md           native review and specialized subagent adapters
+docs/DEPLOYMENT_TAGS.md            optional deployment-by-tags pattern (not installed)
 templates/agent-work-packet.md    delegate work packet contract
 templates/epic-board.md          optional epic coordination board
 .agents/roles/                   functional, implementation, QA and infrastructure roles
