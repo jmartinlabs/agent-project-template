@@ -252,7 +252,7 @@ agent registrations are the optional OpenCode adapters (`review`, `functional`, 
 and `infrastructure`) installed by the [OpenCode adapter](../../docs/OPENCODE_ADAPTER.md). `review`
 is a read-only audit surface; the specialized adapters use OpenCode's default tools under their
 role and packet contracts. They are not launchers, schedulers or controllers for external OpenCode
-sessions. The review trio may be removed as a unit; specialized adapters are independently optional.
+sessions. The `review` adapter (agent, plugin and wrapper) may be removed as a unit; specialized adapters are independently optional.
 Check what the actual client (Codex, Claude Code or another) supports for delegation, non-blocking
 execution and isolation before using it, per execution. API runtimes configured separately do not
 describe what an interactive session can do. Releasing a coordinator turn does not end a running
