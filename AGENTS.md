@@ -3,12 +3,13 @@ This repository contains a reusable development methodology, not an application.
 Do not initialize a sample project here. In a derived project, replace this paragraph and
 add its approved install, run and test commands after bootstrap.
 
-Skill names: Codex uses `$name` (`$orchestrate`); Claude Code uses `/name` (`/orchestrate`).
-Both run the same canonical Skill in `.agents/skills/`.
+Skill names: Codex uses `$name` (`$orchestrate`); Claude Code and Hermes use `/name`
+(`/orchestrate`). All run the same canonical Skill in `.agents/skills/`; Hermes additionally
+needs `hermes skills trust` once per checkout before project Skills load.
 
 ## Commands
 - Validate template changes: `./scripts/validate-template`. Test the validator: `./scripts/test-validator`.
-- Guides: [Claude adapter](docs/CLAUDE_ADAPTER.md), [OpenCode adapter](docs/OPENCODE_ADAPTER.md), [agent behavioral evals](docs/AGENT_EVALS.md).
+- Guides: [Claude adapter](docs/CLAUDE_ADAPTER.md), [Hermes adapter](docs/HERMES_ADAPTER.md), [OpenCode adapter](docs/OPENCODE_ADAPTER.md), [agent behavioral evals](docs/AGENT_EVALS.md).
 
 ## How to work
 - Use orchestrate and [adaptive workflows](specs/methodology/workflows.md) to classify work as Quick, Standard or Full.
