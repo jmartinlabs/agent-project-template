@@ -785,7 +785,7 @@ class ValidationTests(unittest.TestCase):
    ('specs/methodology/dynamic-agents.md', 'savings still need measurement'),
    ('templates/agent-work-packet.md', 'Client / version / session ID'),
    ('templates/agent-work-packet.md', 'Blocking notice'),
-   ('templates/progress.md', 'Current checkpoint'),
+   ('templates/progress.md', 'append-only'),
    ('templates/testplan.md', 'Local / CI platform and owner'),
    ('.agents/skills/orchestrate/SKILL.md', 'progressively spaced CI queries'),
    ('.agents/skills/dev/SKILL.md', 'negative/integration cases before code'),

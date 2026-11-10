@@ -5,7 +5,8 @@
 Repository: UNDECIDED
 Last reconciled (date + source commit/PR): UNVERIFIED
 Coordinator next action: Inspect canonical spec/roadmap/progress before assigning work.
-Current summary owner/link: this board or the existing progress document; no competing statuses.
+Current summary owner/link: this board when it exists — it is the single current-state surface;
+progress documents keep append-only history and no competing statuses.
 External clients / IDs / start-stop owners / notification routes: NONE VERIFIED.
 
 | Functional ID | Priority | SPEC status / approval evidence | DEV status / blocks | QA status | MERGE status | Functional acceptance | Hard dependencies | Owner / isolated branch | Blocker / decision needed | Next independent action | Evidence / last verified |

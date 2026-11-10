@@ -16,7 +16,7 @@ This is an uninitialized template. No product, stack or architecture has been ap
 | `epic-board.md` | Optional multi-epic queue, blockers, dependencies and evidence links; never canonical approvals | orchestrate only |
 | `NN-slug-brainstorming.md` | Append-only questions and confirmed answers | spec |
 | `NN-slug-specification.md` | Approved behavior, contracts and acceptance checks | spec |
-| `NN-slug-progress.md` | Implementation tasks, evidence and next action | dev |
+| `NN-slug-progress.md` | Per-task state when no board exists; append-only evidence history | dev |
 | `NN-slug-testplan.md` | Acceptance-to-verification mapping and current results | dev |
 | `session-handoff.md` | Optional latest shutdown checkpoint when no existing progress/board file fits; retire after successful restoration and consolidation; if tracked, remove in the same task change, never a standalone PR; no automatic resume authority | handoff only |
 
