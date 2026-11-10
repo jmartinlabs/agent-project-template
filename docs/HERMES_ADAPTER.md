@@ -5,6 +5,10 @@ client** of the existing methodology: nothing was removed, no canonical contract
 and `.claude/`, `.opencode/`, `.codex/`, relay, usage metrics and the board template stay as
 they were.
 
+**Delegation with Hermes is not validated.** No delegated run exists: `delegate_task` has
+never been exercised by this harness, foreground or background, so P2 and P2b remain
+**UNRUN**. Everything proven here is a single foreground session.
+
 Governing constraint: **compatibility at the lowest possible cost.** A canonical file changes
 only for a reproducible defect, with the smallest edit that removes it. Everything else stays
 listed as optional and unapplied.
@@ -122,14 +126,27 @@ Evidence: [`summary`](../evals/results/2026-11-10-hermes-p0-summary.json),
 [`discovery log`](../evals/results/2026-11-10-hermes-p0-discovery.log),
 [`rendered index`](../evals/results/2026-11-10-hermes-p0-index.txt).
 
-### 6.2 P-ISO — isolation proof, no model: **PASS 26/26**
+### 6.2 P-ISO — isolation proof, no model: **PASS**
 
-Probe: [`evals/results/2026-11-10-hermes-piso-probe.sh`](../evals/results/2026-11-10-hermes-piso-probe.sh).
-Two identical runs, no network, no model calls.
+Two probes, two roles. The one that runs from now on aims **every** write at a disposable
+decoy and uses a **synthetic** config; the first run is kept unchanged because it was actually
+executed, and its write attempts did point at the real checkout and the real profile (all
+denied, both untouched afterwards).
+
+| Probe | Result | Write attempts at real paths |
+| --- | --- | --- |
+| `2026-11-10-hermes-piso-probe.sh` — historical, unchanged | 26/26, 2 identical runs | 2 (real checkout, real profile): both denied, verified unchanged |
+| [`-piso-probe-v2.sh`](../evals/results/2026-11-10-hermes-piso-probe-v2.sh) — current | 27/27, 2 identical runs | 0: decoy checkout, decoy profile home, synthetic config |
+
+Both are model-free and network-free. Evidence: historical
+[`log`](../evals/results/2026-11-10-hermes-piso.log) and
+[`summary`](../evals/results/2026-11-10-hermes-piso-summary.json); current
+[`log`](../evals/results/2026-11-10-hermes-piso-v2.log) and
+[`summary`](../evals/results/2026-11-10-hermes-piso-v2-summary.json).
 
 | Group | What was proven |
 | --- | --- |
-| A (13 checks) | `sandbox-exec` denies writes to the origin checkout, to the real profile, to `/tmp` and through a symlink pointing outside the fixture; the same path is writable with no profile and with a profile that allows it (A/B controls); a sandboxed `hermes config set` leaves the decoy config byte-identical while the unsandboxed control changes it; reads stay allowed |
+| A (14 checks in v2) | `sandbox-exec` denies writes to a checkout-shaped decoy, a profile-home-shaped decoy, `/tmp` and through a symlink pointing outside the fixture; the same path is writable with no profile and with a profile that allows it (A/B controls); a sandboxed `hermes config set` leaves the synthetic config byte-identical while the unsandboxed control changes it; reads stay allowed; and A11 asserts statically that neither the real checkout nor the real profile is covered by any allow rule, and that both are writable without the jail — so a write there would be denied by the rule, without aiming one at it |
 | B (4 checks) | `file` toolset = `read_file`, `write_file`, `patch`, `search_files`; the `vision` surface composed by the runtime is exactly `vision_analyze`; no mutating tool in it |
 | C (6 checks) | the pre/post manifest is stable on a clean tree, catches one appended byte (exactly one changed path), is restored by revert, catches an untracked file, and catches a same-size byte flip whose mtime was restored — a timestamp check does not |
 | D (3 checks) | origin hashes identical before/after, real profile config and trust unchanged, fixture clean |
