@@ -1,0 +1,146 @@
+{
+ "schema": "hermes-probe/1",
+ "phase": "P-ISO isolation proof",
+ "result": "PASS",
+ "checks": [
+  {
+   "id": "A1",
+   "status": "PASS",
+   "detail": "sandbox-exec=/usr/bin/sandbox-exec"
+  },
+  {
+   "id": "A2",
+   "status": "PASS",
+   "detail": "profile compiles and executes"
+  },
+  {
+   "id": "A3",
+   "status": "PASS",
+   "detail": "write inside fixture allowed"
+  },
+  {
+   "id": "A4",
+   "status": "PASS",
+   "detail": "origin write denied (exit=1, parent writable=yes)"
+  },
+  {
+   "id": "A5",
+   "status": "PASS",
+   "detail": "real profile (HERMES_HOME) write denied (exit=1)"
+  },
+  {
+   "id": "A6",
+   "status": "PASS",
+   "detail": "/tmp write denied (exit=1)"
+  },
+  {
+   "id": "A7",
+   "status": "PASS",
+   "detail": "symlink traversal denied (exit=1)"
+  },
+  {
+   "id": "A8a",
+   "status": "PASS",
+   "detail": "escape path writable with no sandbox"
+  },
+  {
+   "id": "A8b",
+   "status": "PASS",
+   "detail": "same path denied by the profile"
+  },
+  {
+   "id": "A8c",
+   "status": "PASS",
+   "detail": "allow rule makes the path writable again: the denial is the rule, not the environment"
+  },
+  {
+   "id": "A9a",
+   "status": "PASS",
+   "detail": "sandboxed config write left the decoy config byte-identical (hermes exit=1)"
+  },
+  {
+   "id": "A9b",
+   "status": "PASS",
+   "detail": "control without the sandbox changes the same file: the deny rule is what blocked it"
+  },
+  {
+   "id": "A10",
+   "status": "PASS",
+   "detail": "reads outside the write jail stay allowed"
+  },
+  {
+   "id": "B1",
+   "status": "PASS",
+   "detail": "file toolset=['read_file', 'write_file', 'patch', 'search_files']"
+  },
+  {
+   "id": "B2",
+   "status": "PASS",
+   "detail": "resolved=['patch', 'read_file', 'search_files', 'write_file']"
+  },
+  {
+   "id": "B3",
+   "status": "PASS",
+   "detail": "vision surface=['vision_analyze']"
+  },
+  {
+   "id": "B4",
+   "status": "PASS",
+   "detail": "mutating tools in vision surface=[]"
+  },
+  {
+   "id": "C0",
+   "status": "PASS",
+   "detail": "clean tree: manifest stable across two reads (105 lines)"
+  },
+  {
+   "id": "C1",
+   "status": "PASS",
+   "detail": "one appended byte in AGENTS.md -> exactly one changed path (2 hash rows + 2 porcelain row)"
+  },
+  {
+   "id": "C2",
+   "status": "PASS",
+   "detail": "revert restores the exact baseline"
+  },
+  {
+   "id": "C3",
+   "status": "PASS",
+   "detail": "untracked file detected by porcelain and by content hashes"
+  },
+  {
+   "id": "C4",
+   "status": "PASS",
+   "detail": "size and mtime identical, sha256 still catches the flip (3 diff lines)"
+  },
+  {
+   "id": "C5",
+   "status": "PASS",
+   "detail": "fixture restored to the baseline manifest"
+  },
+  {
+   "id": "D1",
+   "status": "PASS",
+   "detail": "origin content hashes identical before/after"
+  },
+  {
+   "id": "D2",
+   "status": "PASS",
+   "detail": "real profile config unchanged, trusted_project_dirs still empty"
+  },
+  {
+   "id": "D3",
+   "status": "PASS",
+   "detail": "fixture working tree clean"
+  }
+ ],
+ "counts": {
+  "total": 26,
+  "pass": 26,
+  "fail": 0,
+  "blocked": 0
+ },
+ "records": [],
+ "generated_from": "2026-11-10-hermes-piso.log",
+ "generator": "parse CHECK lines from the log; no hand transcription"
+}
