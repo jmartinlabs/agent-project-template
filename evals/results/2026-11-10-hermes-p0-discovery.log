@@ -1,0 +1,166 @@
+
+===== 0. environment =====
+date_local=2026-11-10T00:38:06+0100
+date_utc=2026-11-09T23:38:06Z
+os=15.5 (arm64)
+hermes_binary=/Users/josemartin/.hermes/hermes-agent/.hermes/bin/hermes
+hermes_version=Hermes Agent v0.23.0 (2026.9.24) · stable · local 2bd378ed1b8d
+hermes_install=/Users/josemartin/.hermes/hermes-agent
+python=Python 3.14.9
+HERMES_HOME=/Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/home
+
+===== 1. origin + real profile BEFORE =====
+origin_head=bf5470d40f89124611b656d1b95f1a3f804d88a3
+origin_status=?? docs/HERMES_ADAPTER.md;?? evals/results/2026-11-10-hermes-p0-discovery.log;?? evals/results/2026-11-10-hermes-p0-index.txt;?? evals/results/2026-11-10-hermes-p0-probe.sh;?? evals/results/2026-11-10-hermes-p0-summary.json;
+real_config_sha256=115c2f3f874612d2977ac77d57fa04560b62e604b92a3aac554e5564f8bf1dac
+real_trusted_dirs=[] 
+real_installed_skill_names=43
+origin_sha256_of_15_files=14
+
+===== 2. disposable clone =====
+
+$ git clone --quiet --no-hardlinks /Users/josemartin/Projects/agent-project-template /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template
+[exit=0]
+fixture_head=bf5470d40f89124611b656d1b95f1a3f804d88a3
+fixture_skill_md_total=22
+fixture_.agents_skills=11 fixture_.claude_skills=11
+
+===== 3. fresh HERMES_HOME, BEFORE trust =====
+temp_home_config_existed=no
+resolve_agent_cwd() = /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template
+find_project_root() = /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template
+get_project_skills_dirs() = []
+untrusted_notice(root,count) = ('/Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template', 11)
+index_chars = 0 project_rows = 0
+
+===== 4. trust the clone only =====
+
+$ env HERMES_HOME=/Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/home hermes skills trust /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template
+Trusted: /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template
+11 project skill(s) will load in sessions started inside this repo (they take precedence over same-named profile skills).
+[exit=0]
+temp_config_sha256_after_trust=eef6a61a758f576626958a4cd8c6a81bc71b43b1537683a105cc8f9e8ae86536
+trusted_dirs_temp_home=  - /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template 
+trust_idempotent:
+
+$ env HERMES_HOME=/Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/home hermes skills trust /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template
+Already trusted: /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template
+11 project skill(s) will load in sessions started inside this repo (they take precedence over same-named profile skills).
+[exit=0]
+
+===== 5. resolver + quarantine + rendered index (no model) =====
+find_project_root() = /Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template
+get_project_skills_dirs() = ['/Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template/.agents/skills']
+candidate_dirs = ['/Users/josemartin/.hermes/cache/scratch/hermes-p0v4-20261110T003806/fixture/agent-project-template/.agents/skills']
+claude_skills_dir_scanned = False
+canonical_skill_files = 11
+[
+ {
+  "name": "adopt-project",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "adopt-project: safe \u2014 4 finding(s) in persistence"
+ },
+ {
+  "name": "bootstrap",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "bootstrap: safe \u2014 2 finding(s) in persistence"
+ },
+ {
+  "name": "dev",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "dev: safe \u2014 2 finding(s) in persistence"
+ },
+ {
+  "name": "handoff",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "handoff: clean scan, no threats detected"
+ },
+ {
+  "name": "init-project",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "init-project: safe \u2014 2 finding(s) in persistence"
+ },
+ {
+  "name": "orchestrate",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "orchestrate: safe \u2014 4 finding(s) in persistence"
+ },
+ {
+  "name": "relay",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "relay: clean scan, no threats detected"
+ },
+ {
+  "name": "roadmap",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "roadmap: safe \u2014 1 finding(s) in persistence"
+ },
+ {
+  "name": "spec",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "spec: safe \u2014 1 finding(s) in persistence"
+ },
+ {
+  "name": "task",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "task: safe \u2014 2 finding(s) in persistence"
+ },
+ {
+  "name": "tweak",
+  "quarantined": false,
+  "verdict": "safe",
+  "summary": "tweak: safe \u2014 1 finding(s) in persistence"
+ }
+]
+quarantined = []
+verdicts = ['safe']
+catalog_entries = 11 resolved = 11 visible = 11
+load_names = ['adopt-project', 'bootstrap', 'dev', 'handoff', 'init-project', 'orchestrate', 'relay', 'roadmap', 'spec', 'task', 'tweak']
+shadowed = [('adopt-project', 'unique'), ('bootstrap', 'unique'), ('dev', 'unique'), ('handoff', 'unique'), ('init-project', 'unique'), ('orchestrate', 'unique'), ('relay', 'unique'), ('roadmap', 'unique'), ('spec', 'unique'), ('task', 'unique'), ('tweak', 'unique')]
+index_chars = 2072 project_rows = 11
+index_project_rows:
+    - adopt-project: [project] Adopt the agent-project-template methodology in an...
+    - bootstrap: [project] Build and verify the smallest end-to-end walking skeleton...
+    - dev: [project] Implement an approved specification in verified...
+    - handoff: [project] Stop an active agent session safely, consolidate...
+    - init-project: [project] Start or resume interactive project initialization, from...
+    - orchestrate: [project] Coordinate software work from initial planning through...
+    - relay: [project] Exchange substantive messages between two agents through...
+    - roadmap: [project] Interview the user and produce or revise an approved...
+    - spec: [project] Specify a roadmap epic by number or a new feature by name...
+    - task: [project] Deliver a medium scoped feature through a short plan...
+    - tweak: [project] Implement a small low-risk change or straightforward bug...
+
+===== 6. conflicts =====
+real_profile_names=43 project_names=11
+intersection_with_installed_skills:
+(end)
+real_profile_name_list_unchanged=yes
+registry_collisions_untested=only `hermes skills inspect` was tried once in an earlier probe; see summary
+
+===== 7. origin + real profile AFTER =====
+origin_head=bf5470d40f89124611b656d1b95f1a3f804d88a3
+origin_status=?? docs/HERMES_ADAPTER.md;?? evals/results/2026-11-10-hermes-p0-discovery.log;?? evals/results/2026-11-10-hermes-p0-index.txt;?? evals/results/2026-11-10-hermes-p0-probe.sh;?? evals/results/2026-11-10-hermes-p0-summary.json;
+origin_hashes_identical=yes
+real_config_sha256=115c2f3f874612d2977ac77d57fa04560b62e604b92a3aac554e5564f8bf1dac
+real_trusted_dirs=[] 
+real_profile_project_rows=0
+fixture_working_tree_clean=yes
+
+===== 8. isolation facts =====
+fixture_git_inode=72327581 origin_git_inode=29818549
+temp_home_under_scratch=yes
+temp_home_auth_json=0 temp_home_dot_env=0
+temp_home_scan_cache_files=11
+trust_only_in_temp_config=1
+real_config_mentions_fixture=0
