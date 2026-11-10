@@ -86,7 +86,7 @@ verified feedback with no reply (03), correction to the correct session (04), in
 (05), two sessions kept apart (06), known states only (07), no summary without pending work (08),
 read-only full status with provenance (09), a handoff that does not authorize a merge (10), no
 repetitive supervision (11), Claude Code compatibility (12), plus ambiguous origin (13 and 15),
-a decision request (14) and PENDIENTE DE ENVIAR versus ESPERANDO RETORNO (16). The `sample-responses.json`
+a decision request (14) and PENDIENTE versus ENVIADO (16). The `sample-responses.json`
 entries for these cases are reference fixtures written by the template author, not agent output.
 Their live runs on Codex, Claude Code and OpenCode, and the OpenCode round trip, are UNRUN.
 
