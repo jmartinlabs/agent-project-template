@@ -1,14 +1,24 @@
 # Universal AI development template
-A reusable Codex and Claude Code agent development methodology for any project stack. This repository contains
+A reusable Codex, Claude Code, OpenCode and Hermes agent development methodology for any project stack. This repository contains
 no application and makes no language, database, framework or hosting choice for you.
 
-## Codex / Claude Code portability (v2.4 candidate)
+## Client portability (v2.4 candidate)
 
 The same canonical `AGENTS.md`, Skills, approval policy and role contracts are
-reused on both platforms. Codex uses `$orchestrate`; Claude Code loads
+reused on every supported client. Codex uses `$orchestrate`; Claude Code loads
 `CLAUDE.md` and offers `/orchestrate` through thin wrappers in
 `.claude/skills/`. Optional Claude agent profiles are under `.claude/agents/`.
 See the [Claude setup and smoke test](docs/CLAUDE_ADAPTER.md).
+
+OpenCode runs the same Skills through native agents: `review` is a separate read-only adapter
+over `scripts/review-read`, and the optional `functional`, `implementation` and
+`infrastructure` subagents wrap the canonical roles. See the
+[OpenCode adapter](docs/OPENCODE_ADAPTER.md).
+
+Hermes is a third client of the same files: it reads `.agents/skills/` natively as
+`/orchestrate` after one `hermes skills trust` per checkout, and needs no wrapper or copy.
+See the [Hermes adapter](docs/HERMES_ADAPTER.md) for trust, the cwd rule and the verified
+limits; delegation with Hermes is not validated yet.
 
 [Behavioral evals](docs/AGENT_EVALS.md) provide portable decision scenarios
 and a scorer. CI runs scorer **self-tests only**; it does not call Claude or
