@@ -1,0 +1,49 @@
+
+===== 0. environment =====
+date_local=2026-11-10T09:54:24+0100
+os=15.5 arch=arm64
+hermes=Hermes Agent v0.23.0 (2026.9.24) · stable · local 2bd378ed1b8d
+model=deepseek/deepseek-v4.1-flash provider=commandcode
+origin=/Users/josemartin/Projects/agent-project-template
+work=/Users/josemartin/.hermes/cache/scratch/p1d-20261110T095424
+
+===== 1. origin + real profile BEFORE =====
+origin_head=bf5470d40f89124611b656d1b95f1a3f804d88a3
+origin_sha256_files=14
+real_config_sha256=115c2f3f874612d2977ac77d57fa04560b62e604b92a3aac554e5564f8bf1dac
+real_trusted_dirs=[] 
+
+===== 2. disposable clone + throwaway home =====
+fixture_head=bf5470d40f89124611b656d1b95f1a3f804d88a3
+credentials=symlinked (not copied): auth.json, .env
+    Trusted: /Users/josemartin/.hermes/cache/scratch/p1d-20261110T095424/fixture/agent-project-template
+    11 project skill(s) will load in sessions started inside this repo (they take precedence over same-named profile skills).
+temp_trusted=  - /Users/josemartin/.hermes/cache/scratch/p1d-20261110T095424/fixture/agent-project-template 
+
+===== 3. P1a. skills index gate (no model) =====
+{"vision_only": {"chars": 0, "project_rows": 0}, "with_skills": {"chars": 2058, "project_rows": 11}}
+CHECK P1a1 PASS skills index with -t vision only: 0 chars
+CHECK P1a2 PASS skills index with the skills toolset: 2058 chars, 11 project rows
+
+===== 4. P1b. one live session (1 model call) =====
+session_exit=0
+--- response
+    1. adopt-project, bootstrap, dev, handoff, init-project, orchestrate, relay, roadmap, spec, task, tweak
+    2. Quick
+--- stderr (tail)
+CHECK P1b1 PASS all 11 canonical Skill names present in the response
+CHECK P1b2 PASS workflow classification returned (Quick) for a typo fix
+CHECK P1b3 PASS usage report: api_calls=1 total_tokens=8096
+
+===== 5. D. origin and real profile untouched =====
+CHECK D1 PASS origin content hashes identical before/after
+real_config_sha256_after=115c2f3f874612d2977ac77d57fa04560b62e604b92a3aac554e5564f8bf1dac
+real_trusted_dirs_after=[] 
+CHECK D2 PASS real profile config and trust unchanged
+CHECK D3 PASS fixture working tree clean
+launcher_install_state_new_files=0
+credential_files_copied=0 (symlinks only)
+
+===== 6. result =====
+CHECKS total=8 pass=8 fail=0 blocked=0
+RESULT PASS 8/8

@@ -1,0 +1,80 @@
+{
+ "schema": "hermes-p0/1",
+ "date": "2026-11-10",
+ "phase": "P0 discovery only",
+ "result": "PASS",
+ "client": {
+  "name": "Hermes Agent",
+  "version": "v0.23.0",
+  "build": "2bd378ed1b8d",
+  "install_method": "git",
+  "python": "3.14.9",
+  "install_dir": "/Users/josemartin/.hermes/hermes-agent",
+  "os": "macOS 15.5 arm64"
+ },
+ "isolation": {
+  "fixture": "disposable git clone (--no-hardlinks)",
+  "hermes_home": "throwaway under ~/.hermes/cache/scratch",
+  "model_credentials_present": false,
+  "real_profile_touched": false,
+  "runs": 2,
+  "identical_results_on_second_run": true
+ },
+ "discovery": {
+  "canonical_dir": ".agents/skills",
+  "skills_found": 11,
+  "skills_loaded": 11,
+  "quarantined": [],
+  "verdicts": [
+   "safe"
+  ],
+  "scanner": "skills-guard-v10",
+  "findings": {
+   "category": "persistence",
+   "severity": "low",
+   "count": 19
+  },
+  "claude_wrappers_scanned": false,
+  "load_names": [
+   "adopt-project",
+   "bootstrap",
+   "dev",
+   "handoff",
+   "init-project",
+   "orchestrate",
+   "relay",
+   "roadmap",
+   "spec",
+   "task",
+   "tweak"
+  ]
+ },
+ "index": {
+  "chars": 2072,
+  "project_rows": 11
+ },
+ "model_calls": 0,
+ "actions_outside_scope": [
+  "one accidental read-only registry lookup in an earlier probe run: `hermes skills inspect orchestrate` (skills.sh) listed 3 published skills with that name; no install, no write, no model call. Not repeated in the stored probe."
+ ],
+ "checks": {
+  "c1_clone_isolated_git_inodes_differ": true,
+  "c2_origin_head_unchanged": true,
+  "c3_origin_file_hashes_identical": true,
+  "c4_real_profile_config_sha256_unchanged": true,
+  "c5_real_profile_trusted_dirs_still_empty": true,
+  "c6_real_profile_project_skill_rows_zero": true,
+  "c7_trust_written_only_to_temp_home": true,
+  "c8_no_model_credentials_in_temp_home": true,
+  "c9_eleven_canonical_skills_discovered": true,
+  "c10_claude_skills_dir_not_scanned": true,
+  "c11_zero_quarantined_all_safe": true,
+  "c12_eleven_unique_load_names": true,
+  "c13_no_shadowing": true,
+  "c14_index_has_eleven_project_rows": true,
+  "c15_trust_idempotent": true,
+  "c16_no_collision_with_installed_skills": true,
+  "c17_fixture_working_tree_clean": true,
+  "c18_temp_home_under_scratch": true
+ }
+}
