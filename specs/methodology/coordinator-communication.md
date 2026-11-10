@@ -34,23 +34,24 @@ changing any task state. Never attribute feedback to the last session by intuiti
 
 | State | Use when | It does not mean |
 | --- | --- | --- |
-| PENDIENTE DE ENVIAR | The prompt is prepared; the user has not confirmed sending it. | Work has started. |
-| ESPERANDO RETORNO | The user confirmed sending it. | The client is running or will return. |
-| RETORNO RECIBIDO | A return arrived and has not been verified. | The result is accepted. |
-| EN REVISIÓN | The coordinator or QA has started verifying the candidate. | Verification passed. |
-| CORRECCIÓN PENDIENTE | A correction message is prepared to send. | It was sent. |
+| PENDIENTE | A prompt or a correction is prepared; the user has not confirmed sending it. | Work has started. |
+| ENVIADO | The user confirmed sending it; nothing has come back. | The client is running or will return. |
+| RECIBIDO | A return arrived. It is a **claim**, not evidence. | The result is accepted or verified. |
+| VERIFICADO | The return's candidate SHA, diff and checks were checked against evidence. | Merge approval; that is a separate gate. |
 | BLOQUEADO | A decision, authorization or impediment must be resolved first. | The whole project is blocked. |
-| COMPLETADO | The result is verified against evidence and the task has no pending work. | Merge approval; that is a separate gate. |
-| DESCONOCIDO | The evidence is insufficient to choose a state. | Failure. |
+
+Five states, one per task. A state describes the task, never an individual message.
 
 Rules:
 
-- Delivering a prompt never proves execution. Only the user's confirmation moves a task to
-  ESPERANDO RETORNO, and only a return moves it to RETORNO RECIBIDO.
-- Only the coordinator marks COMPLETADO, after checking the return's candidate SHA, diff and checks.
-  A return that says "validated" or "tests green" without evidence stays RETORNO RECIBIDO or DESCONOCIDO.
-- Report external work completion and the later merge gate separately, for example
-  `COMPLETADO · gate merge: pendiente de aprobación explícita`.
+- A prepared message is PENDIENTE whether it is the first prompt or a correction; the reply says which. Verification in progress stays RECIBIDO and the reply says `recibido, verificando`.
+- Delivering a prompt never proves execution. Only the user's confirmation moves a task to ENVIADO, and only a return moves it to RECIBIDO.
+- Only the coordinator marks VERIFICADO, after checking the return's candidate SHA, diff and checks.
+  A return that says "validated" or "tests green" without evidence stays RECIBIDO.
+- If the evidence is insufficient to choose a state, say `DESCONOCIDO` and name what would resolve it.
+  That is an escape hatch for honesty, not a sixth state.
+- Report verified external work and the merge gate on separate axes, for example
+  `VERIFICADO · gate merge: pendiente de aprobación explícita`.
 - Native subagents use only the states their runtime actually exposes. Do not add states they lack.
 - Never show percentages or invented progress.
 
@@ -95,12 +96,12 @@ When finished, return one complete HANDOFF → CODEX block: task/session, status
 Each coordinator reply starts by naming the task and session and confirming receipt. Then it states
 whether this is a **received report** or a **verified result**. Then:
 
-- **a) Verified without corrections:** no message to the client is needed. Mark COMPLETADO only with evidence.
+- **a) Verified without corrections:** no message to the client is needed. Mark VERIFICADO only with evidence.
 - **b) Corrections:** name the recipient session, Task ID, reason and copyable block (section 5).
-  Mark CORRECCIÓN PENDIENTE until the user confirms sending, then ESPERANDO RETORNO.
+  Mark PENDIENTE until the user confirms sending, then ENVIADO.
 - **c) Insufficient information:** send a minimal copyable query to the correct session, asking only
-  for the missing items.
-- **d) Review in progress:** state EN REVISIÓN and that nothing needs sending now.
+  for the missing items; the task stays RECIBIDO.
+- **d) Review in progress:** state RECIBIDO (`recibido, verificando`) and that nothing needs sending now.
 - **e) External participation finished:** say whether the session should stay waiting or be closed by the user.
   Ask for final consolidation only if necessary information is missing.
 - **f) Decision or authorization:** give the decision needed, its reason, the alternatives, the exact scope
@@ -135,7 +136,7 @@ When open work or pending actions exist, end the reply with 2 to 4 lines:
 Estado · <Task ID> (<client>, <session>): <STATE> — <last known event>. Acción humana: <action or ninguna>. Responder a OpenCode: sí/no.
 ```
 
-- Put blockers and human actions first; group the rest in one line (for example `Otros: 2 ESPERANDO RETORNO`).
+- Put blockers and human actions first; group the rest in one line (for example `Otros: 2 ENVIADO`).
 - Omit the summary completely when there is no open work or pending action.
 - Do not repeat completed history.
 - Use the current summary and relevant events only. Do not query Git or workers, re-read histories,

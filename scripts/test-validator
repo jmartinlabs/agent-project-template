@@ -13,7 +13,9 @@ import sys
 import tempfile
 import unittest
 ROOT=Path(__file__).resolve().parents[1]
-validate=runpy.run_path(str(ROOT/'scripts/validate-template'))['validate']
+_VALIDATOR=runpy.run_path(str(ROOT/'scripts/validate-template'))
+validate=_VALIDATOR['validate']
+satisfied=_VALIDATOR['satisfied']
 NO_GIT_NOTICE='NOTICE: fixture built without Git metadata; untracked-file isolation is not enforced.'
 # Concatenated so this file does not trip the portability rule it exercises.
 MACHINE_PATH='/'+'Users/algo'
@@ -785,7 +787,7 @@ class ValidationTests(unittest.TestCase):
    ('specs/methodology/dynamic-agents.md', 'savings still need measurement'),
    ('templates/agent-work-packet.md', 'Client / version / session ID'),
    ('templates/agent-work-packet.md', 'Blocking notice'),
-   ('templates/progress.md', 'Current checkpoint'),
+   ('templates/progress.md', 'append-only'),
    ('templates/testplan.md', 'Local / CI platform and owner'),
    ('.agents/skills/orchestrate/SKILL.md', 'progressively spaced CI queries'),
    ('.agents/skills/dev/SKILL.md', 'negative/integration cases before code'),
@@ -830,7 +832,7 @@ class ValidationTests(unittest.TestCase):
  def test_communication_unverified_is_not_failed(self):
   self.change('specs/methodology/coordinator-communication.md','Missing evidence alone proves neither failure nor non-execution.','Missing evidence means FAIL.'); self.assertRule('communication')
  def test_communication_states_required(self):
-  self.change('specs/methodology/coordinator-communication.md','ESPERANDO RETORNO','ESPERANDO'); self.assertRule('communication')
+  self.change('specs/methodology/coordinator-communication.md','ENVIADO','ENVIAD'); self.assertRule('communication')
  def test_communication_return_fields_required(self):
   self.change('templates/agent-work-packet.md','Decisions needed','Open questions'); self.assertRule('communication')
  def test_communication_orchestrator_link(self):
@@ -983,6 +985,18 @@ class ValidationTests(unittest.TestCase):
    with self.subTest(name=name):
     p=self.root/name; original=p.read_text()
     p.write_text(original.replace('approvals.md#local-worktrees','approvals.md')); self.assertRule('consistency'); p.write_text(original)
+ def test_rule_rewording_passes_validation(self):
+  # The contract is the rule, not its wording: a legitimate rewrite must not fail CI.
+  self.change('specs/methodology/dynamic-agents.md','Replace stale current-state labels',
+              'Overwrite outdated status labels')
+  self.assertEqual(validate(self.root),[])
+ def test_rule_capitalisation_and_line_wrap_pass_validation(self):
+  self.change('specs/methodology/dynamic-agents.md','Replace stale current-state labels',
+              'REPLACE  stale\ncurrent-state   labels')
+  self.assertEqual(validate(self.root),[])
+ def test_rule_removal_still_fails_validation(self):
+  self.change('specs/methodology/dynamic-agents.md','Replace stale current-state labels','')
+  self.assertRule('coordination')
  def test_publication_policy_contract(self):
   cases = (
    '## Branch and PR publication', 'No separate publication approval is needed',
