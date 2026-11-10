@@ -6,7 +6,10 @@ Keep one current summary per task, replaced in place. When `specs/epic-board.md`
 single current-state surface and this table is history only: never keep two competing statuses.
 Everything below the table is append-only; a correction is a new dated entry, not an edit.
 
-## Current state
+## Current state — only when no board exists
+
+If `specs/epic-board.md` exists, do not maintain this table: the board holds the current state
+and this file keeps only the history below.
 
 | Task | State | Owner (start/stop, permission-sensitive operations) | Branch / candidate SHA | Checks last verified | PR / CI / merge | Next action | Evidence |
 | --- | --- | --- | --- | --- | --- | --- | --- |
