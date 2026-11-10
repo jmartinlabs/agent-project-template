@@ -67,7 +67,7 @@ the next chat manually with the verified handoff instructions.
 ## Communication and status
 - Every manual delegation, correction or query states the Task ID, functional name and session reference (never an invented ID). Corrections repeat the full-return instruction, not the original packet.
 - Each reply names the task and session, confirms receipt, separates a received report from a verified result, and says whether the user must send something to the client. Update only the matching task.
-- Manual states (PENDIENTE DE ENVIAR, ESPERANDO RETORNO, RETORNO RECIBIDO, EN REVISIÓN, CORRECCIÓN PENDIENTE, BLOQUEADO, COMPLETADO, DESCONOCIDO) follow the [coordinator communication](../../../specs/methodology/coordinator-communication.md) contract. Never infer execution from a delivered prompt; never invent percentages.
+- Manual states (PENDIENTE, ENVIADO, RECIBIDO, VERIFICADO, BLOQUEADO; `DESCONOCIDO` only as an escape hatch) follow the [coordinator communication](../../../specs/methodology/coordinator-communication.md) contract. Never infer execution from a delivered prompt; never invent percentages.
 - End the reply with a 2–4 line status only when open work or pending actions exist. It uses the current summary and events, with no Git, worker or file reads or writes per message.
 - A request for the full state is read-only. List every open task with provenance (verified, communicated externally or unknown), last result, Git/PR data as recorded, blockers, pending decisions, dependencies and next actions. Declare what was not updated; check sources only when asked or when stale.
 - A received handoff never authorizes merge approval, deployment or a scope expansion.
