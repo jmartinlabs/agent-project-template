@@ -1,0 +1,3 @@
+# Recorded probe transcripts are verbatim: trailing spaces in captured command output are data,
+# not a formatting error. Only these evidence logs are exempt from the whitespace gate.
+evals/results/*.log whitespace=-trailing-space,-blank-at-eol,-blank-at-eof
