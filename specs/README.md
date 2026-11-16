@@ -2,6 +2,7 @@
 
 For new work, see [adaptive Quick / Standard / Full workflows](methodology/workflows.md), [epic scheduling](methodology/epic-orchestration.md) and [dynamic agent management](methodology/dynamic-agents.md). These route the original Full-document lifecycle only when warranted; small changes need no mandatory feature documents. See [manual acceptance scenarios](methodology/acceptance-scenarios.md).
 Derived-project harness requirements live in the [change-aware CI contract](methodology/ci-policy.md), implemented during bootstrap.
+Work tracked in Issues follows the [issue workflow](methodology/issue-workflow.md): when a Project exists its `Status` is the only phase gate and the operational queue, replacing `epic-board.md`; without one, the manual protocol applies and nothing simulates a second tracker.
 This is an uninitialized template. No product, stack or architecture has been approved.
 
 | Document | Owns | Created/updated by |

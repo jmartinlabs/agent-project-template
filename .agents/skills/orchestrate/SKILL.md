@@ -22,7 +22,7 @@ A classification, a proportionate plan, optional model advice, the authorized sc
    - Quick: proceed after a one-line plan only if the user clearly asked, it is reversible and low risk, and no protected or stricter project gate applies.
    - Standard / Full: get confirmation unless the user already explicitly authorized that workflow and scope. Reuse valid authorization.
    - Consultation or analysis alone never authorizes edits. Never implement in a read-only planning mode.
-3. **Route** within the verified scope: Quick → tweak; Standard → task; Full → init-project, bootstrap, roadmap, spec, dev as needed. In existing projects reuse the roadmap and specs; do not reinitialize or rebuild a walking skeleton without a real architecture reason.
+3. **Route** within the verified scope: Quick → tweak; Standard → task; Full → init-project, bootstrap, roadmap, spec, dev as needed. When authorized work already exists as Issues, [work-issue](../work-issue/SKILL.md) reads, routes and reserves it inside its phase gate, following the [issue workflow](../../../specs/methodology/issue-workflow.md); a blocker removes only its own Issue. In existing projects reuse the roadmap and specs; do not reinitialize or rebuild a walking skeleton without a real architecture reason.
 4. **Full work.** New project: init-project covers questions, architecture, an end-to-end bootstrap and a roadmap. Existing large feature: roadmap only if several epics need sequencing; otherwise spec then dev. Brainstorming records decisions and open questions; never silently approve a proposal.
 5. **Overlapping epics** follow [epic orchestration](../../../specs/methodology/epic-orchestration.md). Reconcile approvals, Git and tests at session start and at milestones. Keep the next roadmap work and dependencies identified; while work advances or waits, prepare independent work inside the existing gates — a SPEC draft, a bounded investigation, a work packet for already authorized DEV, or QA test design — and replan on results or blockers. Never create busywork or bypass a gate.
 6. **Delegation** follows [dynamic agents](../../../specs/methodology/dynamic-agents.md). Prefer a specialist for substantial, autonomous work and reserve direct execution for small corrections, coordination, user decisions and operations where delegation does not pay. Keep one executor per task, delegate a whole outcome with checks, ownership, applicable rules and stop conditions, and use fresh bounded context. Choose the execution mode adaptively — direct, foreground or background — background only with verified client support and real benefit. Announce task and ID, executor, mode, isolation and coordinator availability when substantial work starts. Add concurrent tasks only for independent work with disjoint ownership, and never invent agents. Required independent QA still reviews the candidate. Manual clients get identity, the copyable packet and the mandatory `HANDOFF → CODEX` return, as set out in [coordinator communication](../../../specs/methodology/coordinator-communication.md).
@@ -47,6 +47,9 @@ Yield the turn only for:
 A required check that fails and can be corrected inside the authorized scope is not a blocker:
 investigate the failure, correct the cause and rerun the affected verification before yielding.
 Stop only when a real blocker remains.
+
+A `$work-issue` session obeys the same rule over its queue: delivering one Issue, leaving another
+in review or asking whether to continue never ends the turn while eligible work remains.
 
 "Continuing to verify" is an update followed by the next action in the same turn, not a
 closing promise. Reuse a valid authorization for corrections and checks in the same scope;

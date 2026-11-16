@@ -13,7 +13,8 @@ needs `hermes skills trust` once per checkout before project Skills load.
 
 ## How to work
 - Use orchestrate and [adaptive workflows](specs/methodology/workflows.md) to classify work as Quick, Standard or Full.
-- Track work with [identifiers](specs/methodology/identifiers.md): one stable functional ID, the `SPEC`/`DEV`/`QA`/`MERGE` stages, local `DEV-nn` blocks and one board. Never infer approval from another stage.
+- Track work with [identifiers](specs/methodology/identifiers.md): one stable functional ID, the `SPEC`/`DEV`/`QA`/`MERGE` stages, local `DEV-nn` blocks and one operational state — the Project when it exists, otherwise one board. Never infer approval from another stage.
+- Work recorded in Issues follows the [issue workflow](specs/methodology/issue-workflow.md): the Project `Status` is the phase gate, `work-issue` reads, routes and reserves that work, and the manual protocol applies when no Project is configured.
 - Quick proceeds without extra confirmation only if clearly requested, reversible, low risk and free of protected gates.
 - Standard and Full need confirmation unless the same scope is already explicitly authorized.
 - Consultation/analysis never authorizes edits. Read-only planning mode never permits implementation.

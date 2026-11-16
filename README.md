@@ -38,6 +38,7 @@ Start by describing the work, optionally in your client's planning mode, or invo
 - Quick: `$tweak` for small low-risk modifications, without mandatory spec files.
 - Standard: `$task` for bounded features, brief plan and acceptance checks.
 - Full: existing `$init-project`, `$bootstrap`, `$roadmap`, `$spec`, `$dev`, using only necessary phases.
+- Issues/Projects: `$work-issue` reads, routes and reserves authorized work inside its phase gate ([issue workflow](specs/methodology/issue-workflow.md)); the manual protocol covers projects without a Project, and nothing auto-merges or auto-closes.
 
 [Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is preferred for substantial autonomous work when the client supports it and remains environment-dependent; scripts and CI remain the portable enforcement layer. [Manual behavioral acceptance scenarios](specs/methodology/acceptance-scenarios.md) cover Quick, Standard, Full, escalation and resume. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
 
@@ -105,16 +106,18 @@ See [document ownership](specs/README.md) and [Skills invocation](NEW_PROJECT_PR
 AGENTS.md                         concise agent entry point
 NEW_PROJECT_PROMPT.md              new-project prompt
 ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
-.agents/skills/{adopt-project,orchestrate,handoff,relay,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
+.agents/skills/{adopt-project,orchestrate,handoff,relay,work-issue,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
 specs/methodology/model-selection.md advisory model and reasoning recommendations
 specs/methodology/epic-orchestration.md dependency-aware epic scheduler
 specs/methodology/dynamic-agents.md dynamic specialist lifecycle
+specs/methodology/issue-workflow.md portable Issue/Project protocol, 12 statuses and phase gates
 docs/GUIA_VISUAL_ORQUESTACION.md   eight editable Mermaid diagrams
 docs/OPENCODE_ADAPTER.md           native review and specialized subagent adapters
 templates/agent-work-packet.md    delegate work packet contract
 templates/epic-board.md          optional epic coordination board
+templates/issue.md               minimal Issue contract for tracked work
 .agents/roles/                   functional, implementation, QA and infrastructure roles
 .opencode/agents/review.md       OpenCode native read-only audit adapter
 .opencode/agents/{functional,implementation,infrastructure}.md  optional specialized adapters
@@ -124,6 +127,8 @@ specs/guidelines/{architecture,ui,quality,security}.md
 templates/{brainstorming,specification,roadmap,progress,testplan}.md
 scripts/validate-template          standard-library checks
 scripts/test-validator            positive/negative regression fixtures
+scripts/work-issue                read, route and reserve Ready Issues (optional Project)
+scripts/test-work-issue           work-issue regression fixtures, no network
 scripts/agent-relay               optional two-participant Git transport
 scripts/test-agent-relay          relay protocol regression tests
 docs/archive/                      history: prompt backups, v2.4.2 audit/benchmark (not methodology)
