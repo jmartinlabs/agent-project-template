@@ -32,7 +32,8 @@ produce several executable Issues; link the parent epic or roadmap row when it e
 
 `Depends on #N` for each hard dependency, or `None`. A dependency is satisfied only when it is
 `Done`; an Issue still in review does not unblock this one. The number is resolved in this
-repository only: a same-numbered Issue in another repository never satisfies it.
+repository only: a same-numbered Issue in another repository never satisfies it, and a
+qualified `owner/repo#N` reference is unsupported and fails closed.
 
 ## Authorization and evidence
 
