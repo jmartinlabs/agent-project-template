@@ -2,6 +2,7 @@
 
 For new work, see [adaptive Quick / Standard / Full workflows](methodology/workflows.md), [epic scheduling](methodology/epic-orchestration.md) and [dynamic agent management](methodology/dynamic-agents.md). These route the original Full-document lifecycle only when warranted; small changes need no mandatory feature documents. See [manual acceptance scenarios](methodology/acceptance-scenarios.md).
 Derived-project harness requirements live in the [change-aware CI contract](methodology/ci-policy.md), implemented during bootstrap.
+Work tracked in Issues follows the [issue workflow](methodology/issue-workflow.md): when a Project exists its `Status` is the only phase gate and the operational queue, replacing `epic-board.md`; without one, the manual protocol applies and nothing simulates a second tracker.
 This is an uninitialized template. No product, stack or architecture has been approved.
 
 | Document | Owns | Created/updated by |
@@ -13,10 +14,10 @@ This is an uninitialized template. No product, stack or architecture has been ap
 | `guidelines/quality.md` | Commands, checks, review and Definition of Done | bootstrap / dev |
 | `guidelines/security.md` | Threats, safeguards and authorization boundaries | init-project / dev |
 | `roadmap.md` | Approved product outcomes and epic scope | roadmap |
-| `epic-board.md` | Optional multi-epic queue, blockers, dependencies and evidence links; never canonical approvals | orchestrate only |
+| `epic-board.md` | Optional multi-epic queue, blockers, dependencies and evidence links when no Project owns status; never canonical approvals | orchestrate only |
 | `NN-slug-brainstorming.md` | Append-only questions and confirmed answers | spec |
 | `NN-slug-specification.md` | Approved behavior, contracts and acceptance checks | spec |
-| `NN-slug-progress.md` | Per-task state when no board exists; append-only evidence history | dev |
+| `NN-slug-progress.md` | Per-task state when no Project or board exists; append-only evidence history | dev |
 | `NN-slug-testplan.md` | Acceptance-to-verification mapping and current results | dev |
 | `session-handoff.md` | Optional latest shutdown checkpoint when no existing progress/board file fits; retire after successful restoration and consolidation; if tracked, remove in the same task change, never a standalone PR; no automatic resume authority | handoff only |
 
@@ -32,5 +33,5 @@ Eight steps: bootstrap → context files → enforceable rules → roadmap → s
 processes; the initialization walkthrough coordinates the first four steps.
 
 Mixed-client work reuses the [work packet](../templates/agent-work-packet.md) and
-[coordination contract](methodology/dynamic-agents.md). A current summary in existing
-progress/setup/board documents owns operational state; other documents link it.
+[coordination contract](methodology/dynamic-agents.md). A current summary in the Project/tracker
+or in existing progress/setup/board documents owns operational state; other documents link it.
