@@ -42,9 +42,10 @@ design. Do not wait for an unnecessary instruction, and do not ask permission fo
 that commits no protected decision.
 
 Distinguish a local draft, a registered proposal and a published proposal by evidence, never by
-assertion: a local draft lives only in a working tree and is visible to no other session; a
-registered proposal is persisted in a commit whose SHA can be cited; a published proposal carries
-the remote evidence the project's process requires, such as a push and pull request. A local
+assertion: a local draft lives in a working tree and may be visible to other sessions sharing
+that checkout, but is not yet evidenced by a Git commit; a registered proposal is persisted in a
+commit whose SHA can be cited; a published proposal carries the remote evidence the project's
+process requires, such as a push and pull request. A local
 commit alone does not prove remote publication.
 
 Preparation never promotes a draft, authorizes DEV, starts QA verification, merges or deploys.

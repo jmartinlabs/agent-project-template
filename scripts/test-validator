@@ -1161,9 +1161,10 @@ class ValidationTests(unittest.TestCase):
   # A draft, a registered proposal and a published proposal need distinct evidence.
   self.change('specs/methodology/epic-orchestration.md',
    'Distinguish a local draft, a registered proposal and a published proposal by evidence, never by\n'
-   'assertion: a local draft lives only in a working tree and is visible to no other session; a\n'
-   'registered proposal is persisted in a commit whose SHA can be cited; a published proposal carries\n'
-   "the remote evidence the project's process requires, such as a push and pull request. A local\n"
+   'assertion: a local draft lives in a working tree and may be visible to other sessions sharing\n'
+   'that checkout, but is not yet evidenced by a Git commit; a registered proposal is persisted in a\n'
+   "commit whose SHA can be cited; a published proposal carries the remote evidence the project's\n"
+   'process requires, such as a push and pull request. A local\n'
    'commit alone does not prove remote publication.','Proposals are tracked informally.')
   self.assertRule('proposal-evidence')
  def test_registered_proposal_requires_citable_commit(self):
@@ -1177,14 +1178,18 @@ class ValidationTests(unittest.TestCase):
  def test_proposal_evidence_rewording(self):
   self.change('specs/methodology/epic-orchestration.md',
    'Distinguish a local draft, a registered proposal and a published proposal by evidence, never by\n'
-   'assertion: a local draft lives only in a working tree and is visible to no other session; a\n'
-   'registered proposal is persisted in a commit whose SHA can be cited; a published proposal carries\n'
-   "the remote evidence the project's process requires, such as a push and pull request. A local\n"
+   'assertion: a local draft lives in a working tree and may be visible to other sessions sharing\n'
+   'that checkout, but is not yet evidenced by a Git commit; a registered proposal is persisted in a\n'
+   "commit whose SHA can be cited; a published proposal carries the remote evidence the project's\n"
+   'process requires, such as a push and pull request. A local\n'
    'commit alone does not prove remote publication.',
    'Judge a local draft, a registered proposal and a published proposal by evidence, not by assertion:\n'
-   'a local draft only lives in a working tree and no other session can see it; a registered proposal\n'
-   "is a commit with a citable SHA; a published proposal has the remote evidence the project's process\n"
+   'a local draft may be visible to another session sharing its working tree, but has no Git commit\n'
+   'as evidence yet; a registered proposal is a commit with a citable SHA; a published proposal has\n'
+   "the remote evidence the project's process\n"
    'requires, such as a push and a pull request. A local commit alone never proves remote publication.')
+  self.assertIn('another session sharing its working tree',
+                (self.root/'specs/methodology/epic-orchestration.md').read_text())
   self.assertEqual(validate(self.root),[])
 class FixtureIsolationTests(unittest.TestCase):
  def setUp(self):

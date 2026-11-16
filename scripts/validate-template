@@ -304,7 +304,7 @@ def validate(root):
    if not satisfied(read(name),token): fail('git-preflight',f'{name}: missing {token}')
  for token in ('re:local draft[^.;]{0,120}(working tree|worktree)',
    're:(registered|recorded) proposal[^.;]{0,160}commit',
-   r're:(registered|recorded) proposal[^.;]{0,200}(cit\w*|SHA)',
+   r're:(registered|recorded) proposal[^.;]{0,200}(\bcit\w*|\bSHA\b)',
    're:published proposal[^.;]{0,200}(push|pull request|remote|PR)',
    're:local commit[^.;]{0,80}(not|never)[^.;]{0,80}remote'):
   if not satisfied(epic,token): fail('proposal-evidence',f'epic proposal evidence missing {token}')
