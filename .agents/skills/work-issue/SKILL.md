@@ -78,7 +78,8 @@ their markers belong on the last line and are never quoted as evidence.
    repository, has no other assignee and no open or unverifiable dependency (`Depends on #N`,
    `Blocked by #N`, `Depende de #N`, `Bloqueada por #N`; a negated clause does not count). The
    dependency is resolved in this repository only: a same-numbered Issue in another repository
-   never satisfies it. Without a Project there is no `Ready` status, fingerprint or CLI receipt
+   never satisfies it, and a qualified `owner/repo#N` reference fails closed as unverifiable.
+   Without a Project there is no `Ready` status, fingerprint or CLI receipt
    to re-read: confirm instead the human authorization, scope, ownership and dependencies
    recorded in the Issue.
 5. **Recover context and reserve.** With a Project, read the whole history, the linked sources

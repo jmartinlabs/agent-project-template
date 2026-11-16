@@ -1283,6 +1283,29 @@ class CrossRepositoryDependencyTests(unittest.TestCase):
         self.assertEqual(service(github).take(101), EXIT_REFUSED)
         self.assertEqual(github.calls, [])
 
+    def test_qualified_dependency_fails_closed_even_with_a_local_done_number(self):
+        local = self.item(101, "Ready Development", body="Depends on other/project#7.")
+        local_done = self.item(7, "Done")
+        decisions = self.decisions([local, local_done])
+        self.assertEqual(decisions[101].kind, "unverified-dependency")
+        self.assertEqual(decisions[101].unverified, [7])
+        self.assertEqual(MODULE["dependencies"](local.body), [])
+        self.assertEqual(MODULE["qualified_dependencies"](local.body), [7])
+        self.assertEqual(MODULE["qualified_dependencies"](
+            "No depende de other/project#7."), [])
+        github = FakeGh(items=[local, local_done])
+        self.assertEqual(service(github).take(101), EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+
+    def test_qualified_issue_url_dependency_fails_closed(self):
+        local = self.item(
+            101, "Ready Development",
+            body="Depends on https://github.com/other/project/issues/7")
+        local_done = self.item(7, "Done")
+        decision = self.decisions([local, local_done])[101]
+        self.assertEqual(decision.kind, "unverified-dependency")
+        self.assertEqual(decision.unverified, [7])
+
     def test_resumption_writes_nothing_when_the_dependency_is_only_foreign(self):
         local = self.item(101, "Ready Development", body="Depends on #7.",
                           assignees=["acme-bot"])

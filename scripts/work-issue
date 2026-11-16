@@ -51,11 +51,20 @@ HUMAN_ONLY = frozenset({"Backlog", "Ready Analysis", "Ready Specification",
 
 DEPENDENCY_RE = re.compile(
     r"(?i)\b(?:depends on|blocked by|depende de|bloquead[ao] por|requires|requiere)\s+#(\d+)")
+QUALIFIED_URL_DEP_RE = re.compile(
+    r"(?i)\b(?:depends on|blocked by|depende de|bloquead[ao] por|requires|requiere)\s+"
+    r"https?://github\.com/[^/\s]+/[^/\s]+/issues/(\d+)")
+QUALIFIED_DEP_RE = re.compile(
+    r"(?i)\b(?:depends on|blocked by|depende de|bloquead[ao] por|requires|requiere)\s+"
+    r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+#(\d+)")
 DEPENDENCY_LIST_RE = re.compile(
     r"(?i)^\s*(?:\*\*)?(?:dependencias|dependencies)(?:\*\*)?\s*:\s*(.*)$", re.M)
 NEGATION_RE = re.compile(
     r"(?i)\b(?:no\s+(?:depende|depends|est[áa]\s+bloquead[ao])|"
     r"(?:does|do)\s+not\s+depend\s+on|(?:is|are)\s+not\s+blocked\s+by)")
+QUALIFIED_ISSUE_RE = re.compile(
+    r"(?i)(?:https?://github\.com/[^/\s]+/[^/\s]+/issues/|"
+    r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+#)(\d+)")
 CLAUSE_BOUNDARY_RE = re.compile(
     r"[.;,\n]|\b(?:pero|sino|aunque|sin\s+embargo|si\s+bien|however|though|but|and|y)\b", re.I)
 HTML_COMMENT_RE = re.compile(r"<!--.*?-->", re.S)
@@ -191,15 +200,25 @@ def normalise(raw):
     )
 
 
+def qualified_position(text, position):
+    """True when `position` points at a number inside an `owner/repo#N` reference."""
+    return any(match.start() <= position < match.end()
+               for match in QUALIFIED_ISSUE_RE.finditer(text))
+
+
 def dependencies(body):
     """Issue numbers named as hard dependencies; a negated clause is not a dependency.
 
     Negation is evaluated per clause (up to the previous boundary) so that
-    "does not depend on #7 but depends on #8" still reports #8.
+    "does not depend on #7 but depends on #8" still reports #8. Qualified
+    cross-repository references are not resolved here; `qualified_dependencies`
+    reports them so the caller fails closed instead of matching a local number.
     """
     text = body or ""
     found = set()
     for match in DEPENDENCY_RE.finditer(text):
+        if qualified_position(text, match.start(1)):
+            continue
         start = 0
         for boundary in CLAUSE_BOUNDARY_RE.finditer(text, 0, match.start()):
             start = boundary.end()
@@ -207,7 +226,31 @@ def dependencies(body):
             continue
         found.add(int(match.group(1)))
     for match in DEPENDENCY_LIST_RE.finditer(text):
-        found.update(int(number) for number in ISSUE_REF_RE.findall(match.group(1)))
+        for ref in ISSUE_REF_RE.finditer(match.group(1)):
+            if not qualified_position(match.group(1), ref.start()):
+                found.add(int(ref.group(1)))
+    return sorted(found)
+
+
+def qualified_dependencies(body):
+    """Qualified cross-repository dependencies (`owner/repo#N`); unsupported, fail closed."""
+    text = body or ""
+    found = set()
+    for match in QUALIFIED_DEP_RE.finditer(text):
+        start = 0
+        for boundary in CLAUSE_BOUNDARY_RE.finditer(text, 0, match.start()):
+            start = boundary.end()
+        if not NEGATION_RE.search(text[start:match.start(1)]):
+            found.add(int(match.group(1)))
+    for match in QUALIFIED_URL_DEP_RE.finditer(text):
+        start = 0
+        for boundary in CLAUSE_BOUNDARY_RE.finditer(text, 0, match.start()):
+            start = boundary.end()
+        if not NEGATION_RE.search(text[start:match.start(1)]):
+            found.add(int(match.group(1)))
+    for match in DEPENDENCY_LIST_RE.finditer(text):
+        for ref in QUALIFIED_ISSUE_RE.finditer(match.group(1)):
+            found.add(int(ref.group(1)))
     return sorted(found)
 
 
@@ -276,8 +319,14 @@ def classify(item, agent=None, by_number=None, agents=AGENTS, repo=None):
         decision.reason = "belongs to " + item.repository
         return decision
     known, unknown = agent_routing(item.labels, agents)
-    decision.dependencies = dependencies(item.body)
+    qualified = set(qualified_dependencies(item.body))
+    decision.dependencies = sorted(set(dependencies(item.body)) | qualified)
     for number in decision.dependencies:
+        if number in qualified:
+            # A cross-repository reference is not supported; never let a local Issue
+            # with the same number stand in for it.
+            decision.unverified.append(number)
+            continue
         dependency = dependency_item(by_number, number, repo)
         if dependency is None:
             decision.unverified.append(number)

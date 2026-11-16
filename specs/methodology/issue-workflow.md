@@ -110,7 +110,9 @@ board.
    to that agent's queue.
 2. **Verify.** With a Project, require the specific `Ready` status; without one, require the
    human authorization recorded in the Issue. In both cases require sufficient scope, ownership
-   and no open dependency. An agent never creates permission by moving the Status itself.
+   and no open dependency. A dependency number resolves only in this repository; a qualified
+   `owner/repo#N` reference is not supported and fails closed as unverifiable. An agent never
+   creates permission by moving the Status itself.
 3. **Recover context.** Read the whole history with pagination, the linked sources and the
    decision hierarchy (latest explicit user instruction, approved scope, real state). Publish
    a short receipt bound to a fingerprint ([context receipt](#context-receipt)); on material
