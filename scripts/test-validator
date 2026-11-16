@@ -1144,6 +1144,131 @@ class ValidationTests(unittest.TestCase):
   data['cases'] = [c for c in data['cases'] if not str(c.get('id','')).startswith('proactive-')]
   p.write_text(json.dumps(data))
   self.assertRule('agent-evals')
+ def test_work_issue_protocol_required(self):
+  (self.root/'specs/methodology/issue-workflow.md').unlink(); self.assertRule('structure')
+ def test_work_issue_skill_required(self):
+  (self.root/'.agents/skills/work-issue/SKILL.md').unlink(); self.assertRule('structure')
+ def test_work_issue_adapter_required(self):
+  (self.root/'scripts/work-issue').unlink(); self.assertRule('structure')
+ def test_work_issue_fixture_required(self):
+  (self.root/'scripts/fixtures/work-issue-project.json').unlink(); self.assertRule('structure')
+ def test_issue_template_required(self):
+  (self.root/'templates/issue.md').unlink(); self.assertRule('structure')
+ def test_work_issue_skill_manifest(self):
+  self.change('.agents/skills/work-issue/SKILL.md','name: work-issue','name: other')
+  self.assertRule('manifest')
+ def test_work_issue_skill_contract_headings(self):
+  self.change('.agents/skills/work-issue/SKILL.md','## Procedure','## Steps')
+  self.assertRule('contracts')
+ def test_work_issue_claude_bridge(self):
+  self.change('.claude/skills/work-issue/SKILL.md','.agents/skills/work-issue/SKILL.md','README.md')
+  self.assertRule('claude')
+ def test_work_issue_protocol_headings(self):
+  cases = ('## Two entry paths','## Single source of operational state','## The 12 statuses',
+   '## Ownership of transitions','## Manual protocol without a Project','## Agent routing',
+   '## Session continuity','## Communication and document ownership','## PR ↔ Issue linkage',
+   '## Tool adapter','## Stop conditions')
+  for heading in cases:
+   with self.subTest(heading=heading):
+    p=self.root/'specs/methodology/issue-workflow.md'; original=p.read_text()
+    self.assertIn(heading,original)
+    try:
+     p.write_text(original.replace(heading,'## Removed'))
+     self.assertRule('issue-workflow')
+    finally:
+     p.write_text(original)
+ def test_work_issue_protocol_statuses_and_linkage(self):
+  cases = ('Ready Development','Previous Status','Refs #','addCloseIssueReferences','reopen',
+   'never guessed','optional')
+  for token in cases:
+   with self.subTest(token=token):
+    p=self.root/'specs/methodology/issue-workflow.md'; original=p.read_text()
+    self.assertIn(token,original)
+    try:
+     p.write_text(original.replace(token,'REMOVED'))
+     self.assertRule('issue-workflow')
+    finally:
+     p.write_text(original)
+ def test_work_issue_skill_keeps_the_session_contract(self):
+  cases = ('## Skill and tool','no session or memory of its own between calls',
+   '## Session continuity','one reservation at a time','no cron, webhook, bot','manual protocol')
+  for token in cases:
+   with self.subTest(token=token):
+    p=self.root/'.agents/skills/work-issue/SKILL.md'; original=p.read_text()
+    self.assertIn(token,original)
+    try:
+     p.write_text(original.replace(token,'REMOVED'))
+     self.assertRule('issue-workflow')
+    finally:
+     p.write_text(original)
+ def test_issue_template_fields(self):
+  cases = ('## Requested phase','## Linked SPEC','## Acceptance checks','## Dependencies',
+   '## Authorization and evidence','Backlog')
+  for token in cases:
+   with self.subTest(token=token):
+    p=self.root/'templates/issue.md'; original=p.read_text()
+    self.assertIn(token,original)
+    try:
+     p.write_text(original.replace(token,'REMOVED'))
+     self.assertRule('issue-workflow')
+    finally:
+     p.write_text(original)
+ def test_work_issue_adapter_has_no_project_or_repository_defaults(self):
+  p=self.root/'scripts/work-issue'; original=p.read_text()
+  for token in ('jmartinlabs','myfinanzas','default=4'):
+   with self.subTest(token=token):
+    try:
+     p.write_text(original.replace('CONFIG_HELP = (','CONFIG_HELP = ("%s",' % token))
+     self.assertRule('issue-workflow')
+    finally:
+     p.write_text(original)
+ def test_work_issue_adapter_keeps_the_closed_project_failure(self):
+  cases=('no GitHub Project configured','issue-workflow.md','--repo','--project')
+  for token in cases:
+   with self.subTest(token=token):
+    p=self.root/'scripts/work-issue'; original=p.read_text()
+    self.assertIn(token,original)
+    try:
+     p.write_text(original.replace(token,'REMOVED'))
+     self.assertRule('issue-workflow')
+    finally:
+     p.write_text(original)
+ def test_work_issue_suite_is_not_recursive(self):
+  self.change('scripts/test-work-issue','No network, no GitHub, no real Issues.',
+              'No network; it also calls validate-template.')
+  self.assertRule('issue-workflow')
+ def test_work_issue_suite_is_wired_through_the_existing_entry_point(self):
+  p=self.root/'scripts/test-validator'
+  p.write_text(p.read_text().replace('test-work-issue','work-issue-suite'))
+  self.assertRule('issue-workflow')
+ def test_work_issue_wiring_links(self):
+  cases = (('AGENTS.md','issue-workflow.md'),
+   ('specs/README.md','issue-workflow.md'),
+   ('specs/methodology/epic-orchestration.md','issue-workflow.md'),
+   ('specs/methodology/identifiers.md','issue-workflow.md'),
+   ('templates/progress.md','Project/tracker'),
+   ('.agents/skills/orchestrate/SKILL.md','../work-issue/SKILL.md'),
+   ('.agents/skills/init-project/SKILL.md','Backlog'),
+   ('.agents/skills/roadmap/SKILL.md','Backlog'),
+   ('.agents/skills/spec/SKILL.md','templates/issue.md'))
+  for name, token in cases:
+   with self.subTest(name=name, token=token):
+    p=self.root/name; original=p.read_text()
+    self.assertIn(token,original)
+    try:
+     p.write_text(original.replace(token,'REMOVED'))
+     self.assertRule('issue-workflow')
+    finally:
+     p.write_text(original)
+class WorkIssueSuiteTests(unittest.TestCase):
+ """The work-issue suite runs once through this existing entry point, never per fixture."""
+ def test_suite_passes_inside_the_validated_fixture(self):
+  temp=tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)
+  fixture=build_fixture(ROOT,Path(temp.name)/'fixture')
+  proc=subprocess.run([sys.executable,str(fixture/'scripts/test-work-issue'),'-q'],
+   capture_output=True,text=True,encoding='utf-8')
+  self.assertEqual(proc.returncode,0,proc.stderr[-4000:])
+  self.assertIn('Ran ',proc.stderr)
 class FixtureIsolationTests(unittest.TestCase):
  def setUp(self):
   temp=tempfile.TemporaryDirectory(); self.addCleanup(temp.cleanup)

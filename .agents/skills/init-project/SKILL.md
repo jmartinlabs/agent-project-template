@@ -68,6 +68,13 @@ description, real commands and links. Add enforceable checks (tests, linters, CI
 and invalid cases; do not invent agent hooks.
 ### Stage 6 — Roadmap
 Follow the roadmap Skill. Get approval and commit the initial roadmap.
+When the user asked to initialize the project and a tracker is available, also leave the
+planning Issues each SPEC needs in `Backlog`, linked to their epic and shaped by the
+[Issue template](../../../templates/issue.md); once a SPEC is approved, generate its executable
+Issues the same way without waiting for a new request. Deduplicate first, never mark them
+`Ready` because they were generated, and never invent access: without a repository or
+permission, deliver the proposal and the blocker. Operational state stays in the tracker per the
+[issue workflow](../../../specs/methodology/issue-workflow.md).
 ### Stage 7 — Handoff
 Summarize decisions (by link), technologies, architecture, verified bootstrap, documentation,
 roadmap and open questions. Explain the next steps: spec 01, then dev 01. Mark complete only when
