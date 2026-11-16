@@ -95,8 +95,10 @@ their markers belong on the last line and are never quoted as evidence.
    deliver the branch, PR and evidence. Reserving is the start, not the deliverable.
 7. **Deliver and continue.** Publish the report or PR. With a Project, `move` into `{Phase} In
    Review`; without one, record the report and an explicit review request without writing a
-   Status. Then return to the queue for the next eligible Issue instead of waiting for that
-   decision. Never claim a session, a parallel worker or a dispatch the runtime cannot evidence.
+   Status. `move` re-reads the Status, the assignees and the claims before writing: while
+   another agent's claim or a foreign assignee exists it refuses and writes nothing. Then
+   return to the queue for the next eligible Issue instead of waiting for that decision. Never
+   claim a session, a parallel worker or a dispatch the runtime cannot evidence.
 8. **Block and restore.** Block only from your own `{Phase} In Progress`, recording `Previous
    Status`, reason, owner, exit condition and date. Restore only with `--restore`, only to the
    recorded agent status, and only while the permission still holds; otherwise ask the user.
