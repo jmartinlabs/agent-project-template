@@ -59,7 +59,9 @@ It never replaces per-stage evidence and never turns a partial or unrun check in
 ## 4. Traceability without a second tracker
 
 The existing `specs/epic-board.md` remains the single operational state owner when several
-live workstreams need scheduling. A bounded feature uses its progress and testplan documents.
+live workstreams need scheduling, unless an external tracker owns status: then the Project
+`Status` is the only operational source per the [issue workflow](issue-workflow.md). A bounded
+feature uses its progress and testplan documents.
 
 Each row records:
 

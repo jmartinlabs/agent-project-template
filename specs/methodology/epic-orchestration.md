@@ -5,7 +5,7 @@ For Full work, or Standard work with several independent workstreams. It extends
 
 ## Board and single writer
 
-- Keep `specs/epic-board.md` only when several live epics or workstreams need scheduling. A single bounded feature uses its own progress and testplan.
+- Keep `specs/epic-board.md` only when several live epics or workstreams need scheduling **and no external tracker owns status**. When the project tracks work in Issues/Projects, the Project `Status` is the single operational source per the [issue workflow](issue-workflow.md) and the board is not created. A single bounded feature uses its own progress and testplan.
 - The coordinator is the **single writer** of the board. Delegates return outcomes, SHA and test evidence; they never edit the board.
 - Reconcile the board at session start and at major gates against approved specs, checkpoints, Git and tests. Mark missing evidence `unknown` or `unverified`; never infer approval.
 - Update only fields that materially change (ownership, authorization, candidate, QA verdict, blocker, PR state), not on every worker message.

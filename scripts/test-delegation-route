@@ -1,0 +1,277 @@
+#!/usr/bin/env python3
+"""Positive and negative cases for check-delegation-route. No network, no Hermes runtime."""
+from __future__ import annotations
+
+import json
+import os
+from pathlib import Path
+import sqlite3
+import subprocess
+import sys
+import tempfile
+import unittest
+
+ROOT = Path(__file__).resolve().parents[1]
+SCRIPT = ROOT / 'scripts' / 'check-delegation-route'
+# Arbitrary route names: the verifier must follow the slots a project configures, so the
+# fixtures deliberately avoid any real provider or model catalogue.
+EXPECTED = ['--expect-label', 'reviewer', '--expect-model', 'model-alpha',
+            '--expect-provider', 'provider-a', '--expect-effort', 'medium']
+
+
+def route(backend='model_map', label='reviewer', provider='provider-a', model='model-alpha',
+          effort='medium'):
+    return {'backend': backend, 'label': label, 'provider': provider, 'model': model,
+            'reasoning_effort': effort, 'service_tier': 'normal'}
+
+
+def payload(*routes, statuses=None):
+    statuses = statuses or ['completed'] * len(routes)
+    return json.dumps({'results': [
+        {'task_index': index, 'status': status, 'route': value}
+        for index, (value, status) in enumerate(zip(routes, statuses))]})
+
+
+class DelegationRouteCheck(unittest.TestCase):
+    def setUp(self):
+        temporary = tempfile.TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        self.directory = Path(temporary.name)
+        self.db = self.directory / 'state.db'
+
+    def build(self, rows):
+        connection = sqlite3.connect(self.db)
+        connection.execute('create table async_delegations(delegation_id text primary key, state text, '
+                           'dispatched_at real, completed_at real, result_json text)')
+        connection.executemany('insert into async_delegations values (?,?,?,?,?)', rows)
+        connection.commit()
+        connection.close()
+
+    def run_check(self, *arguments, env=None):
+        return subprocess.run([sys.executable, str(SCRIPT), '--state-db', str(self.db), *arguments],
+                              capture_output=True, text=True, env=env)
+
+    def test_full_route_passes(self):
+        self.build([('deleg_a', 'completed', 1.0, 2.0, payload(route()))])
+        result = self.run_check('--delegation', 'deleg_a', *EXPECTED)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('PASS task=0', result.stdout)
+        self.assertIn('1/1 tasks finished on the requested route', result.stdout)
+
+    def test_silent_fallback_to_default_route_fails(self):
+        worker = route(provider='provider-b', label='worker',
+                       model='model-beta', effort='high')
+        self.build([('deleg_b', 'completed', 1.0, 2.0, payload(worker))])
+        result = self.run_check('--delegation', 'deleg_b', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('FAIL task=0', result.stdout)
+        self.assertIn('label=worker (expected reviewer)', result.stdout)
+        self.assertIn('provider=provider-b (expected provider-a)', result.stdout)
+        self.assertIn('effort=high (expected medium)', result.stdout)
+
+    def test_provider_mismatch_fails_with_the_right_label_and_model(self):
+        self.build([('deleg_c', 'completed', 1.0, 2.0,
+                     payload(route(provider='provider-b')))])
+        result = self.run_check('--delegation', 'deleg_c', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('provider=provider-b (expected provider-a)', result.stdout)
+
+    def test_model_mismatch_fails_with_the_right_label_and_provider(self):
+        self.build([('deleg_c2', 'completed', 1.0, 2.0,
+                     payload(route(model='model-beta')))])
+        result = self.run_check('--delegation', 'deleg_c2', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('model=model-beta (expected model-alpha)', result.stdout)
+        self.assertNotIn('label=worker', result.stdout)
+
+    def test_effort_mismatch_fails_with_the_right_label_and_model(self):
+        self.build([('deleg_d', 'completed', 1.0, 2.0, payload(route(effort='high')))])
+        result = self.run_check('--delegation', 'deleg_d', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('effort=high (expected medium)', result.stdout)
+
+    def test_missing_effort_is_not_a_pass_when_one_is_expected(self):
+        self.build([('deleg_e', 'completed', 1.0, 2.0, payload(route(effort='')))])
+        result = self.run_check('--delegation', 'deleg_e', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('effort=- (expected medium)', result.stdout)
+
+    def test_unfinished_task_fails_even_with_the_right_route(self):
+        self.build([('deleg_f', 'completed', 1.0, 2.0, payload(route(), statuses=['interrupted']))])
+        result = self.run_check('--delegation', 'deleg_f', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('status=interrupted (not completed)', result.stdout)
+
+    def test_failed_task_fails_even_with_the_right_route(self):
+        self.build([('deleg_g', 'completed', 1.0, 2.0, payload(route(), statuses=['error']))])
+        result = self.run_check('--delegation', 'deleg_g', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('status=error (not completed)', result.stdout)
+
+    def test_delegation_state_that_did_not_complete_fails(self):
+        self.build([('deleg_h', 'interrupted', 1.0, 2.0, payload(route()))])
+        result = self.run_check('--delegation', 'deleg_h', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('state=interrupted (not completed)', result.stderr)
+        self.assertNotIn('PASS', result.stdout)
+
+    def test_one_bad_task_in_a_batch_fails_the_check(self):
+        self.build([('deleg_i', 'completed', 1.0, 2.0,
+                     payload(route(), route(label='worker', model='model-beta',
+                                            provider='provider-b', effort='high')))])
+        result = self.run_check('--delegation', 'deleg_i', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('PASS task=0', result.stdout)
+        self.assertIn('FAIL task=1', result.stdout)
+        self.assertIn('1/2 tasks', result.stdout)
+
+    def test_no_expectation_never_emits_pass(self):
+        self.build([('deleg_j', 'completed', 1.0, 2.0, payload(route()))])
+        result = self.run_check('--delegation', 'deleg_j')
+        self.assertEqual(result.returncode, 2)
+        self.assertNotIn('PASS', result.stdout)
+        self.assertIn('never emitted without an expectation', result.stderr)
+
+    def test_latest_reads_the_newest_delegation(self):
+        self.build([
+            ('deleg_old', 'completed', 1.0, 2.0,
+             payload(route(label='worker', model='model-beta',
+                           provider='provider-b', effort='high'))),
+            ('deleg_new', 'completed', 3.0, 4.0, payload(route()))])
+        result = self.run_check('--latest', *EXPECTED)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('delegation deleg_new', result.stdout)
+
+    def test_running_delegation_without_results_is_a_failure_not_a_pass(self):
+        self.build([('deleg_k', 'running', 1.0, None, None)])
+        result = self.run_check('--delegation', 'deleg_k', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('no results yet', result.stderr)
+        self.assertNotIn('PASS', result.stdout)
+
+    def test_missing_metadata_is_a_skip(self):
+        result = subprocess.run([sys.executable, str(SCRIPT), '--state-db',
+                                 str(self.directory / 'absent.db'), *EXPECTED],
+                                capture_output=True, text=True)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('SKIP', result.stderr)
+        self.assertEqual(result.stdout, '')
+
+    def test_unknown_delegation_is_a_skip(self):
+        self.build([('deleg_l', 'completed', 1.0, 2.0, payload(route()))])
+        result = self.run_check('--delegation', 'deleg_missing', *EXPECTED)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('not found', result.stderr)
+
+    def test_malformed_result_json_is_unverified_not_a_crash(self):
+        self.build([('deleg_m', 'completed', 1.0, 2.0, '{"results": [')])
+        result = self.run_check('--delegation', 'deleg_m', *EXPECTED)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('unreadable result_json', result.stderr)
+        self.assertNotIn('Traceback', result.stderr)
+        self.assertEqual(result.stdout, '')
+
+    def test_results_that_are_not_a_list_are_unverified(self):
+        self.build([('deleg_n', 'completed', 1.0, 2.0, json.dumps({'results': {'task': 0}}))])
+        result = self.run_check('--delegation', 'deleg_n', *EXPECTED)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('not a list', result.stderr)
+        self.assertNotIn('Traceback', result.stderr)
+
+    def test_absent_state_cannot_pass(self):
+        for state in (None, ''):
+            with self.subTest(state=state):
+                self.db.unlink(missing_ok=True)
+                self.build([('deleg_p', state, 1.0, None, payload(route()))])
+                result = self.run_check('--delegation', 'deleg_p', *EXPECTED)
+                self.assertEqual(result.returncode, 1)
+                self.assertIn('(not completed): not verified', result.stderr)
+                self.assertNotIn('PASS', result.stdout)
+
+    def test_json_document_reports_every_task(self):
+        self.build([('deleg_o', 'completed', 1.0, 2.0,
+                     payload(route(), route(label='worker', model='model-beta',
+                                            provider='provider-b', effort='high')))])
+        result = self.run_check('--delegation', 'deleg_o', *EXPECTED, '--json')
+        self.assertEqual(result.returncode, 1)
+        document = json.loads(result.stdout)
+        self.assertEqual(document['delegation'], 'deleg_o')
+        self.assertEqual(document['failures'], 1)
+        self.assertEqual([task['status'] for task in document['tasks']], ['PASS', 'FAIL'])
+        self.assertEqual([task['finished'] for task in document['tasks']], [True, True])
+        self.assertEqual(document['tasks'][1]['observed']['model'], 'model-beta')
+        self.assertEqual(document['expected']['provider'], 'provider-a')
+
+    def test_arbitrary_route_slot_passes_without_fixed_names(self):
+        slot = route(label='planner', provider='provider-z', model='model-omega', effort='high')
+        self.build([('deleg_q', 'completed', 1.0, 2.0, payload(slot))])
+        result = self.run_check('--delegation', 'deleg_q', '--expect-label', 'planner',
+                                '--expect-provider', 'provider-z', '--expect-model',
+                                'model-omega', '--expect-effort', 'high')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('PASS task=0', result.stdout)
+
+    def test_missing_route_metadata_fails_against_an_expectation(self):
+        self.build([('deleg_r', 'completed', 1.0, 2.0,
+                     json.dumps({'results': [{'task_index': 0, 'status': 'completed'}]}))])
+        result = self.run_check('--delegation', 'deleg_r', *EXPECTED)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn('label=- (expected reviewer)', result.stdout)
+        self.assertNotIn('Traceback', result.stderr)
+
+    def test_entry_that_is_not_an_object_is_unverified(self):
+        self.build([('deleg_s', 'completed', 1.0, 2.0,
+                     json.dumps({'results': ['not-an-object']}))])
+        result = self.run_check('--delegation', 'deleg_s', *EXPECTED)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('result entry 0 is not an object', result.stderr)
+        self.assertNotIn('PASS', result.stdout)
+
+    def test_route_that_is_not_an_object_is_unverified(self):
+        self.build([('deleg_t', 'completed', 1.0, 2.0,
+                     json.dumps({'results': [
+                         {'task_index': 0, 'status': 'completed', 'route': 'oops'}]}))])
+        result = self.run_check('--delegation', 'deleg_t', *EXPECTED)
+        self.assertEqual(result.returncode, 2)
+        self.assertIn('route is not an object', result.stderr)
+        self.assertNotIn('Traceback', result.stderr)
+
+    def test_hermes_home_resolves_the_active_profile_state_db(self):
+        self.build([('deleg_home', 'completed', 1.0, 2.0, payload(route()))])
+        environment = dict(os.environ)
+        environment.pop('HERMES_HOME', None)
+        environment['HERMES_HOME'] = str(self.directory)
+        result = subprocess.run([sys.executable, str(SCRIPT), '--delegation', 'deleg_home',
+                                 *EXPECTED], capture_output=True, text=True, env=environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('PASS task=0', result.stdout)
+
+    def test_state_db_argument_wins_over_hermes_home(self):
+        self.build([('deleg_wins', 'completed', 1.0, 2.0, payload(route()))])
+        environment = dict(os.environ)
+        environment['HERMES_HOME'] = str(self.directory / 'absent-home')
+        result = self.run_check('--delegation', 'deleg_wins', *EXPECTED, env=environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_profile_resolves_under_an_isolated_home(self):
+        home = self.directory / 'home'
+        profile_db = home / '.hermes' / 'profiles' / 'demo' / 'state.db'
+        profile_db.parent.mkdir(parents=True)
+        connection = sqlite3.connect(profile_db)
+        connection.execute('create table async_delegations(delegation_id text primary key, '
+                           'state text, dispatched_at real, completed_at real, result_json text)')
+        connection.execute('insert into async_delegations values (?,?,?,?,?)',
+                           ('deleg_profile', 'completed', 1.0, 2.0, payload(route())))
+        connection.commit()
+        connection.close()
+        environment = dict(os.environ)
+        environment.pop('HERMES_HOME', None)
+        environment['HOME'] = str(home)
+        result = subprocess.run([sys.executable, str(SCRIPT), '--profile', 'demo',
+                                 '--delegation', 'deleg_profile', *EXPECTED],
+                                capture_output=True, text=True, env=environment)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+
+if __name__ == '__main__':
+    unittest.main(verbosity=2)

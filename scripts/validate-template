@@ -6,11 +6,11 @@ import json
 import re
 import sys
 from urllib.parse import unquote, urlsplit
-SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'handoff', 'relay', 'task', 'tweak', 'adopt-project')
+SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'handoff', 'relay', 'work-issue', 'task', 'tweak', 'adopt-project')
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
- *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/agent-relay','scripts/test-agent-relay','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','specs/methodology/coordinator-communication.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/HERMES_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
+ *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan','issue')),
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/work-issue','scripts/test-work-issue','scripts/check-delegation-route','scripts/test-delegation-route','scripts/fixtures/work-issue-project.json','scripts/agent-relay','scripts/test-agent-relay','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','specs/methodology/coordinator-communication.md','specs/methodology/issue-workflow.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/HERMES_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
 EXPECTED_GIT={
  'status':({},()),
  'branches':({},()),
@@ -359,7 +359,7 @@ def validate(root):
    'CI contract', 'required check', 'branch protection', 'check identity',
    'do not substitute'):
   if not satisfied(adopted,token): fail('adoption',f'adopt-project Skill missing {token}')
- safety=docs+[root/n for n in ('docs/archive/PROMPT_BACKUP.md','docs/archive/PROMPT_BACKUP_COMPLETE.md','.claude/settings.json','.gitignore','.github/workflows/validate.yml','scripts/validate-template','scripts/test-validator','scripts/agent-relay','scripts/test-agent-relay','scripts/review-read') if (root/n).is_file()]
+ safety=docs+[root/n for n in ('docs/archive/PROMPT_BACKUP.md','docs/archive/PROMPT_BACKUP_COMPLETE.md','.claude/settings.json','.gitignore','.github/workflows/validate.yml','scripts/validate-template','scripts/test-validator','scripts/work-issue','scripts/test-work-issue','scripts/check-delegation-route','scripts/test-delegation-route','scripts/agent-relay','scripts/test-agent-relay','scripts/review-read') if (root/n).is_file()]
  patterns=(r'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----',r'\bgh[pousr]_[A-Za-z0-9]{30,}\b',r'\bgithub_pat_[A-Za-z0-9_]{30,}\b',r'\bAKIA[A-Z0-9]{16}\b',r'\bsk-[A-Za-z0-9]{32,}\b',r'(?im)^\s*(?:password|api_key|access_token|secret)\s*[:=]\s*["\']?[A-Za-z0-9+/=_-]{20,}')
  for p in safety:
   s=p.read_text(encoding='utf-8')
@@ -583,6 +583,75 @@ def validate(root):
  }.items():
   for token in tokens:
    if not satisfied(read(name),token): fail('continuity',f'{name}: missing {token}')
+ # Issue and Project workflow: the portable protocol is canonical, and the Skill, the adapter
+ # and the Issue template link it instead of restating it. A Project is optional, so the manual
+ # protocol and the closed failure without a Project are part of the contract.
+ issue=read('specs/methodology/issue-workflow.md')
+ for token in ('## Two entry paths','## Single source of operational state','## The 12 statuses',
+   '## Ownership of transitions','## Manual protocol without a Project','## Taking one Issue',
+   '## Context receipt','## Agent routing','## Session continuity',
+   '## Communication and document ownership','## PR ↔ Issue linkage','## Tool adapter',
+   '## Adopting it in a project','## Stop conditions',
+   'Backlog','Ready Analysis','Analysis In Progress','Analysis In Review','Ready Specification',
+   'Specification In Progress','Specification In Review','Ready Development',
+   'Development In Progress','Development In Review','Blocked','Done',
+   'Previous Status','Refs #','addCloseIssueReferences','reopen','never guessed','optional',
+   'only when no Project is configured','never substitutes for `Ready {Phase}`',
+   'closing-capable','can close the Issue','## Decisiones vigentes','## Estado',
+   '## Alcance autorizado','## Fuentes consultadas','Huella del contexto'):
+  if not satisfied(issue,token): fail('issue-workflow',f'protocol missing {token}')
+ for token in ('## Skill and tool','no session or memory of its own between calls',
+   '## Session continuity','one reservation at a time','no cron, webhook, bot','--repo',
+   '--project','manual protocol','issue-workflow.md','## Context receipt','--summary-file',
+   '## Decisiones vigentes','Huella del contexto','last non-empty line','no CLI receipt'):
+  if not satisfied(read('.agents/skills/work-issue/SKILL.md'),token):
+   fail('issue-workflow',f'work-issue Skill missing {token}')
+ for token in ('## Objective','## Requested phase','## Scope','## Linked SPEC',
+   '## Acceptance checks','## Dependencies','## Authorization and evidence','Backlog',
+   'repository only'):
+  if not satisfied(read('templates/issue.md'),token):
+   fail('issue-workflow',f'Issue template missing {token}')
+ adapter=read('scripts/work-issue')
+ for token in ('--repo','--project','no GitHub Project configured','issue-workflow.md'):
+  if token not in adapter: fail('issue-workflow',f'work-issue adapter missing {token}')
+ for token in ('jmartinlabs','myfinanzas','default=4'):
+  if token in adapter.lower(): fail('issue-workflow',f'work-issue adapter hardcodes {token}')
+ # The suite is exercised once through the existing validator entry point, never per fixture
+ # and never recursively (workflow files are out of scope for this integration).
+ if 'validate-template' in read('scripts/test-work-issue'):
+  fail('issue-workflow','the work-issue suite must not call the validator')
+ if 'test-work-issue' not in read('scripts/test-validator'):
+  fail('issue-workflow','the existing validator test entry must run the work-issue suite once')
+ for name,token in (('AGENTS.md','issue-workflow.md'),('specs/README.md','issue-workflow.md'),
+   ('specs/methodology/epic-orchestration.md','issue-workflow.md'),
+   ('specs/methodology/identifiers.md','issue-workflow.md'),
+   ('templates/progress.md','Project/tracker'),
+   ('.agents/skills/orchestrate/SKILL.md','../work-issue/SKILL.md'),
+   ('.agents/skills/init-project/SKILL.md','Backlog'),
+   ('.agents/skills/roadmap/SKILL.md','Backlog'),
+   ('.agents/skills/spec/SKILL.md','templates/issue.md')):
+  if not satisfied(read(name),token): fail('issue-workflow',f'{name}: missing {token}')
+ # Delegation route evidence: a slot is configuration, so the verifier accepts expectations
+ # from the dispatch option and stays read-only over local metadata.
+ route=read('scripts/check-delegation-route')
+ for token in ('--state-db','--profile','--delegation','--latest','--expect-label',
+   '--expect-model','--expect-provider','--expect-effort','HERMES_HOME','mode=ro',
+   'result_json','never emitted without an expectation',"state != 'completed'"):
+  if token not in route: fail('delegation-route',f'verifier missing {token}')
+ for token in ('### Delegation routes','model_map.options','slot','at dispatch','--expect-label',
+   'Exit 2 is never a pass','circular','--delegation <id>','HERMES_HOME'):
+  if not satisfied(read('specs/methodology/model-selection.md'),token):
+   fail('delegation-route',f'model-selection missing {token}')
+ for name in ('scripts/check-delegation-route','scripts/test-delegation-route'):
+  text=read(name)
+  for token in ('gpt-6.1-sol','openai-codex','alibaba-token-plan','deepseek'):
+   if token in text.lower(): fail('delegation-route',f'{name} hardcodes {token}')
+ if len(re.findall(r'(?m)^    def test_',read('scripts/test-delegation-route')))<18:
+  fail('delegation-route','the delegation-route suite lost its positive/negative coverage')
+ if 'validate-template' in read('scripts/test-delegation-route'):
+  fail('delegation-route','the delegation-route suite must not call the validator')
+ if 'test-delegation-route' not in read('scripts/test-validator'):
+  fail('delegation-route','the existing validator test entry must run the delegation-route suite once')
  return errors
 if __name__=='__main__':
  if len(sys.argv)>2: sys.exit('Usage: validate-template [repository-root]')

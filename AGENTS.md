@@ -13,7 +13,8 @@ needs `hermes skills trust` once per checkout before project Skills load.
 
 ## How to work
 - Use orchestrate and [adaptive workflows](specs/methodology/workflows.md) to classify work as Quick, Standard or Full.
-- Track work with [identifiers](specs/methodology/identifiers.md): one stable functional ID, the `SPEC`/`DEV`/`QA`/`MERGE` stages, local `DEV-nn` blocks and one board. Never infer approval from another stage.
+- Track work with [identifiers](specs/methodology/identifiers.md): one stable functional ID, the `SPEC`/`DEV`/`QA`/`MERGE` stages, local `DEV-nn` blocks and one operational state — the Project when it exists, otherwise one board. Never infer approval from another stage.
+- Work recorded in Issues follows the [issue workflow](specs/methodology/issue-workflow.md): the Project `Status` is the phase gate, `work-issue` reads, routes and reserves that work, and the manual protocol applies when no Project is configured.
 - Quick proceeds without extra confirmation only if clearly requested, reversible, low risk and free of protected gates.
 - Standard and Full need confirmation unless the same scope is already explicitly authorized.
 - Consultation/analysis never authorizes edits. Read-only planning mode never permits implementation.
@@ -41,5 +42,5 @@ needs `hermes skills trust` once per checkout before project Skills load.
 ## Project lifecycle
 - New project: start or resume with `init-project`; record stages in `specs/setup-progress.md`. See [document ownership](specs/README.md).
 - Existing project: use [the adoption prompt](ADOPT_EXISTING_PROJECT_PROMPT.md) and `adopt-project`; keep its code and decisions. Never run `init-project` on it.
-- Multi-epic work: only the coordinator updates `specs/epic-board.md`. Keep the next roadmap work and dependencies identified; while work advances or waits, prepare independent work that commits no protected decision: a SPEC draft, a bounded investigation, a work packet for already authorized DEV, or QA test design. Replan on completion, results and blockers, consolidate pending decisions and leave a verifiable next action. Assign bounded agents with role contracts and the work packet, based on real client capability. Never create busywork, code unapproved specs or auto-merge PRs.
+- Multi-epic work: only the coordinator updates `specs/epic-board.md`, and only as the fallback when no Project owns status. With a Project, its `Status` is the single master and the board, if kept for overarching scheduling, must not become a second status list. Keep the next roadmap work and dependencies identified; while work advances or waits, prepare independent work that commits no protected decision: a SPEC draft, a bounded investigation, a work packet for already authorized DEV, or QA test design. Replan on completion, results and blockers, consolidate pending decisions and leave a verifiable next action. Assign bounded agents with role contracts and the work packet, based on real client capability. Never create busywork, code unapproved specs or auto-merge PRs.
 - To stop and hand over: use [handoff](.agents/skills/handoff/SKILL.md). It checkpoints state, asks controllable workers to stop and never auto-resumes.
