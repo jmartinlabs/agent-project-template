@@ -80,7 +80,7 @@ options; the harness never creates or edits Project fields.
 
 ## Manual protocol without a Project
 
-When no tracker is configured, or the project deliberately works without one:
+When no tracker is configured for the work:
 
 1. The Issue states the requested phase, scope, acceptance checks, dependencies and the
    **identifiable human authorization** for that phase (who, what, when). An agent comment is
@@ -95,9 +95,12 @@ When no tracker is configured, or the project deliberately works without one:
 5. `Blocked` keeps its `Previous Status`, reason, owner and exit condition in the Issue.
 6. Acceptance and closure are human. Nothing is "Done" because work was delivered or merged.
 
-The same protocol applies when a Project exists but the phase is authorized in the Issue: the
-Status is then updated by the user, and the agent neither invents nor edits it. Do not rebuild
-the protocol as a new state machine or as a second board.
+The manual protocol applies **only when no Project is configured** for this work. If a Project
+exists but cannot be read or written, the Project `Status` remains the gate: stop and report
+the blocker, ask for the missing access and do not switch to the manual protocol. A comment,
+label, assignee or Issue-level phase request never substitutes for `Ready {Phase}` while a
+Project owns the status. Do not rebuild the protocol as a new state machine or as a second
+board.
 
 ## Taking one Issue
 
@@ -105,17 +108,18 @@ the protocol as a new state machine or as a second board.
    and PR, dependencies, assignee and real state. `work-issue` without arguments lists every
    Issue in the three `Ready` groups with a proposed distribution; `next --agent X` reduces it
    to that agent's queue.
-2. **Verify.** Require the specific `Ready` status, identifiable human authorization,
-   sufficient scope, ownership and no open dependency. An agent never creates permission by
-   moving the Status itself.
+2. **Verify.** With a Project, require the specific `Ready` status; without one, require the
+   human authorization recorded in the Issue. In both cases require sufficient scope, ownership
+   and no open dependency. An agent never creates permission by moving the Status itself.
 3. **Recover context.** Read the whole history with pagination, the linked sources and the
    decision hierarchy (latest explicit user instruction, approved scope, real state). Publish
-   a short receipt bound to a fingerprint; on material contradiction or unverifiable
-   authorization, stop dependent work and report.
-4. **Reserve.** Re-read the Status, confirm no other assignee or claim, publish the claim
-   comment, assign and move to `{Phase} In Progress`. Re-read afterwards; a drifted Status
-   retracts the writes. Reservation is best-effort (GitHub has no compare-and-set): one
-   reservation at a time, never a lock service.
+   a short receipt bound to a fingerprint ([context receipt](#context-receipt)); on material
+   contradiction or unverifiable authorization, stop dependent work and report.
+4. **Reserve.** With a Project, re-read the Status, confirm no other assignee or claim, publish
+   the claim comment, assign and move to `{Phase} In Progress`; re-read afterwards and retract
+   the writes on drift. Without one, publish the start comment, assign the Issue and re-read it.
+   Reservation is best-effort (GitHub has no compare-and-set): one reservation at a time, never
+   a lock service.
 5. **Execute** the authorized phase with the Skill that owns it (`orchestrate`, `spec`, `dev`,
    `task`, `tweak`) and deliver the branch, PR and evidence. Never skip a gate because the
    work is "small"; never exceed the scope because the Tool allows it.
@@ -123,6 +127,41 @@ the protocol as a new state machine or as a second board.
 7. **Block** and restore as described above; **accept** only as the user.
 8. **Resume** from Issue + SPEC + PR + handoff comments, without depending on a chat. Never
    take over an apparently abandoned Issue unilaterally.
+
+## Context receipt
+
+`context --publish` creates the checkpoint that lets a later `take` or `move` prove the tool
+re-read the Issue structure. It never proves that the agent read or understood the content.
+The summary file must carry these exact headings; a missing one refuses publication:
+
+```markdown
+## Decisiones vigentes
+- ...
+## Estado
+- ...
+## Alcance autorizado
+- ...
+## Fuentes consultadas
+- Body, comments, linked SPEC and PR.
+```
+
+Publish it with the real flags (configuration precedes the subcommand):
+
+```bash
+scripts/work-issue --repo OWNER/NAME --project N context --issue N --agent hermes \
+  --publish --summary-file path/to/summary.md
+```
+
+A valid receipt carries `Autor`, `Rol`, `Fase`, `Tipo: Contexto`, the four sections, a
+`Huella del contexto: <12 hex> (N comentarios)` line and, as the **last non-empty line**,
+the exact `<!-- work-issue:context ... -->` marker. A comment that merely quotes the marker
+is material, not a receipt, and does not accredit the reading. `Rol` is one of `Coordinador
+funcional`, `Ejecutor`, `Revisor`.
+
+The fingerprint covers title, body, Status, labels, assignees and every material comment. It
+expires on **any** new comment — including the agent's own claim or report — and on `take`,
+which changes Status and assignee. Publish a new receipt after `take` and before the first
+`move`; a receipt from the `Ready` state authorizes nothing in `In Progress`.
 
 ## Agent routing
 
@@ -151,12 +190,17 @@ with a header declaring real identity, so a shared GitHub account is never mista
 authorization:
 
 ```text
-Author: <agent>
-Role: Coordinator | Executor | Reviewer
-Phase: Analysis | Specification | Development
-Type: Start | Context | Progress | Report | Block | Review | Handoff | Proposal
-Executor: <when the publisher differs from the executor>
+Autor: <agent>
+Rol: Coordinador funcional | Ejecutor | Revisor
+Fase: Analysis | Specification | Development
+Tipo: Inicio | Contexto | Progreso | Informe | Bloqueo | Revisión | Handoff | Propuesta
+Ejecutor: <when the publisher differs from the executor>
 ```
+
+Status changes carry a `record` block with `- De: <current Status>` and `- A: <target Status>`;
+`Previous Status` keeps that exact field name because the Project option and the pilot use it.
+The markers (`<!-- work-issue:... -->`) are structural, not decorative: copying one into free
+text or changing the header fields breaks receipt and block recognition.
 
 | Surface | Owns |
 | --- | --- |
@@ -174,18 +218,23 @@ confirmation, and never rewrite historical comments to add an identity.
 ## PR ↔ Issue linkage
 
 The Issue is the work frame and may hold several PRs. Every PR is linked so it appears in the
-Issue's `Development` section, and **merging never closes the Issue**: closure follows the
-user's `Done` decision.
+Issue's `Development` section; closure is a human `Done` decision by intent, never a substitute
+for acceptance.
 
 1. Open the PR into the project's target branch (`feature/* → main`, or `feature/* → test →
-   main` when the project requires it) with `Refs #N` in the body. `Closes`/`Fixes` keywords
-   only act against the default branch, so they are unreliable for intermediate branches.
+   main` when the project requires it) with `Refs #N` in the body. `Closes`/`Fixes` are
+   closing keywords: against the repository's default branch (`main`) they can close the Issue
+   automatically on merge. They are unreliable for intermediate branches and never replace
+   the explicit link.
 2. Link immediately after creation: `addCloseIssueReferences(issueId, [pullRequestId])` through
    `gh api graphql`; verify both directions (`closedByPullRequestsReferences` on the Issue,
-   `closingIssuesReferences` on the PR).
-3. **Guard after merge:** re-read the Issue after any merge; if it closed, reopen it and record
-   the incident. An Issue closed by a merge is not acceptance. The harness documents this
-   capability and guard; it installs no bot and moves no Status on merge.
+   `closingIssuesReferences` on the PR). Treat the native reference as closing-capable, not as
+   a guarantee in either direction.
+3. **After any merge, re-read the Issue.** A native closing link against the default branch can
+   close it automatically: that is a real risk of the linkage, not an accepted flow. If the
+   Issue closed and no human `Done` acceptance was recorded, reopen it and note the incident;
+   if acceptance was already recorded, leave the closure alone. The harness documents this
+   guard; it installs no bot and moves no Status on merge.
 
 ## Tool adapter
 

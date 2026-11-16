@@ -1165,7 +1165,8 @@ class ValidationTests(unittest.TestCase):
   self.assertRule('claude')
  def test_work_issue_protocol_headings(self):
   cases = ('## Two entry paths','## Single source of operational state','## The 12 statuses',
-   '## Ownership of transitions','## Manual protocol without a Project','## Agent routing',
+   '## Ownership of transitions','## Manual protocol without a Project','## Taking one Issue',
+   '## Context receipt','## Agent routing',
    '## Session continuity','## Communication and document ownership','## PR ↔ Issue linkage',
    '## Tool adapter','## Stop conditions')
   for heading in cases:
@@ -1179,7 +1180,9 @@ class ValidationTests(unittest.TestCase):
      p.write_text(original)
  def test_work_issue_protocol_statuses_and_linkage(self):
   cases = ('Ready Development','Previous Status','Refs #','addCloseIssueReferences','reopen',
-   'never guessed','optional')
+   'never guessed','optional','only when no Project is configured',
+   'never substitutes for `Ready {Phase}`','closing-capable','can close the Issue',
+   '## Decisiones vigentes','## Fuentes consultadas','Huella del contexto')
   for token in cases:
    with self.subTest(token=token):
     p=self.root/'specs/methodology/issue-workflow.md'; original=p.read_text()
@@ -1191,7 +1194,9 @@ class ValidationTests(unittest.TestCase):
      p.write_text(original)
  def test_work_issue_skill_keeps_the_session_contract(self):
   cases = ('## Skill and tool','no session or memory of its own between calls',
-   '## Session continuity','one reservation at a time','no cron, webhook, bot','manual protocol')
+   '## Session continuity','one reservation at a time','no cron, webhook, bot','manual protocol',
+   '## Context receipt','--summary-file','## Decisiones vigentes','last non-empty line',
+   'no CLI receipt')
   for token in cases:
    with self.subTest(token=token):
     p=self.root/'.agents/skills/work-issue/SKILL.md'; original=p.read_text()
@@ -1203,7 +1208,7 @@ class ValidationTests(unittest.TestCase):
      p.write_text(original)
  def test_issue_template_fields(self):
   cases = ('## Requested phase','## Linked SPEC','## Acceptance checks','## Dependencies',
-   '## Authorization and evidence','Backlog')
+   '## Authorization and evidence','Backlog','repository only')
   for token in cases:
    with self.subTest(token=token):
     p=self.root/'templates/issue.md'; original=p.read_text()

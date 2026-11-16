@@ -38,7 +38,7 @@ Start by describing the work, optionally in your client's planning mode, or invo
 - Quick: `$tweak` for small low-risk modifications, without mandatory spec files.
 - Standard: `$task` for bounded features, brief plan and acceptance checks.
 - Full: existing `$init-project`, `$bootstrap`, `$roadmap`, `$spec`, `$dev`, using only necessary phases.
-- Issues/Projects: `$work-issue` reads, routes and reserves authorized work inside its phase gate ([issue workflow](specs/methodology/issue-workflow.md)); the manual protocol covers projects without a Project, and nothing auto-merges or auto-closes.
+- Issues/Projects: `$work-issue` reads, routes and reserves authorized work inside its phase gate ([issue workflow](specs/methodology/issue-workflow.md)); the manual protocol covers projects without a Project, and nothing auto-merges. Closure is a human `Done` decision: a native closing link can close the Issue on merge, so verify and use the reopen guard.
 
 [Workflow, approval and delegation rules](specs/methodology/workflows.md). Multiagent delegation is preferred for substantial autonomous work when the client supports it and remains environment-dependent; scripts and CI remain the portable enforcement layer. [Manual behavioral acceptance scenarios](specs/methodology/acceptance-scenarios.md) cover Quick, Standard, Full, escalation and resume. Lifecycle hooks are not installed by this revision pending verified client support and safe deployment.
 
@@ -48,7 +48,7 @@ Start by describing the work, optionally in your client's planning mode, or invo
 
 ## Epic orchestration (v2.3)
 
-For multiple epics, [epic orchestration](specs/methodology/epic-orchestration.md) adds a dependency-aware scheduler, [epic board template](templates/epic-board.md) and [specialist role contracts](.agents/roles/README.md) for functional, implementation and QA tasks. Roles are task instructions, not guaranteed registered subagents; optional OpenCode adapters expose `review`, `functional`, `implementation` and `infrastructure` as native subagents, with `review` read-only.
+For multiple epics, [epic orchestration](specs/methodology/epic-orchestration.md) adds a dependency-aware scheduler, an optional [epic board template](templates/epic-board.md) (fallback when no Project owns status) and [specialist role contracts](.agents/roles/README.md) for functional, implementation and QA tasks. Roles are task instructions, not guaranteed registered subagents; optional OpenCode adapters expose `review`, `functional`, `implementation` and `infrastructure` as native subagents, with `review` read-only.
 
 While E1.6 awaits a financial decision, the functional lane can draft independent E1.7 requirements and QA can prepare provisional tests. E1.6 implementation remains blocked until explicit approval. After approval, `$orchestrate` can route to `$dev` and QA inside the active run without asking you to invoke those Skills manually. Merges and consequential decisions always need your approval. No background continuation after the session closes.
 

@@ -574,20 +574,26 @@ def validate(root):
  issue=read('specs/methodology/issue-workflow.md')
  for token in ('## Two entry paths','## Single source of operational state','## The 12 statuses',
    '## Ownership of transitions','## Manual protocol without a Project','## Taking one Issue',
-   '## Agent routing','## Session continuity','## Communication and document ownership',
-   '## PR ↔ Issue linkage','## Tool adapter','## Adopting it in a project','## Stop conditions',
+   '## Context receipt','## Agent routing','## Session continuity',
+   '## Communication and document ownership','## PR ↔ Issue linkage','## Tool adapter',
+   '## Adopting it in a project','## Stop conditions',
    'Backlog','Ready Analysis','Analysis In Progress','Analysis In Review','Ready Specification',
    'Specification In Progress','Specification In Review','Ready Development',
    'Development In Progress','Development In Review','Blocked','Done',
-   'Previous Status','Refs #','addCloseIssueReferences','reopen','never guessed','optional'):
+   'Previous Status','Refs #','addCloseIssueReferences','reopen','never guessed','optional',
+   'only when no Project is configured','never substitutes for `Ready {Phase}`',
+   'closing-capable','can close the Issue','## Decisiones vigentes','## Estado',
+   '## Alcance autorizado','## Fuentes consultadas','Huella del contexto'):
   if not satisfied(issue,token): fail('issue-workflow',f'protocol missing {token}')
  for token in ('## Skill and tool','no session or memory of its own between calls',
    '## Session continuity','one reservation at a time','no cron, webhook, bot','--repo',
-   '--project','manual protocol','issue-workflow.md'):
+   '--project','manual protocol','issue-workflow.md','## Context receipt','--summary-file',
+   '## Decisiones vigentes','Huella del contexto','last non-empty line','no CLI receipt'):
   if not satisfied(read('.agents/skills/work-issue/SKILL.md'),token):
    fail('issue-workflow',f'work-issue Skill missing {token}')
  for token in ('## Objective','## Requested phase','## Scope','## Linked SPEC',
-   '## Acceptance checks','## Dependencies','## Authorization and evidence','Backlog'):
+   '## Acceptance checks','## Dependencies','## Authorization and evidence','Backlog',
+   'repository only'):
   if not satisfied(read('templates/issue.md'),token):
    fail('issue-workflow',f'Issue template missing {token}')
  adapter=read('scripts/work-issue')

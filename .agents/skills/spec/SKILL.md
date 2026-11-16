@@ -39,7 +39,8 @@ with a two-digit number, approved decisions and a local documentation commit.
    delegate returns the approval request and draft evidence to the coordinator, which records
    approval and commits the approved documents. Never self-approve or commit a draft as
    approved. Preserve unrelated user changes. Return approval evidence and dependency changes
-   to the coordinator, which owns the shared epic board.
+   to the coordinator, which owns the shared current-state surface (`Project` `Status` when
+   configured, otherwise the epic board).
    When a tracker is configured, also generate the executable Issues derived from the approved
    SPEC in `Backlog`, one per deliverable, shaped by the [Issue template](../../../templates/issue.md)
    and linked to the SPEC: deduplicate first, never mark them `Ready` and never authorize their
