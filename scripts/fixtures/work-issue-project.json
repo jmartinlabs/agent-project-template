@@ -108,7 +108,8 @@
     {
       "content": {"number": 120, "title": "In progress", "body": "Work already taken.", "url": "https://github.com/acme/widgets/issues/120"},
       "id": "PVTI_fixture_120",
-      "status": "Development In Progress"
+      "status": "Development In Progress",
+      "assignees": ["acme-bot"]
     }
   ]
 }

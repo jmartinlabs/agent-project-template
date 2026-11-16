@@ -1088,11 +1088,8 @@ class Service:
                                 % error)
         if status_to and item is not None:
             if current is None:
-                try:
-                    self.github.set_status(item, status_to)
-                    problems.append("Status restored to %s without a verified read" % status_to)
-                except WorkIssueError as error:
-                    problems.append("Status not restored to %s (%s)" % (status_to, error))
+                problems.append("Status not restored to %s: its current value is unverified"
+                                % status_to)
             elif current.status == status_to:
                 pass
             elif status_written is None or current.status == status_written:
@@ -1104,7 +1101,9 @@ class Service:
                 problems.append("Status left at %s: it changed after our write and was not "
                                 "overwritten" % current.status)
         if assigned:
-            if current is not None and not self._owns_assignee(current):
+            if current is None:
+                problems.append("assignee not removed: current ownership is unverified")
+            elif not self._owns_assignee(current):
                 problems.append("assignee left as is: it is no longer exactly ours (%s)"
                                 % (", ".join(current.assignees) or "none"))
             else:
@@ -1139,7 +1138,7 @@ class Service:
                     % ", ".join(str(entry.get("id")) for entry in others))
         if not mine:
             return "no claim recorded by %s; reserve first with take" % agent
-        if not self._owns_assignee(item):
+        if not item.assignees or not self._owns_assignee(item):
             return ("the assignees are not exactly our identity (%s)"
                     % (", ".join(item.assignees) or "unknown"))
         return None
@@ -1208,7 +1207,7 @@ class Service:
             return ["comment %s not retracted (%s)" % (comment_id, error)]
         return []
 
-    def _recheck(self, number, agent, item, digest):
+    def _recheck(self, number, agent, item, digest, own_report_id=None):
         """Re-read the gate immediately before writing: it is never assumed to still hold.
 
         GitHub has no compare-and-set, so the Status, the assignees and the claim set are read
@@ -1223,7 +1222,8 @@ class Service:
         if fresh.status != item.status:
             return "the Status changed during the operation (%s -> %s)" % (item.status,
                                                                           fresh.status)
-        material = self._material(comments)
+        material = [entry for entry in self._material(comments)
+                    if entry.get("id") != own_report_id]
         problem = self._ownership_problem(number, agent, fresh, material)
         if problem:
             return "the ownership changed during the operation: " + problem
@@ -1254,7 +1254,7 @@ class Service:
         """
         return [entry for entry in comments if not is_receipt_body(entry.get("body"))]
 
-    def _receipt(self, number, agent, digest, comments, material_count):
+    def _receipt(self, number, agent, digest, comments, material_count, item):
         """Our valid receipt, only when it is the latest comment and the material matches.
 
         The structure is revalidated here: a body that only resembles a receipt never restores
@@ -1272,6 +1272,11 @@ class Service:
         if marker[:2] != (agent, number):
             return None
         if marker[2] != digest or marker[3] != material_count:
+            return None
+        phase = phase_of(item.status)
+        if phase is None and item.status == "Blocked":
+            phase = phase_of(self.blocked_previous(number, agent, comments) or "")
+        if phase is None or parts["header"]["Fase"] != phase.capitalize():
             return None
         return last
 
@@ -1305,7 +1310,7 @@ class Service:
                                  pr_states=pr_states, truncated=truncated)
         receipts = [entry for entry in comments if is_receipt_body(entry.get("body"))
                     and context_of(entry.get("body"))[:2] == (agent, number)]
-        valid = self._receipt(number, agent, digest, comments, len(material)) if agent else None
+        valid = self._receipt(number, agent, digest, comments, len(material), item) if agent else None
         timeline = [{"id": entry.get("id"),
                      "when": (entry.get("created_at") or entry.get("createdAt") or "")[:10],
                      "author": (entry.get("user") or {}).get("login") or "—",
@@ -1481,7 +1486,7 @@ class Service:
             self.out("[dry-run] #%d %s -> %s (claim comment + assignee, no writes)"
                      % (number, item.status, target))
             return EXIT_OK
-        if not self._receipt(number, agent, digest, comments, len(material)):
+        if not self._receipt(number, agent, digest, comments, len(material), item):
             self.out("Not reserved #%d: no current context receipt; run "
                      "`work-issue context --issue %d --agent %s --publish --summary-file <file>` "
                      "after reading the Issue, its history and the linked sources"
@@ -1626,7 +1631,7 @@ class Service:
                      % (number, item.status, target))
             return EXIT_OK
         digest = fingerprint(item, material)
-        if not self._receipt(number, agent, digest, comments, len(material)):
+        if not self._receipt(number, agent, digest, comments, len(material), item):
             self.out("Not moved #%d: no current context receipt for the present state; run "
                      "`work-issue context --issue %d --agent %s --publish` again"
                      % (number, number, agent))
@@ -1650,6 +1655,13 @@ class Service:
             for entry in pending:
                 self.out("  pending write: " + entry)
             return EXIT_FAILED
+        problem = self._recheck(number, agent, item, digest, own_report_id=report_id)
+        if problem:
+            pending = self._retract_own(number, report_id)
+            self.out("Not moved #%d: %s; the Status was not changed" % (number, problem))
+            for entry in pending:
+                self.out("  pending write: " + entry)
+            return EXIT_REFUSED
         try:
             self.github.set_status(item, target)
         except WorkIssueError as error:

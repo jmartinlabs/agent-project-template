@@ -257,7 +257,11 @@ def seed_receipts(github, agent="hermes"):
         material = [entry for entry in github.comments_store.get(item.number, [])
                     if not MODULE["context_of"](entry["body"])]
         digest = MODULE["fingerprint"](item, material)
-        body = MODULE["context_body"](agent, "Coordinador funcional", "development", item,
+        phase = MODULE["phase_of"](item.status)
+        if phase is None and item.status == "Blocked":
+            previous = Service(github, agent).blocked_previous(item.number, agent, material)
+            phase = MODULE["phase_of"](previous or "")
+        body = MODULE["context_body"](agent, "Coordinador funcional", phase or "development", item,
                                       SUMMARY, digest, len(material))
         github.next_id += 1
         github.comments_store.setdefault(item.number, []).append(
@@ -726,6 +730,7 @@ class RegressionTests(unittest.TestCase):
     def test_block_then_restore_cannot_skip_a_phase(self):
         items = load_items()
         fixture_item(102, items).status = "Analysis In Progress"
+        fixture_item(102, items).assignees = ["acme-bot"]
         claim = claim_body("hermes", "Coordinador funcional", "analysis", fixture_item(102, items))
         github = FakeGh(items=items, claims={102: [{"id": 3, "body": claim}]})
         svc = service(github)
@@ -858,7 +863,8 @@ class SecondRoundTests(unittest.TestCase):
         lines = []
         code = Service(github, "hermes", "Coordinador funcional", lines.append).take(101)
         self.assertEqual(code, EXIT_FAILED)
-        self.assertIn(("unassign", 101), github.calls)
+        self.assertNotIn(("unassign", 101), github.calls)
+        self.assertIn("unverified", "\n".join(lines))
         self.assertIn("re-read", "\n".join(lines))
 
     def test_options_after_the_subcommand_are_accepted(self):
@@ -924,14 +930,16 @@ class ThirdRoundTests(unittest.TestCase):
         self.assertEqual(service(github).move(120, "Development In Progress", restore=True),
                          EXIT_REFUSED)
 
-    def test_failed_verification_restores_the_written_status(self):
+    def test_failed_verification_preserves_unreadable_state_and_reports_it(self):
         github = FakeGh(fail_item_after=2)
         seed_receipts(github)
         lines = []
         code = Service(github, "hermes", "Coordinador funcional", lines.append).take(101)
         self.assertEqual(code, EXIT_FAILED)
-        self.assertEqual(fixture_item(101, github.data).status, "Ready Development")
-        self.assertIn("status", [call[0] for call in github.calls if call[0] == "status"])
+        self.assertEqual(fixture_item(101, github.data).status, "Development In Progress")
+        self.assertEqual([call for call in github.calls if call[0] == "status"],
+                         [("status", 101, "Development In Progress")])
+        self.assertIn("pending write", "\n".join(lines))
 
     def test_take_does_not_claim_success_without_a_persisted_claim(self):
         github = FakeGh(drop_comments=True)
@@ -2018,6 +2026,60 @@ class ReceiptStructureTests(unittest.TestCase):
         body = github.comments_store[120][-1]["body"]
         self.assertIn("Fase: Development", body)
         self.assertTrue(MODULE["is_receipt_body"](body))
+
+
+class FinalBoundaryTests(unittest.TestCase):
+    def progress(self, assignees=None, github_type=FakeGh):
+        items = load_items()
+        item = fixture_item(120, items)
+        item.status = "Development In Progress"
+        if assignees is not None:
+            item.assignees = assignees
+        claim = claim_body("hermes", "Coordinador funcional", "development", item)
+        github = github_type(items=items, claims={120: [{"id": 11, "body": claim}]})
+        seed_receipts(github)
+        return github
+
+    def test_delivery_requires_the_assignee_even_when_the_claim_remains(self):
+        github = self.progress(assignees=[])
+        self.assertEqual(Service(github, "hermes").move(120, "Development In Review"),
+                         EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+
+    def test_unreadable_rollback_never_overwrites_unverified_state(self):
+        github = self.progress()
+        github.fail.add("item")
+        item = fixture_item(120, github.data)
+        pending = Service(github, "hermes")._rollback(
+            120, assigned=True, status_to="Ready Development", item=item,
+            status_written="Development In Progress")
+        self.assertTrue(pending)
+        self.assertEqual(github.calls, [])
+        self.assertEqual(item.status, "Development In Progress")
+        self.assertEqual(item.assignees, ["acme-bot"])
+
+    def test_a_receipt_from_another_phase_never_authorizes_delivery(self):
+        github = self.progress()
+        receipt = github.comments_store[120][-1]
+        receipt["body"] = receipt["body"].replace("Fase: Development", "Fase: Analysis")
+        self.assertEqual(Service(github, "hermes").move(120, "Development In Review"),
+                         EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+
+    def test_state_is_rechecked_after_publishing_the_report(self):
+        class HumanMoveDuringReport(FakeGh):
+            def comment(self, number, body):
+                comment_id = super().comment(number, body)
+                if MODULE["report_of"](body):
+                    fixture_item(number, self.data).status = "Backlog"
+                return comment_id
+
+        github = self.progress(github_type=HumanMoveDuringReport)
+        self.assertEqual(Service(github, "hermes").move(120, "Development In Review"),
+                         EXIT_REFUSED)
+        self.assertFalse([call for call in github.calls if call[0] == "status"])
+        self.assertEqual(fixture_item(120, github.data).status, "Backlog")
+        self.assertEqual(report_comments(github, 120), [])
 
 
 class ParserTests(unittest.TestCase):
