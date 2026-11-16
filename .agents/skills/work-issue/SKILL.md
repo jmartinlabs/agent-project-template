@@ -51,7 +51,9 @@ decides *which* Issue an agent may take and how the session records it.
 An inventory of every Ready Issue with phase, routing, dependencies and next action; one
 reservation per Issue the session works (claim comment + assignee + `In Progress`), its context
 receipt and the transitions each phase permits; and a short session ledger. The **tool** writes
-nothing else: no branch, no PR, no merge, no approval.
+nothing else: no branch, no PR, no merge, no approval. Operational comments keep the protocol
+header (`Autor`, `Rol`, `Fase`, `Tipo`, optional `Ejecutor`) and the `- De:` / `- A:` record;
+their markers belong on the last line and are never quoted as evidence.
 
 ## Procedure
 
@@ -64,31 +66,74 @@ nothing else: no branch, no PR, no merge, no approval.
    `next --agent X` reduces that to one queue in work order. Never treat "propose" as
    "dispatch", and never consume a truncated reading.
 2. **Authorize.** `Ready {Phase}` authorizes that phase only. A comment, label or assignee is
-   never an approval. **Without a Project, use the manual protocol**: the Issue must carry the
-   identifiable human authorization for the requested phase before any reservation, and the
-   agent neither invents statuses nor edits a Status it cannot read.
+   never an approval. **Only when no Project is configured**, use the manual protocol: the
+   Issue must carry the identifiable human authorization for the requested phase before any
+   reservation, and the agent neither invents statuses nor writes one. A Project that exists
+   but cannot be read is a blocker whose `Status` remains the gate; an Issue comment never
+   substitutes for `Ready {Phase}`.
 3. **Route.** Simple labels `opencode`, `hermes`, `codex`; namespaced `agent:X`/`to:X` fail
    closed outside the catalogue; no label means any compatible agent; two labels or an unknown
    agent mean report and wait. Never change another agent's routing label.
-4. **Check.** Confirm the Issue is still Ready, belongs to the configured repository, has no
-   other assignee and no open or unverifiable dependency (`Depends on #N`, `Blocked by #N`,
-   `Depende de #N`, `Bloqueada por #N`; a negated clause does not count).
-5. **Recover context and reserve.** Read the whole history, the linked sources and the decision
-   hierarchy; publish a receipt bound to the current fingerprint. Then `take`, which re-reads
-   the Status, publishes the claim, assigns and moves to `{Phase} In Progress`, and retracts its
-   own writes on drift, collision or failed verification. The claim is best-effort evidence,
-   not a lock: one reservation at a time, and never a lock service.
+4. **Check.** With a Project, confirm the Issue is still `Ready`, belongs to the configured
+   repository, has no other assignee and no open or unverifiable dependency (`Depends on #N`,
+   `Blocked by #N`, `Depende de #N`, `Bloqueada por #N`; a negated clause does not count). The
+   dependency is resolved in this repository only: a same-numbered Issue in another repository
+   never satisfies it. Without a Project there is no `Ready` status, fingerprint or CLI receipt
+   to re-read: confirm instead the human authorization, scope, ownership and dependencies
+   recorded in the Issue.
+5. **Recover context and reserve.** With a Project, read the whole history, the linked sources
+   and the decision hierarchy; publish a receipt bound to the current fingerprint ([context
+   receipt](#context-receipt)). Then `take`, which re-reads the Status, publishes the claim,
+   assigns and moves to `{Phase} In Progress`, and retracts its own writes on drift, collision
+   or failed verification. Without a Project, publish the start comment with the protocol
+   header (`Autor`, `Rol`, `Fase`, `Tipo: Inicio`, optional `Ejecutor`), assign the Issue and
+   re-read it: that comment plus the assignee is the reservation, and no CLI receipt or
+   fingerprint is required. The claim is best-effort evidence, not a lock:
+   one reservation at a time, and never a lock service.
 6. **Execute.** Continue with the Skill that owns the phase (`spec`, `dev`, `task`, `tweak`) and
    deliver the branch, PR and evidence. Reserving is the start, not the deliverable.
-7. **Deliver and continue.** Publish the report or PR, `move` into `{Phase} In Review`, then
-   return to the queue for the next eligible Issue instead of waiting for that decision. Never
-   claim a session, a parallel worker or a dispatch the runtime cannot evidence.
+7. **Deliver and continue.** Publish the report or PR. With a Project, `move` into `{Phase} In
+   Review`; without one, record the report and an explicit review request without writing a
+   Status. Then return to the queue for the next eligible Issue instead of waiting for that
+   decision. Never claim a session, a parallel worker or a dispatch the runtime cannot evidence.
 8. **Block and restore.** Block only from your own `{Phase} In Progress`, recording `Previous
    Status`, reason, owner, exit condition and date. Restore only with `--restore`, only to the
    recorded agent status, and only while the permission still holds; otherwise ask the user.
 9. **Verify.** Every write is re-read; a failed write or verification is undone as far as
    possible and the rest is reported as a pending write. Argument validation happens before any
    GitHub access.
+
+## Context receipt
+
+The canonical contract is [the context receipt section](../../../specs/methodology/issue-workflow.md#context-receipt);
+this is the operational way to satisfy it. Publish with the real flags:
+
+```bash
+scripts/work-issue --repo OWNER/NAME --project N context --issue N --agent hermes \
+  --publish --summary-file path/to/summary.md
+```
+
+The summary file must use exactly these headings, or publication is refused:
+
+```markdown
+## Decisiones vigentes
+- ...
+## Estado
+- ...
+## Alcance autorizado
+- ...
+## Fuentes consultadas
+- Body, comments, linked SPEC and PR.
+```
+
+Only a comment whose **last non-empty line** is the exact `<!-- work-issue:context ... -->`
+marker, whose header starts with `Autor:` and `Tipo: Contexto`, and that carries the
+`Huella del contexto:` line counts as a receipt. A quoted marker or a missing header/line is
+material, not a receipt, and a receipt never proves the reading.
+
+The receipt expires on **any** new comment — including the agent's own claim or report — and on
+`take`, which changes Status and assignee. Publish a new receipt after `take` and before the
+first `move`; a receipt from the `Ready` state authorizes nothing in `In Progress`.
 
 ## Session continuity
 

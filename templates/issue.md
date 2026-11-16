@@ -31,7 +31,8 @@ produce several executable Issues; link the parent epic or roadmap row when it e
 ## Dependencies
 
 `Depends on #N` for each hard dependency, or `None`. A dependency is satisfied only when it is
-`Done`; an Issue still in review does not unblock this one.
+`Done`; an Issue still in review does not unblock this one. The number is resolved in this
+repository only: a same-numbered Issue in another repository never satisfies it.
 
 ## Authorization and evidence
 
@@ -40,4 +41,5 @@ produce several executable Issues; link the parent epic or roadmap row when it e
 - Tracker: Project and status when one exists, otherwise `manual protocol`. Everything starts
   in `Backlog`: generating documentation or tickets never marks work `Ready`.
 - Evidence on delivery: branch and commit, PR, checks (PASS / FAIL / UNRUN) and the exact review
-  request. A merge never closes the Issue by itself.
+  request. Closure is a human `Done` decision: a native closing link can close the Issue on
+  merge, so verify after any merge and reopen it if acceptance was not recorded.

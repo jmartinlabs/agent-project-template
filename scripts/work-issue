@@ -21,7 +21,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 AGENTS = ("opencode", "hermes", "codex")
-ROLES = ("Coordinator", "Executor", "Reviewer")
+# Wire values shared with the operating pilot; they are part of the comment contract.
+ROLES = ("Coordinador funcional", "Ejecutor", "Revisor")
 
 STATUSES = (
     "Backlog", "Ready Analysis", "Analysis In Progress", "Analysis In Review",
@@ -63,7 +64,7 @@ RECORD_START = "<!-- work-issue:record -->"
 RECORD_END = "<!-- /work-issue:record -->"
 RECORD_RE = re.compile(r"<!-- work-issue:record -->(.*?)<!-- /work-issue:record -->", re.S)
 RESERVED_LINE_RE = re.compile(
-    r"(?im)^(\s*)(-?\s*)(Author|Role|Phase|Type|Issue|From|To|Executor|Previous Status)\s*:")
+    r"(?im)^(\s*)(-?\s*)(Autor|Rol|Fase|Tipo|Issue|De|A|Ejecutor|Previous Status)\s*:")
 SPEC_RE = re.compile(r"specs/[0-9A-Za-z._/-]+\.md")
 EPIC_RE = re.compile(r"(?i)\b(?:épica|epica|epic)\s*[:·]?\s*([A-Z]?\d+(?:\.\d+)?)")
 ISSUE_REF_RE = re.compile(r"#(\d+)")
@@ -74,8 +75,8 @@ CONTEXT_MARKER = "<!-- work-issue:context"
 CONTEXT_RE = re.compile(
     r"<!-- work-issue:context agent=([a-z0-9_-]+) issue=(\d+) fingerprint=([0-9a-f]{12}) "
     r"comments=(\d+) -->")
-CONTEXT_SECTIONS = ("## Current decisions", "## State", "## Authorized scope",
-                    "## Sources read")
+CONTEXT_SECTIONS = ("## Decisiones vigentes", "## Estado", "## Alcance autorizado",
+                    "## Fuentes consultadas")
 AUTHORIZATION_RE = re.compile(
     r"(?i)\b(approve[ds]?|approval|authori[sz]e[ds]?|not authori[sz]ed|reject(?:ed)?|"
     r"apruebo|aprobad[oa]|autoriz[oa]|autorizad[oa]|no autorizad[oa]|rechazad[oa]|"
@@ -238,6 +239,30 @@ def agent_routing(labels, agents=AGENTS):
     return sorted(set(known)), sorted(set(unknown))
 
 
+def dependency_index(items):
+    """Issue number -> every Project item carrying it, across repositories."""
+    index = {}
+    for item in items:
+        if item.number:
+            index.setdefault(item.number, []).append(item)
+    return index
+
+
+def dependency_item(index, number, repo):
+    """The item that may satisfy `#number` for `repo`, or None.
+
+    A shared Project can carry the same Issue number in several repositories. Only an
+    item from the target repository can satisfy a dependency; foreign items never do,
+    and a local/foreign collision resolves identically whatever the item order. More
+    than one local candidate is ambiguous and authorizes nothing.
+    """
+    entries = index.get(number) or []
+    if not isinstance(entries, list):
+        entries = [entries]
+    candidates = [item for item in entries if same_repo(item.repository, repo)]
+    return candidates[0] if len(candidates) == 1 else None
+
+
 def classify(item, agent=None, by_number=None, agents=AGENTS, repo=None):
     """Decide whether the agent may take this item, and why not when it may not."""
     by_number = by_number or {}
@@ -253,7 +278,7 @@ def classify(item, agent=None, by_number=None, agents=AGENTS, repo=None):
     known, unknown = agent_routing(item.labels, agents)
     decision.dependencies = dependencies(item.body)
     for number in decision.dependencies:
-        dependency = by_number.get(number)
+        dependency = dependency_item(by_number, number, repo)
         if dependency is None:
             decision.unverified.append(number)
         elif dependency.status != "Done":
@@ -319,7 +344,7 @@ def sort_key(decision):
 
 def plan(items, agent=None, agents=AGENTS, repo=None):
     """Every Ready item with its routing decision, ordered by eligibility then priority."""
-    by_number = {item.number: item for item in items if item.number}
+    by_number = dependency_index(items)
     decisions = [classify(item, agent, by_number, agents, repo)
                  for item in items if item.status in READY]
     return sorted(decisions, key=sort_key)
@@ -461,9 +486,9 @@ def is_receipt_body(body):
     if not context_of(text):
         return False
     head = text.splitlines()[:5]
-    return bool(head) and head[0].startswith("Author:") \
-        and any("Type: Context" in line for line in head) \
-        and "Context fingerprint:" in text
+    return bool(head) and head[0].startswith("Autor:") \
+        and any("Tipo: Contexto" in line for line in head) \
+        and "Huella del contexto:" in text
 
 
 def comment_kind(body):
@@ -543,7 +568,7 @@ def context_findings(item, comments, refs, spec_present=None, pr_states=None,
         section = RECORD_RE.search(body)
         if not section:
             continue
-        target = re.search(r"(?m)^- To: (%s)$" % "|".join(STATUSES), section.group(1))
+        target = re.search(r"(?m)^- A: (%s)$" % "|".join(STATUSES), section.group(1))
         last_transition = target.group(1) if target else None
         break
     if last_transition and last_transition != item.status:
@@ -579,15 +604,15 @@ def validate_summary(text):
 
 def context_body(agent, role, phase, item, summary, digest, count):
     header = [
-        "Author: %s" % sanitize(agent),
-        "Role: %s" % role,
-        "Phase: %s" % (phase or "?").capitalize(),
-        "Type: Context",
+        "Autor: %s" % sanitize(agent),
+        "Rol: %s" % role,
+        "Fase: %s" % (phase or "?").capitalize(),
+        "Tipo: Contexto",
         "",
     ]
     trailer = ["",
-               "Context fingerprint: `%s` (%d comments). A resumption may reuse this receipt "
-               "only while the fingerprint is unchanged." % (digest, count),
+               "Huella del contexto: `%s` (%d comentarios). Una reanudación solo puede reutilizar "
+               "este recibo mientras la huella no cambie." % (digest, count),
                "",
                "%s agent=%s issue=%d fingerprint=%s comments=%d -->"
                % (CONTEXT_MARKER, agent, item.number, digest, count)]
@@ -639,16 +664,16 @@ def validate_transition(current, target, previous_status=None, restore=False):
 def claim_body(agent, role, phase, item, note=None, executor=None):
     """Operative comment header required by the protocol, plus the claim marker."""
     lines = [
-        "Author: %s" % sanitize(agent),
-        "Role: %s" % role,
-        "Phase: %s" % (phase or "?").capitalize(),
-        "Type: Start",
+        "Autor: %s" % sanitize(agent),
+        "Rol: %s" % role,
+        "Fase: %s" % (phase or "?").capitalize(),
+        "Tipo: Inicio",
         "",
-        "## Issue claim",
+        "## Toma de la Issue",
         "",
         "- **Issue:** #%d — %s" % (item.number, item.title),
-        "- **Previous Status:** %s" % item.status,
-        "- Executor: %s" % sanitize(executor or agent),
+        "- **Status previo:** %s" % item.status,
+        "- Ejecutor: %s" % sanitize(executor or agent),
         "",
     ]
     if note:
@@ -674,21 +699,21 @@ def phase_of(status):
 def report_body(agent, role, phase, item, target, note=None, previous_status=None,
                 executor=None):
     header = [
-        "Author: %s" % sanitize(agent),
-        "Role: %s" % role,
-        "Phase: %s" % (phase or "?").capitalize(),
-        "Type: %s" % ("Block" if target == "Blocked" else "Report"),
+        "Autor: %s" % sanitize(agent),
+        "Rol: %s" % role,
+        "Fase: %s" % (phase or "?").capitalize(),
+        "Tipo: %s" % ("Bloqueo" if target == "Blocked" else "Informe"),
     ]
     if executor:
-        header.append("Executor: %s" % sanitize(executor))
+        header.append("Ejecutor: %s" % sanitize(executor))
     record = [
         "- Issue: #%d" % item.number,
-        "- From: %s" % item.status,
-        "- To: %s" % target,
+        "- De: %s" % item.status,
+        "- A: %s" % target,
     ]
     if previous_status:
         record.append("- Previous Status: %s" % previous_status)
-    lines = header + ["", "## Status change", "", RECORD_START] + record + [RECORD_END, ""]
+    lines = header + ["", "## Cambio de estado", "", RECORD_START] + record + [RECORD_END, ""]
     if note:
         lines += [sanitize(note).rstrip(), ""]
     lines.append('%s agent=%s issue=%d -->' % (REPORT_MARKER, agent, item.number))
@@ -1115,8 +1140,7 @@ class Service:
         claims = [entry for entry in material if claim_of(entry.get("body"))]
         mine = [entry for entry in claims if claim_of(entry.get("body")) == (agent, number)]
         others = [entry for entry in claims if claim_of(entry.get("body")) != (agent, number)]
-        decision = classify(item, agent, {entry.number: entry for entry in items},
-                            repo=self.github.repo)
+        decision = classify(item, agent, dependency_index(items), repo=self.github.repo)
         if (decision.kind == "taken" and mine and not others
                 and not decision.pending and not decision.unverified
                 and self._owns_assignee(item)):
@@ -1309,14 +1333,14 @@ class Service:
                 continue
             # Only the latest report may authorize a restore; an older block record
             # must not resurrect a phase after the Issue moved on (see SKILL limits).
-            if "Type: Block" not in body or block_of(body) != (agent, number):
+            if "Tipo: Bloqueo" not in body or block_of(body) != (agent, number):
                 return None
             section = RECORD_RE.search(body)
             if not section:
                 return None
             record = section.group(1)
             recorded = re.search(r"(?m)^- Previous Status: (%s)$" % "|".join(STATUSES), record)
-            source = re.search(r"(?m)^- From: (%s)$" % "|".join(STATUSES), record)
+            source = re.search(r"(?m)^- De: (%s)$" % "|".join(STATUSES), record)
             if not recorded or not source or source.group(1) != recorded.group(1):
                 return None
             if recorded.group(1) not in AGENT_IN_PROGRESS:
