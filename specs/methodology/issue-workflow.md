@@ -63,7 +63,9 @@ options; the harness never creates or edits Project fields.
   SPEC never authorizes development; a merge is not acceptance.
 - **Agent:** takes only work already in a `Ready {Phase}`, reserves it, moves it to that
   phase's `In Progress`, works, publishes evidence and delivers into `{Phase} In Review`. It
-  may declare `Blocked` from its own `{Phase} In Progress`.
+  may declare `Blocked` from its own `{Phase} In Progress`. Delivery repeats the ownership
+  gate: while another agent's claim or a foreign assignee exists, `move` refuses and writes
+  nothing, and it never clears that ownership.
 - **Rejected review:** the user records the observations and returns the Issue to the same
   phase's `In Progress`. The agent works only on the requested corrections; a new
   authorization is neither created nor implied.
@@ -158,7 +160,10 @@ A valid receipt carries `Autor`, `Rol`, `Fase`, `Tipo: Contexto`, the four secti
 `Huella del contexto: <12 hex> (N comentarios)` line and, as the **last non-empty line**,
 the exact `<!-- work-issue:context ... -->` marker. A comment that merely quotes the marker
 is material, not a receipt, and does not accredit the reading. `Rol` is one of `Coordinador
-funcional`, `Ejecutor`, `Revisor`.
+funcional`, `Ejecutor`, `Revisor`; `Fase` is `Analysis`, `Specification` or `Development`, and
+the visible fingerprint must agree with the marker. Publication is declared only after the
+comment is read back: the persisted body must be the one emitted and still bound to the
+current fingerprint, or the tool retracts its own comment and reports the failure.
 
 The fingerprint covers title, body, Status, labels, assignees and every material comment. It
 expires on **any** new comment — including the agent's own claim or report — and on `take`,

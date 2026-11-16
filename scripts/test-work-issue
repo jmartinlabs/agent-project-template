@@ -71,7 +71,8 @@ class FakeGh:
 
     def __init__(self, items=None, fail=(), claims=None, race=False, truncated=False,
                  drift_status=None, fail_item_after=None, drop_comments=False,
-                 repo=REPO):
+                 tamper_report=False, ghost_comment=False, fail_comments_after=None,
+                 assign_conflict=False, drift_after_write=None, repo=REPO):
         self.data = copy.deepcopy(items if items is not None else load_items())
         self.repo = repo
         self.fail = set(fail)
@@ -80,7 +81,14 @@ class FakeGh:
         self.drift_status = drift_status
         self.fail_item_after = fail_item_after
         self.drop_comments = drop_comments
+        self.tamper_report = tamper_report
+        self.ghost_comment = ghost_comment
+        self.fail_comments_after = fail_comments_after
+        self.assign_conflict = assign_conflict
+        self.drift_after_write = drift_after_write
         self.item_reads = 0
+        self.comment_reads = 0
+        self.written_status = None
         self.calls = []
         self.next_id = 1000
         self.comments_store = {item.number: [dict(entry) for entry in (claims or {}).get(item.number, [])]
@@ -116,7 +124,10 @@ class FakeGh:
         raise WorkIssueError("Issue #%d is not in the Project" % number)
 
     def comments(self, number):
+        self.comment_reads += 1
         if "comments" in self.fail:
+            raise WorkIssueError("comment read failed")
+        if self.fail_comments_after is not None and self.comment_reads > self.fail_comments_after:
             raise WorkIssueError("comment read failed")
         return [dict(entry) for entry in self.comments_store.setdefault(number, [])]
 
@@ -128,7 +139,11 @@ class FakeGh:
         if self.drop_comments:
             return None
         self.next_id += 1
-        self.comments_store.setdefault(number, []).append({"id": self.next_id, "body": body})
+        if self.ghost_comment:
+            return self.next_id
+        stored = body.replace("- A: Development In Review", "- A: Development In Progress") \
+            if self.tamper_report else body
+        self.comments_store.setdefault(number, []).append({"id": self.next_id, "body": stored})
         if self.race:
             rival = claim_body("opencode", "Coordinador funcional", "development",
                                fixture_item(number))
@@ -141,7 +156,8 @@ class FakeGh:
         self.calls.append(("assign", number))
         for entry in self.data:
             if entry.number == number:
-                entry.assignees = ["acme-bot"]
+                entry.assignees = ["acme-bot", "other-human"] if self.assign_conflict \
+                    else ["acme-bot"]
 
     def unassign(self, number):
         if "unassign" in self.fail:
@@ -163,9 +179,12 @@ class FakeGh:
         if "status" in self.fail:
             raise WorkIssueError("Status change failed")
         self.calls.append(("status", item.number, status))
+        self.written_status = status
         for entry in self.data:
             if entry.number == item.number:
                 entry.status = status
+                if self.drift_after_write is not None and status != self.drift_after_write:
+                    entry.status = self.drift_after_write   # someone else moves it immediately
 
 
 def service(github, agent="hermes", out=None):
@@ -1718,6 +1737,287 @@ class SessionContinuityTests(unittest.TestCase):
         self.session(github, lines=lines).next_issue("hermes")
         self.assertIn("NEXT #110", self.head(lines))
         self.assertEqual(len(claim_comments(github, 101)), 1)
+
+
+class LateClaimGh(FakeGh):
+    """A rival claim that only becomes visible after the first history read."""
+
+    def __init__(self, *args, after=1, number=120, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.after = after
+        self.claim_number = number
+
+    def comments(self, number):
+        entries = super().comments(number)
+        if number == self.claim_number and self.comment_reads > self.after:
+            rival = {"id": 777, "body": claim_body(
+                "opencode", "Coordinador funcional", "development", fixture_item(number))}
+            if all(entry["id"] != 777 for entry in entries):
+                entries = entries + [rival]
+        return entries
+
+
+class OwnershipExclusivityTests(unittest.TestCase):
+    """A delivery is refused unless the agent holds the only claim and the only assignee.
+
+    A historical claim of our own is not enough: a foreign assignee or a competing claim means
+    the Issue is not ours to write, and the tool never takes it over or clears it.
+    """
+
+    def progress(self, assignees=None, rival=False, status="Development In Progress"):
+        items = load_items()
+        fixture_item(120, items).status = status
+        if assignees is not None:
+            fixture_item(120, items).assignees = list(assignees)
+        comments = [{"id": 11, "body": claim_body(
+            "hermes", "Coordinador funcional", "development", fixture_item(120, items))}]
+        if rival:
+            comments.append({"id": 12, "body": claim_body(
+                "opencode", "Coordinador funcional", "development", fixture_item(120, items))})
+        return FakeGh(items=items, claims={120: comments})
+
+    def blocked(self, assignees=None):
+        items = load_items()
+        fixture_item(120, items).status = "Development In Progress"
+        if assignees is not None:
+            fixture_item(120, items).assignees = list(assignees)
+        claim = claim_body("hermes", "Coordinador funcional", "development",
+                           fixture_item(120, items))
+        block = report_body("hermes", "Coordinador funcional", "development",
+                            fixture_item(120, items), "Blocked",
+                            previous_status="Development In Progress", note="reason")
+        fixture_item(120, items).status = "Blocked"
+        return FakeGh(items=items, claims={120: [{"id": 11, "body": claim},
+                                                 {"id": 12, "body": block}]})
+
+    def test_move_refuses_a_foreign_assignee(self):
+        github = self.progress(assignees=["other-human"])
+        lines = []
+        code = Service(github, "hermes", "Coordinador funcional", lines.append).move(
+            120, "Development In Review", note="QA only")
+        self.assertEqual(code, EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+        self.assertEqual(fixture_item(120, github.data).status, "Development In Progress")
+        self.assertEqual(fixture_item(120, github.data).assignees, ["other-human"])
+        self.assertIn("assign", "\n".join(lines).lower())
+
+    def test_move_refuses_a_competing_claim_even_when_ours_is_older(self):
+        github = self.progress(rival=True)
+        self.assertEqual(service(github).move(120, "Development In Review", note="QA only"),
+                         EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+        self.assertEqual(fixture_item(120, github.data).status, "Development In Progress")
+
+    def test_move_dry_run_applies_the_same_ownership_gate(self):
+        for github in (self.progress(assignees=["other-human"]), self.progress(rival=True)):
+            self.assertEqual(service(github).move(120, "Development In Review", dry_run=True),
+                             EXIT_REFUSED, github.item_reads)
+            self.assertEqual(github.calls, [])
+
+    def test_restore_refuses_a_foreign_assignee(self):
+        github = self.blocked(assignees=["other-human"])
+        self.assertEqual(service(github).move(120, None, restore=True), EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+        self.assertEqual(fixture_item(120, github.data).status, "Blocked")
+
+    def test_move_rechecks_the_ownership_immediately_before_writing(self):
+        github = LateClaimGh(items=load_items(), claims={120: [{"id": 11, "body": claim_body(
+            "hermes", "Coordinador funcional", "development", fixture_item(120))}]})
+        fixture_item(120, github.data).status = "Development In Progress"
+        code = service(github).move(120, "Development In Review", note="QA only")
+        self.assertEqual(code, EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+        self.assertEqual(fixture_item(120, github.data).status, "Development In Progress")
+
+    def test_exclusive_ownership_still_delivers(self):
+        github = self.progress(assignees=["acme-bot"])
+        self.assertEqual(service(github).move(120, "Development In Review", note="delivered"),
+                         EXIT_OK)
+        self.assertIn(("status", 120, "Development In Review"), github.calls)
+
+
+class WriteConfirmationTests(unittest.TestCase):
+    """No write is declared successful until the comment is read back and identified."""
+
+    def progress(self, **kwargs):
+        items = load_items()
+        fixture_item(120, items).status = "Development In Progress"
+        claim = claim_body("hermes", "Coordinador funcional", "development",
+                           fixture_item(120, items))
+        return FakeGh(items=items, claims={120: [{"id": 11, "body": claim}]}, **kwargs)
+
+    def test_move_does_not_change_the_status_when_the_report_is_not_persisted(self):
+        github = self.progress(drop_comments=True)
+        lines = []
+        code = service(github, "hermes", lines.append).move(
+            120, "Development In Review", note="delivered")
+        self.assertEqual(code, EXIT_FAILED)
+        self.assertNotIn(("status", 120, "Development In Review"), github.calls)
+        self.assertEqual(fixture_item(120, github.data).status, "Development In Progress")
+        self.assertIn("not confirmed", "\n".join(lines))
+
+    def test_move_does_not_change_the_status_when_the_report_was_modified(self):
+        github = self.progress(tamper_report=True)
+        lines = []
+        code = service(github, "hermes", lines.append).move(
+            120, "Development In Review", note="delivered")
+        self.assertEqual(code, EXIT_FAILED)
+        self.assertNotIn(("status", 120, "Development In Review"), github.calls)
+        self.assertEqual(report_comments(github, 120), [])
+        self.assertTrue([call for call in github.calls if call[0] == "retract"])
+        self.assertIn("differs", "\n".join(lines))
+
+    def test_move_reports_the_pending_report_when_it_cannot_be_retracted(self):
+        github = self.progress(tamper_report=True, fail={"retract"})
+        lines = []
+        code = service(github, "hermes", lines.append).move(
+            120, "Development In Review", note="delivered")
+        self.assertEqual(code, EXIT_FAILED)
+        self.assertIn("pending write", "\n".join(lines))
+        self.assertNotIn(("status", 120, "Development In Review"), github.calls)
+
+    def test_move_does_not_change_the_status_when_the_readback_fails(self):
+        github = self.progress(fail_comments_after=2)
+        lines = []
+        code = service(github, "hermes", lines.append).move(
+            120, "Development In Review", note="delivered")
+        self.assertEqual(code, EXIT_FAILED)
+        self.assertNotIn(("status", 120, "Development In Review"), github.calls)
+        self.assertEqual(fixture_item(120, github.data).status, "Development In Progress")
+
+    def test_take_does_not_accept_a_foreign_assignee_after_its_write(self):
+        github = FakeGh(assign_conflict=True)
+        lines = []
+        seed_receipts(github)
+        code = Service(github, "hermes", "Coordinador funcional", lines.append).take(101)
+        self.assertEqual(code, EXIT_FAILED)
+        self.assertNotIn(("unassign", 101), github.calls)          # another identity is kept
+        self.assertEqual(fixture_item(101, github.data).assignees, ["acme-bot", "other-human"])
+        self.assertEqual(fixture_item(101, github.data).status, "Ready Development")
+        self.assertIn("pending write", "\n".join(lines))
+
+    def test_take_does_not_overwrite_a_status_changed_after_its_write(self):
+        github = FakeGh(drift_after_write="Backlog")
+        seed_receipts(github)
+        lines = []
+        code = Service(github, "hermes", "Coordinador funcional", lines.append).take(101)
+        self.assertEqual(code, EXIT_FAILED)
+        writes = [call for call in github.calls if call[0] == "status"]
+        self.assertEqual(writes, [("status", 101, "Development In Progress")])
+        self.assertEqual(fixture_item(101, github.data).status, "Backlog")
+        self.assertIn("not overwritten", "\n".join(lines))
+
+    def test_context_does_not_report_success_without_a_persisted_receipt(self):
+        github = FakeGh(ghost_comment=True)
+        lines = []
+        code = Service(github, "hermes", "Coordinador funcional", lines.append).context(
+            101, "hermes", publish=True, summary=SUMMARY)
+        self.assertEqual(code, EXIT_FAILED)
+        self.assertNotIn("Context published", "\n".join(lines))
+        self.assertEqual(github.comments_store[101], [])
+
+    def test_context_retracts_its_receipt_when_the_state_changed_while_publishing(self):
+        github = FakeGh(drift_status="Ready Analysis")
+        lines = []
+        code = Service(github, "hermes", "Coordinador funcional", lines.append).context(
+            101, "hermes", publish=True, summary=SUMMARY)
+        self.assertEqual(code, EXIT_FAILED)
+        self.assertIn("changed", "\n".join(lines))
+        self.assertNotIn("Context published", "\n".join(lines))
+        self.assertTrue([call for call in github.calls if call[0] == "retract"])
+        self.assertEqual([entry for entry in github.comments_store[101]
+                          if MODULE["context_of"](entry["body"])], [])
+
+
+class ReceiptStructureTests(unittest.TestCase):
+    """The receipt structure the protocol promises is validated, not assumed."""
+
+    INVENTED = ("Autor: invented\nTipo: Contexto\nHuella del contexto: WRONG\n"
+                "<!-- work-issue:context agent=hermes issue=101 fingerprint=%s comments=0 -->")
+
+    def receipt(self, digest="0123456789ab", count=0, item=None):
+        return MODULE["context_body"]("hermes", "Coordinador funcional", "development",
+                                      item or fixture_item(101), SUMMARY, digest, count)
+
+    def test_a_body_without_rol_phase_and_sections_is_not_a_receipt(self):
+        body = self.INVENTED % MODULE["fingerprint"](fixture_item(101), [])
+        self.assertFalse(MODULE["is_receipt_body"](body))
+        self.assertNotEqual(MODULE["comment_kind"](body), "context")
+
+    def test_take_refuses_a_receipt_without_the_declared_structure(self):
+        github = FakeGh()
+        body = self.INVENTED % MODULE["fingerprint"](fixture_item(101), [])
+        github.comments_store[101] = [{"id": 1, "body": body}]
+        self.assertEqual(service(github).take(101), EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+
+    def test_a_receipt_whose_visible_fingerprint_disagrees_with_the_marker_is_material(self):
+        body = self.receipt().replace("Huella del contexto: `0123456789ab`",
+                                      "Huella del contexto: `ffffffffffff`")
+        self.assertFalse(MODULE["is_receipt_body"](body))
+        github = FakeGh()
+        github.comments_store[101] = [{"id": 1, "body": body}]
+        self.assertEqual(service(github).take(101), EXIT_REFUSED)
+        self.assertEqual(github.calls, [])
+
+    def test_a_receipt_missing_one_section_is_material(self):
+        body = self.receipt().replace("## Alcance autorizado\n- The one described in the "
+                                      "Issue.\n", "")
+        self.assertFalse(MODULE["is_receipt_body"](body))
+
+    def test_a_receipt_with_an_unknown_role_or_phase_is_material(self):
+        for broken in (self.receipt().replace("Rol: Coordinador funcional", "Rol: Autor inventado"),
+                       self.receipt().replace("Fase: Development", "Fase: ?"),
+                       self.receipt().replace("Fase: Development", "Fase: invented")):
+            self.assertFalse(MODULE["is_receipt_body"](broken), broken)
+
+    def test_a_receipt_with_a_second_header_inside_the_body_is_material(self):
+        body = self.receipt().replace("## Estado\n", "## Estado\nFase: Development\n")
+        self.assertFalse(MODULE["is_receipt_body"](body))
+
+    def test_the_pilot_receipt_is_still_a_receipt(self):
+        self.assertTrue(MODULE["is_receipt_body"](
+            PILOT_RECEIPT.format(digest="0123456789ab", count=0)))
+
+    def test_summary_sections_must_be_exact_ordered_and_non_empty(self):
+        validate = MODULE["validate_summary"]
+        self.assertIsNone(validate(SUMMARY))
+        self.assertIn("missing sections", validate("## Estado\nnothing"))
+        self.assertIn("order", validate("## Estado\nx\n## Decisiones vigentes\nx\n"
+                                       "## Alcance autorizado\nx\n## Fuentes consultadas\nx\n"))
+        self.assertIn("empty sections", validate(
+            "## Decisiones vigentes\n\n## Estado\nx\n## Alcance autorizado\nx\n"
+            "## Fuentes consultadas\nx\n"))
+        self.assertIn("outside", validate("Prefacio\n" + SUMMARY))
+        self.assertIn("empty", validate("   \n"))
+
+    def test_context_publish_refuses_a_blocked_issue_without_its_own_record(self):
+        github = FakeGh()
+        fixture_item(101, github.data).status = "Blocked"
+        lines = []
+        code = Service(github, "hermes", "Coordinador funcional", lines.append).context(
+            101, "hermes", publish=True, summary=SUMMARY)
+        self.assertEqual(code, EXIT_REFUSED)
+        self.assertEqual(github.comments_store[101], [])
+        self.assertIn("phase", "\n".join(lines))
+
+    def test_context_publish_derives_the_blocked_phase_from_its_own_record(self):
+        items = load_items()
+        fixture_item(120, items).status = "Development In Progress"
+        claim = claim_body("hermes", "Coordinador funcional", "development",
+                           fixture_item(120, items))
+        block = report_body("hermes", "Coordinador funcional", "development",
+                            fixture_item(120, items), "Blocked",
+                            previous_status="Development In Progress", note="reason")
+        fixture_item(120, items).status = "Blocked"
+        github = FakeGh(items=items, claims={120: [{"id": 11, "body": claim},
+                                                   {"id": 12, "body": block}]})
+        code = Service(github, "hermes", "Coordinador funcional", lambda line: None).context(
+            120, "hermes", publish=True, summary=SUMMARY)
+        self.assertEqual(code, EXIT_OK)
+        body = github.comments_store[120][-1]["body"]
+        self.assertIn("Fase: Development", body)
+        self.assertTrue(MODULE["is_receipt_body"](body))
 
 
 class ParserTests(unittest.TestCase):
