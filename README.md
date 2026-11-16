@@ -129,6 +129,8 @@ scripts/validate-template          standard-library checks
 scripts/test-validator            positive/negative regression fixtures
 scripts/work-issue                read, route and reserve Ready Issues (optional Project)
 scripts/test-work-issue           work-issue regression fixtures, no network
+scripts/check-delegation-route    read a delegation's effective route from local metadata
+scripts/test-delegation-route     delegation-route regression fixtures, no network
 scripts/agent-relay               optional two-participant Git transport
 scripts/test-agent-relay          relay protocol regression tests
 docs/archive/                      history: prompt backups, v2.4.2 audit/benchmark (not methodology)
