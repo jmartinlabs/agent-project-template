@@ -1310,6 +1310,53 @@ class ValidationTests(unittest.TestCase):
   p=self.root/'scripts/test-validator'
   p.write_text(p.read_text().replace('test-delegation-route','delegation-route-suite'))
   self.assertRule('delegation-route')
+ def test_task_git_preflight_removed(self):
+  # Untracked and foreign work must be seen before edits; deleting the rule must fail CI.
+  self.change('.agents/skills/task/SKILL.md',
+   'Inspect `git status` including untracked files and checkout/worktree ownership before editing; '
+   'preserve unidentified or other-session work and never overwrite, discard, stage or claim it. ','')
+  self.assertRule('git-preflight')
+ def test_task_git_preflight_rewording(self):
+  self.change('.agents/skills/task/SKILL.md',
+   'Inspect `git status` including untracked files and checkout/worktree ownership before editing; '
+   'preserve unidentified or other-session work and never overwrite, discard, stage or claim it.',
+   'Check `git status` with untracked entries and branch/worktree ownership before edits; '
+   'keep other or unknown work intact and do not overwrite, discard, stage or claim it.')
+  self.assertEqual(validate(self.root),[])
+ def test_proposal_evidence_removed(self):
+  # A draft, a registered proposal and a published proposal need distinct evidence.
+  self.change('specs/methodology/epic-orchestration.md',
+   'Distinguish a local draft, a registered proposal and a published proposal by evidence, never by\n'
+   'assertion: a local draft lives in a working tree and may be visible to other sessions sharing\n'
+   'that checkout, but is not yet evidenced by a Git commit; a registered proposal is persisted in a\n'
+   "commit whose SHA can be cited; a published proposal carries the remote evidence the project's\n"
+   'process requires, such as a push and pull request. A local\n'
+   'commit alone does not prove remote publication.','Proposals are tracked informally.')
+  self.assertRule('proposal-evidence')
+ def test_registered_proposal_requires_citable_commit(self):
+  self.change('specs/methodology/epic-orchestration.md',
+   'commit whose SHA can be cited','commit that exists')
+  self.assertRule('proposal-evidence')
+ def test_local_commit_does_not_prove_publication(self):
+  self.change('specs/methodology/epic-orchestration.md',
+   'commit alone does not prove remote publication','commit is enough')
+  self.assertRule('proposal-evidence')
+ def test_proposal_evidence_rewording(self):
+  self.change('specs/methodology/epic-orchestration.md',
+   'Distinguish a local draft, a registered proposal and a published proposal by evidence, never by\n'
+   'assertion: a local draft lives in a working tree and may be visible to other sessions sharing\n'
+   'that checkout, but is not yet evidenced by a Git commit; a registered proposal is persisted in a\n'
+   "commit whose SHA can be cited; a published proposal carries the remote evidence the project's\n"
+   'process requires, such as a push and pull request. A local\n'
+   'commit alone does not prove remote publication.',
+   'Judge a local draft, a registered proposal and a published proposal by evidence, not by assertion:\n'
+   'a local draft may be visible to another session sharing its working tree, but has no Git commit\n'
+   'as evidence yet; a registered proposal is a commit with a citable SHA; a published proposal has\n'
+   "the remote evidence the project's process\n"
+   'requires, such as a push and a pull request. A local commit alone never proves remote publication.')
+  self.assertIn('another session sharing its working tree',
+                (self.root/'specs/methodology/epic-orchestration.md').read_text())
+  self.assertEqual(validate(self.root),[])
 class DelegationRouteSuiteTests(unittest.TestCase):
  """The delegation-route suite runs once through this existing entry point, never per fixture."""
  def test_suite_passes_inside_the_validated_fixture(self):

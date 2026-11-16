@@ -41,6 +41,13 @@ investigation, a work packet for already approved and authorized development, or
 design. Do not wait for an unnecessary instruction, and do not ask permission for preparation
 that commits no protected decision.
 
+Distinguish a local draft, a registered proposal and a published proposal by evidence, never by
+assertion: a local draft lives in a working tree and may be visible to other sessions sharing
+that checkout, but is not yet evidenced by a Git commit; a registered proposal is persisted in a
+commit whose SHA can be cited; a published proposal carries the remote evidence the project's
+process requires, such as a push and pull request. A local
+commit alone does not prove remote publication.
+
 Preparation never promotes a draft, authorizes DEV, starts QA verification, merges or deploys.
 Replan when a task completes, a result or return arrives, a blocker appears, or an approval or
 dependency changes: consolidate verified results and pending decisions, and raise only

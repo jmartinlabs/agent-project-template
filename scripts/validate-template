@@ -293,6 +293,21 @@ def validate(root):
   if not satisfied(orchestrator,token): fail('proactive-planning',f'orchestrator look-ahead missing {token}')
  if 'leave a verifiable next action' not in agents: fail('proactive-planning','AGENTS.md missing the look-ahead next action')
  if 'advance the next independent ready item instead of idling' not in epic: fail('proactive-planning','scheduler must advance ready work while waiting')
+ # Preflight must see untracked and foreign work before edits; proposals are classified by evidence.
+ for name,tokens in {
+  '.agents/skills/task/SKILL.md':('re:git status[^.;]{0,80}untracked',
+   're:((checkout|worktree|branch)[^.;]{0,40}ownership|ownership[^.;]{0,40}(checkout|worktree|branch))',
+   're:(preserve|keep|leave)[^.;]{0,100}(untracked|unidentified|unknown|other|foreign)[^.;]{0,60}work',
+   're:(never|not|do not|don.t)[^.;]{0,60}(overwrite|discard|stage|claim)'),
+ }.items():
+  for token in tokens:
+   if not satisfied(read(name),token): fail('git-preflight',f'{name}: missing {token}')
+ for token in ('re:local draft[^.;]{0,120}(working tree|worktree)',
+   're:(registered|recorded) proposal[^.;]{0,160}commit',
+   r're:(registered|recorded) proposal[^.;]{0,200}(\bcit\w*|\bSHA\b)',
+   're:published proposal[^.;]{0,200}(push|pull request|remote|PR)',
+   're:local commit[^.;]{0,80}(not|never)[^.;]{0,80}remote'):
+  if not satisfied(epic,token): fail('proposal-evidence',f'epic proposal evidence missing {token}')
  # Execution mode is adaptive: direct, foreground or background only with verified support.
  for token in ('## Execution mode: direct, foreground, background','**Direct (coordinator).**','**Foreground subagent.**','**Background subagent.**','verified client support',"Releasing the coordinator's turn",'Promise no background persistence','who executes','mode (direct, foreground or background)','coordinator stays available','Never claim a subagent','No universal agent count'):
   if not satisfied(dynamic,token): fail('execution-mode',f'dynamic policy missing {token}')
