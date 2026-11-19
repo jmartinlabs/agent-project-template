@@ -876,6 +876,7 @@ class Gh:
         self.repo = repo
         self.runner = runner or self._run
         self.truncated = False
+        self.diagnosis = None
         self._login = None
 
     def _run(self, argv):
@@ -914,9 +915,15 @@ class Gh:
             raise WorkIssueError("the Project did not return an item list")
         self.truncated = len(entries) >= PROJECT_LIMIT
         # Only Issues: draft items carry no number and Pull Requests are not work items.
-        return [normalise(entry) for entry in entries
-                if (entry.get("content") or {}).get("type") in (None, "Issue")
-                and (entry.get("content") or {}).get("number")]
+        issues = [normalise(entry) for entry in entries
+                  if (entry.get("content") or {}).get("type") in (None, "Issue")
+                  and (entry.get("content") or {}).get("number")]
+        # What the read proved, so a caller can tell an empty Project from a wrong one:
+        # `total` counts every raw entry, `own_ready` the Issues this adapter could reserve.
+        own = [item for item in issues if same_repo(item.repository, self.repo)]
+        self.diagnosis = {"total": len(entries), "issues": issues, "own": own,
+                          "own_ready": [item for item in own if item.status in READY]}
+        return issues
 
     def whoami(self):
         """Login of the shared GitHub identity, needed to recognise our own assignee."""
@@ -1009,10 +1016,45 @@ class Service:
         decisions = plan(self.github.items(), agent if agent is not None else self.agent,
                          repo=getattr(self.github, "repo", None))
         render(decisions, agent if agent is not None else self.agent, self.out)
+        self._project_diagnosis()
         if getattr(self.github, "truncated", False):
             self.out("Warning: the Project exceeds the %d-item read limit; the inventory may be "
                      "incomplete and nothing is reserved." % PROJECT_LIMIT)
         return decisions
+
+    def _project_diagnosis(self):
+        """Explain a Project read that carries no work for the requested repository.
+
+        Three legitimate or wrong reads share one symptom — an empty queue — so they are told
+        apart from what was read, never from the exit code: a new Project is empty, another
+        Project carries only foreign Issues, and a correct Project may simply have nothing in
+        a Ready status yet. Nothing here authorizes, writes or alters transitions; the messages
+        are a diagnosis for the human reading the tool's output.
+        """
+        diagnosis = getattr(self.github, "diagnosis", None)
+        if not diagnosis:
+            return
+        project = "Project #%s (%s)" % (getattr(self.github, "number", ""),
+                                        getattr(self.github, "owner", ""))
+        repo = getattr(self.github, "repo", "")
+        issues = diagnosis.get("issues") or ()
+        own = diagnosis.get("own") or ()
+        if not issues:
+            self.out("Notice: %s returned no items. A new Project is legitimately empty; "
+                     "nothing is wrong." % project)
+            if diagnosis.get("total"):
+                self.out("Notice: %s holds %d draft or pull-request item(s); only Issues are "
+                         "work items." % (project, diagnosis["total"]))
+            return
+        if not own:
+            sources = sorted({repo_key(item.repository) for item in issues} - {""})
+            self.out("WARNING: %s contains no items for %s; found items from: %s. You may be "
+                     "reading the wrong Project. Nothing has been reserved."
+                     % (project, repo, ", ".join(sources) or "unknown repositories"))
+            return
+        if not diagnosis.get("own_ready"):
+            self.out("Notice: %s has %d item(s) in %s, none in a Ready status."
+                     % (repo, len(own), project))
 
     def next_issue(self, agent=None, exclude=()):
         """Next Issue of the agent's session queue plus the whole queue (read-only).
@@ -1027,6 +1069,7 @@ class Service:
                                  % ", ".join(AGENTS))
         items = self.github.items()
         if getattr(self.github, "truncated", False):
+            self._project_diagnosis()
             raise WorkIssueError(
                 "the Project exceeds the %d-item read limit; a truncated queue cannot be "
                 "declared complete or consumed" % PROJECT_LIMIT)
@@ -1041,6 +1084,7 @@ class Service:
             self.out("NO ELIGIBLE WORK for %s — the session has no other reservable Issue."
                      % agent)
             self._explain_skips(decisions, exclude)
+            self._project_diagnosis()
             return EXIT_EMPTY
         head = queue[0]
         phase, target = READY[head.item.status]
