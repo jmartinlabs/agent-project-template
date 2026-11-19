@@ -826,6 +826,24 @@ class ValidationTests(unittest.TestCase):
      self.assertRule('resource-policy')
     finally:
      p.write_text(original)
+ def test_resource_policy_negated_guards(self):
+  # A duplicated threshold or a retired ceiling must fail on presence, not only on absence.
+  cases = (
+   ('specs/methodology/dynamic-agents.md', '\n**25% or less:** duplicated copy\n'),
+   ('specs/methodology/dynamic-agents.md', '\n**5% or less:** duplicated copy\n'),
+   ('specs/methodology/model-selection.md', '\n## Codex subagents: absolute ceiling\n'),
+   ('specs/methodology/model-selection.md', '\nGPT-6.1 Sol Light\n'),
+   ('docs/GUIA_VISUAL_ORQUESTACION.md', '\nEl coordinador aplica un techo absoluto.\n'),
+   ('.agents/skills/orchestrate/SKILL.md', '\nApply the model ceiling before dispatch.\n'),
+  )
+  for name,added in cases:
+   with self.subTest(name=name,added=added.strip()):
+    p=self.root/name; original=p.read_text()
+    try:
+     p.write_text(original+added)
+     self.assertRule('resource-policy')
+    finally:
+     p.write_text(original)
  def test_communication_contract_required(self):
   (self.root/'specs/methodology/coordinator-communication.md').unlink(); self.assertRule('structure')
  def test_copyable_packet_shared_resources(self):
