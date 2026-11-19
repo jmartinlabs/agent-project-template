@@ -537,6 +537,16 @@ def validate(root):
  }.items():
   for token in tokens:
    if not satisfied(read(name),token): fail('resource-policy',f'{name}: missing {token}')
+ # Retired or centralized policy must not reappear elsewhere: presence is the failure here.
+ for name,banned in {
+  'specs/methodology/dynamic-agents.md':('~:**25% or less:**','~:**5% or less:**'),
+  'specs/methodology/model-selection.md':('~:absolute ceiling','~:sol light'),
+  'docs/GUIA_VISUAL_ORQUESTACION.md':('~:techo absoluto','~:sol light'),
+  '.agents/skills/orchestrate/SKILL.md':('~:model ceiling',),
+ }.items():
+  for token in banned:
+   if satisfied(read(name),token):
+    fail('resource-policy',f'{name}: duplicated or retired policy {token}')
  # Structural drift guards only: text presence cannot prove model behavior or consent.
  for name,tokens in {
   'AGENTS.md':('on demand','Consultation/analysis','Project-specific restrictions','specs/methodology/approvals.md#local-worktrees'),
