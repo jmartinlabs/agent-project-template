@@ -556,7 +556,7 @@
     },
     {
       "id": "quota-01",
-      "scenario": "Quota remaining is 26% five-hour and 80% weekly. Task T1 is authorized and model selection assured within ceiling.",
+      "scenario": "Quota remaining is 26% five-hour and 80% weekly. Task T1 is authorized and model selection is assured on the configured route.",
       "expected": {
         "decision": "continue",
         "target": "assign Codex T1"
