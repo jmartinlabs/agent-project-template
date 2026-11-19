@@ -635,6 +635,8 @@ def validate(root):
  # or a derived project must not inherit another checkout's repo/owner/Project association.
  if 'tracker.local.yaml' not in read('specs/methodology/issue-workflow.md'):
   fail('issue-workflow','issue-workflow.md: missing the local tracker declaration')
+ if 'tracker.local.yaml' not in read('.agents/skills/work-issue/SKILL.md'):
+  fail('issue-workflow','work-issue Skill: missing the local tracker declaration')
  for name in ('AGENTS.md','specs/methodology/issue-workflow.md'):
   text=read(name)
   if 'jmartinlabs/agent-project-template' in text and re.search(r'project:\s*"?5\b|--project\s+"?5\b',text):
