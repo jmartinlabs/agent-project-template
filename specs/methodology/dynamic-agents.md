@@ -74,32 +74,30 @@ applicable); and whether the coordinator stays available. Add no extra report an
 messages. Never claim a subagent, a background mode or isolation that was not actually verified.
 
 ## Quota and dispatch gate
-For Codex, query remaining subscription quota when a supported client tool exists:
-execution start and before new assignments after meaningful milestones or quota warnings.
-Reuse a recent reading within the same dispatch batch; no continuous polling, new service
-or automatic paid consumption. Identify source and reading time. Prefer per-limit data;
-compute remaining as `max(0, min(100, 100 - usedPercent))` for valid numeric values.
-Use the minimum remaining across the five-hour (300 minutes) and weekly (10080 minutes)
-windows. Missing/null/invalid values are unavailable, never zero or an invented percentage.
-Partial data is incomplete: apply restrictions from known windows and disclose the gap;
-unknown data never proves normal quota or blocks authorized work solely by assumption.
-Token accounting in the usage reader is not subscription quota. Do not infer Codex quota
-from Claude/OpenCode usage or assume this desktop tool exists in other clients.
 
-- **More than 25% remaining:** normal allocation by complexity and quality: prioritize
-  Codex for complex/critical work; consider enabled OpenCode for bounded verifiable work.
-- **25% or less:** warn; no new Codex task or subagent, **including QA**, without explicit
-  authorization for that identified task. General development approval is insufficient.
-  Propose manual OpenCode only if enabled and suitable. Required QA stays pending until
-  authorized or otherwise independently performed under the existing quality contract.
-- **5% or less:** warn and stop initiating new tasks. Previous authorizations do not
-  suffice: require a new explicit task authorization after this warning. Preserve state
-  and existing advances at safe boundaries; do not destructively interrupt running work.
-  Do not launch another Codex task merely to save a checkpoint; preserve it in the current
-  session where possible. No automatic replacement workers or paid quota reset.
+The quota gate has a single canonical definition in
+[model selection](model-selection.md#quota-and-dispatch-gate); this document does not restate its
+thresholds. Apply it before dispatching any new task or subagent, **including QA**. A quota
+warning is not approval and never waives QA or any other gate.
 
-Record task-specific exceptions and their relation to the warning in the existing packet
-or current summary. A warning is not approval; quota exceptions never waive QA or merges.
+## Dispatch decision and ownership transfer
+
+Before substantial autonomous bounded work, record a short decision in the current summary:
+delegate with the expected benefit, or execute directly for a concrete reason — capability,
+isolation, quota, indivisible context or coordination cost. No universal threshold in minutes or
+files applies. Reevaluate when the scope grows, criteria or modules are added, or correction
+cycles change the economics. Never fabricate parallel work.
+
+Contract loading by actor: the coordinator loads orchestrate and the packet rules; the executor
+loads its role and the phase Skill before working; QA loads its role and the verification rules
+before reviewing. Each actor reads them once; after compaction it reloads only what changed or is
+needed, keeping access to the canonical approvals. Packet excerpts never replace the Skill the
+responsible actor must load.
+
+An active worker's files are closed to parent writes. Before transferring ownership: obtain an
+end/stop acknowledgement and a checkpoint (candidate, dirty files, checks, next action), and name
+the new owner explicitly. A timeout or an interruption request is not an acknowledgement. Prefer
+returning bounded corrections to the same worker while its context is still useful.
 
 ## Resource discipline
 ### Preparation and blocking operations
@@ -143,6 +141,41 @@ required for uncertain impact, mandatory gates or financial/security risk. QA in
 inspects the candidate and evidence, runs checks that resolve risks and records reasons
 for repeats; it does not merely accept the author's summary. Consolidate findings into
 a bounded correction packet, then review the delta.
+
+## Supervision, stop and critical technical review
+
+### Checkpoints and triggers
+Agree checkpoints and measurable triggers per packet, not generalized probing. For long tasks with
+exposed observable state, about five minutes is an adjustable reference; inspect the bounded diff,
+number of files, own commands and processes, tests, useful progress, elapsed time and real cost only
+when available. Without observable state, bound duration and scope and require a recorded return;
+never claim live monitoring. Use bounded event waits between checkpoints.
+
+### Trigger classes
+Four classes apply: change radius; silence or repetition; prohibited risk; cost without a useful
+artifact. A doubling of the expected files or time, or two attempts without new information, are
+diagnostic examples adjusted to the packet, never permission to write outside scope. Any unapproved
+out-of-scope output requires a stop and clarification. A prohibited or unsafe operation requires an
+immediate stop with no threshold and containment. Start diagnosis with observable focal checks
+unless the baseline checks are already necessary; the required final suite stays mandatory.
+
+### Stopping and recovery
+Stop only your own tasks and processes, with the supported controls. Preserve a snapshot of the
+packet, requested/observed route, candidate, dirty files, logs, trigger and controlled resources.
+Inspect and preserve previous or third-party changes before a selective, reversible recovery of the
+attributable edits; never global cleanup, reset, or killing processes by port or name. Obtain an
+acknowledgement before transferring ownership. Record the trigger and action, observed fact versus
+suspected cause, reviewer and resumption condition in the existing Issue. Resume with a reduced
+packet, a falsifiable hypothesis and every original gate.
+
+### Critical technical review
+Critical technical review is a capability: an independent executor or context; a different model is
+not required for independence. Prefer a verified adequate route when one is designated. Record
+requested versus observed identity: a mismatch means the designated route failed; missing metadata
+means identity unverified, not proof of failure. An alternative competent reviewer in the same client
+or an explicit manual handoff is valid; never launch another client automatically. Without a
+reviewer, continue only small, reversible, authorized, objectively checkable work and record the
+limitation; block material or unsafe work and required independent QA. Silence is never approval.
 
 ## Manual OpenCode allocation
 The user declares external availability for each execution; absent a declaration,
