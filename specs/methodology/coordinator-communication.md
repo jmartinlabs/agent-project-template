@@ -70,7 +70,10 @@ also when it is blocked or needs a decision. Its fields are defined in the packe
 task and origin session, status COMPLETED / PARTIAL / BLOCKED / CANCELLED, summary and changes,
 relevant files and pending changes, branch / SHA / PR (or absent or unknown), tests PASS / FAIL / UNRUN
 with command, environment, candidate and evidence, risks and blockers, decisions needed, and the
-recommended next action.
+recommended next action. Native workers may return a compact structured result instead — packet ID,
+candidate and changed files, acceptance evidence with command, environment and log links, PASS /
+FAIL / UNRUN, risks and next action — while the manual relay keeps the full `HANDOFF → CODEX` block
+on every interaction.
 
 Never declare PASS without evidence. If a reported result lacks its command, environment,
 candidate or evidence, label it externally reported and unverified; request only the missing
