@@ -12,3 +12,5 @@ node_modules/
 # Verification artifacts (keep deliberate, sanitized evidence under specs if needed)
 artifacts/
 # Add application-specific generated output only after choosing the project stack.
+# Local state that never leaves this checkout: the tracker declaration of the repository
+.agents/*.local.*
