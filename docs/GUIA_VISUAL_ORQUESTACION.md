@@ -163,7 +163,7 @@ flowchart TD
     M --> V
 ```
 
-La selección respeta la [política canónica de modelos](../specs/methodology/model-selection.md) y las capacidades verificadas del cliente. Los subagentes Codex tienen un techo absoluto de GPT-6.1 Sol Light; el coordinador conserva su modelo. Si no puede garantizarse la selección permitida, no se crea el subagente. Nunca sustituir pruebas por capacidad o razonamiento.
+La selección respeta la [política canónica de modelos](../specs/methodology/model-selection.md) y las capacidades verificadas del cliente: no hay un techo fijo de modelo ni de esfuerzo, y los configura el usuario en cada cliente. El coordinador conserva su modelo. Si no puede garantizarse la selección solicitada, no se crea el subagente. Nunca sustituir pruebas por capacidad o razonamiento.
 
 ## 9. ¿Qué instala realmente esta template?
 

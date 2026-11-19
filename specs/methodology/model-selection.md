@@ -5,21 +5,20 @@ Verify client capabilities before selecting subagent settings. Unknown availabil
 permission to inherit an unchecked model. Model choice never replaces verification,
 independent QA or protected approvals. Report savings only from real telemetry.
 
-## Codex subagents: absolute ceiling
-The maximum permitted combination is `gpt-6.1-sol` + `low` (UI: GPT-6.1 Sol Light).
-Never automatically escalate model or reasoning above this ceiling, including for QA.
-Use an explicitly selected economical available model for straightforward bounded work;
-reserve `gpt-6.1-sol` + `low` for complex or critical work. There is no numeric cost or
-capability ordering across model families: use a verified permitted economical option,
-not an inferred ranking. Never substitute Astra or another unverified family/version.
+## No fixed model ceiling
+
+No fixed model or reasoning-effort ceiling applies to subagents in this template. The user
+configures models, providers, routes and effort manually in each client; this document ranks
+no model family, fixes no permitted combination and never substitutes a model automatically.
+Missing configuration is not permission to assume a model is available.
 
 Before dispatch, record requested model/effort, available controls and the selection
 assurance supplied by the runtime. In this Codex runtime, explicit `model` and
 `reasoning_effort` overrides require fresh context (`fork_turns="none"`); full-history
 forks inherit settings. Recheck this capability in other clients/versions. If selection
-cannot be guaranteed within the ceiling, do not spawn; record the limitation and work
-sequentially within authorization, or propose a manual permitted alternative. Never
-silently inherit an unchecked coordinator model. Do not raise the coordinator model.
+cannot be guaranteed, do not spawn; record the limitation and work sequentially within
+authorization, or propose a manual permitted alternative. Never silently inherit an
+unchecked coordinator model. Do not raise the coordinator model.
 
 After dispatch, verify observed model/effort from attributable runtime metadata or local
 records when exposed. Record requested versus observed values and evidence; an agent's
@@ -86,14 +85,49 @@ that a route failed and says nothing about another client's quota.
 | Bounded Standard implementation | balanced | within client policy |
 | Architecture, ambiguous debugging or critical review | advanced | within client policy |
 
-These are advisory capability labels, not permission to exceed the Codex ceiling.
+These are advisory capability labels, not permission to bypass the routes the user configured.
 Keep the current coordinator model when adequate. In Claude Code retain existing
 `model: inherit` profiles unless an authorized client-specific selection is supported;
-Claude model/effort names are not equivalent to GPT settings. Codex limits apply to
-Codex subagents even when another client coordinates them. Do not invent cross-client
-quota or telemetry. When unavailable, use smaller verifiable increments or report a blocker.
+Claude model/effort names are not equivalent to GPT settings. Each client's configured routes
+apply to the subagents it dispatches, even when another client coordinates them. Do not invent
+cross-client quota or telemetry. When unavailable, use smaller verifiable increments or report a
+blocker.
 
 Load this document when model advice matters, normally Standard / Full. Report one compact
 line: task, client, requested model/effort, assurance and observed evidence (or
 `suggested, availability unverified`). Add no separate approval gate beyond quota and
 existing project approvals. Native client settings remain subject to actual availability.
+
+## Quota and dispatch gate
+
+This section is the single canonical definition of the quota gate; other documents reference it
+instead of restating its thresholds.
+
+For Codex, query remaining subscription quota when a supported client tool exists:
+execution start and before new assignments after meaningful milestones or quota warnings.
+Reuse a recent reading within the same dispatch batch; no continuous polling, new service
+or automatic paid consumption. Identify source and reading time. Prefer per-limit data;
+compute remaining as `max(0, min(100, 100 - usedPercent))` for valid numeric values.
+Use the minimum remaining across the five-hour (300 minutes) and weekly (10080 minutes)
+windows. Missing/null/invalid values are unavailable, never zero or an invented percentage.
+Partial data is incomplete: apply restrictions from known windows and disclose the gap;
+unknown data never proves normal quota or blocks authorized work solely by assumption.
+Token accounting in the usage reader is not subscription quota. Do not infer Codex quota
+from Claude/OpenCode usage or assume this desktop tool exists in other clients.
+
+- **More than 25% remaining:** normal allocation by complexity and quality: prioritize
+  Codex for complex/critical work; consider an enabled external client for bounded
+  verifiable work.
+- **25% or less:** warn; no new Codex task or subagent, **including QA**, without explicit
+  authorization for that identified task. General development approval is insufficient.
+  A manual relay is only proposed when the user declared it enabled and it suits the work.
+  Required QA stays pending until authorized or otherwise independently performed under the
+  existing quality contract.
+- **5% or less:** warn and stop initiating new tasks. Previous authorizations do not
+  suffice: require a new explicit task authorization after this warning. Preserve state
+  and existing advances at safe boundaries; do not destructively interrupt running work.
+  Do not launch another Codex task merely to save a checkpoint; preserve it in the current
+  session where possible. No automatic replacement workers or paid quota reset.
+
+Record task-specific exceptions and their relation to the warning in the existing packet
+or current summary. A warning is not approval; quota exceptions never waive QA or merges.
