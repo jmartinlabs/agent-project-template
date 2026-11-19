@@ -36,7 +36,10 @@ decides *which* Issue an agent may take and how the session records it.
   the agent names the queue the session works until it is exhausted.
 - `$work-issue` on its own is already a complete instruction: the user does not need to pick an
   Issue, ask for the inventory or ask for a PR. Everything here is the method.
-- Configuration is explicit and **never guessed**. Resolve `--repo` from the current checkout
+- Configuration is explicit and **never guessed**. When the checkout declares its tracker in
+  `.agents/tracker.local.yaml` — local, never committed — its `repo`, `owner` and `project` are
+  the only valid pair for that checkout and are passed explicitly on every call. Otherwise
+  resolve `--repo` from the current checkout
   (repository, remote or the project's documented tracker) and the Project number from the
   project context; ask only when either is missing or ambiguous. Never assume a specific
   repository, owner, Project number or priority.

@@ -36,6 +36,8 @@ report_body = MODULE["report_body"]
 CLAIM_MARKER = MODULE["CLAIM_MARKER"]
 STATUSES = MODULE["STATUSES"]
 HUMAN_ONLY = MODULE["HUMAN_ONLY"]
+READY = MODULE["READY"]
+same_repo = MODULE["same_repo"]
 EXIT_OK = MODULE["EXIT_OK"]
 EXIT_REFUSED = MODULE["EXIT_REFUSED"]
 EXIT_FAILED = MODULE["EXIT_FAILED"]
@@ -72,9 +74,13 @@ class FakeGh:
     def __init__(self, items=None, fail=(), claims=None, race=False, truncated=False,
                  drift_status=None, fail_item_after=None, drop_comments=False,
                  tamper_report=False, ghost_comment=False, fail_comments_after=None,
-                 assign_conflict=False, drift_after_write=None, repo=REPO):
+                 assign_conflict=False, drift_after_write=None, repo=REPO,
+                 owner="acme", number=7):
         self.data = copy.deepcopy(items if items is not None else load_items())
         self.repo = repo
+        self.owner = owner
+        self.number = number
+        self.diagnosis = None
         self.fail = set(fail)
         self.race = race
         self.truncated = truncated
@@ -107,7 +113,12 @@ class FakeGh:
     def items(self):
         if "items" in self.fail:
             raise WorkIssueError("Project read failed")
-        return copy.deepcopy(self.data)
+        pool = copy.deepcopy(self.data)
+        # Mirror the adapter contract: the read also records what it proved.
+        own = [item for item in pool if same_repo(item.repository, self.repo)]
+        self.diagnosis = {"total": len(pool), "issues": pool, "own": own,
+                          "own_ready": [item for item in own if item.status in READY]}
+        return pool
 
     def item(self, number, items=None):
         self.item_reads += 1
@@ -1196,6 +1207,121 @@ class RepositoryScopeTests(unittest.TestCase):
         with self.assertRaises(WorkIssueError) as caught:
             github.item(101)
         self.assertIn("other/project", str(caught.exception))
+
+
+class ProjectDiagnosisTests(unittest.TestCase):
+    """A Project that returns no work for the requested repository is diagnosed, not assumed.
+
+    An empty Project, a Project holding another repository's Issues and a Project whose own
+    Issues are all outside a Ready status share one symptom. The tool must name the case, and
+    must never turn a legitimate read into a failure or a real failure into an empty queue.
+    """
+
+    def items(self, *specs):
+        """(number, status, repository) triples, so a case reads as what it means."""
+        return [MODULE["Item"](number=number, title="Issue %d" % number, status=status,
+                               repository=repository)
+                for number, status, repository in specs]
+
+    def test_an_empty_project_is_a_notice_and_not_an_error(self):
+        out = []
+        service(FakeGh(items=[]), out=out.append).inventory()
+        text = "\n".join(out)
+        self.assertIn("Notice: Project #7 (acme) returned no items.", text)
+        self.assertIn("A new Project is legitimately empty; nothing is wrong.", text)
+        out = []
+        self.assertEqual(service(FakeGh(items=[]), out=out.append).next_issue(), EXIT_EMPTY)
+        self.assertIn("Notice: Project #7 (acme) returned no items.", "\n".join(out))
+
+    def test_drafts_and_pull_requests_are_a_legitimately_empty_project(self):
+        raw = {"items": [{"content": {"type": "DraftIssue"}},
+                         {"content": {"type": "PullRequest", "number": 4}}]}
+        github = Gh("acme", 7, REPO, runner=AdapterTests().runner(items=raw))
+        out = []
+        Service(github, "hermes", "Coordinador funcional", out.append).inventory()
+        text = "\n".join(out)
+        self.assertIn("returned no items", text)
+        self.assertIn("holds 2 draft or pull-request item(s); only Issues are work items", text)
+        self.assertNotIn("WARNING", text)
+
+    def test_foreign_items_warn_that_the_project_is_probably_the_wrong_one(self):
+        items = self.items((301, "Ready Development", "other/project"),
+                           (302, "Backlog", "another/thing"),
+                           (303, "Ready Analysis", "other/project"))
+        out = []
+        service(FakeGh(items=items), out=out.append).inventory()
+        text = "\n".join(out)
+        self.assertIn("WARNING: Project #7 (acme) contains no items for %s; found items from: "
+                      "another/thing, other/project." % REPO, text)
+        self.assertIn("You may be reading the wrong Project. Nothing has been reserved.", text)
+        self.assertNotIn("Notice:", text)
+        out = []
+        self.assertEqual(service(FakeGh(items=items), out=out.append).next_issue(), EXIT_EMPTY)
+        self.assertIn("WARNING: Project #7 (acme) contains no items for %s" % REPO,
+                      "\n".join(out))
+
+    def test_own_items_outside_ready_are_an_informative_notice(self):
+        items = self.items((301, "Backlog", REPO), (302, "Done", REPO),
+                           (303, "Analysis In Progress", REPO))
+        out = []
+        service(FakeGh(items=items), out=out.append).inventory()
+        text = "\n".join(out)
+        self.assertIn("Notice: %s has 3 item(s) in Project #7 (acme), none in a Ready status."
+                      % REPO, text)
+        self.assertNotIn("WARNING", text)
+        self.assertNotIn("wrong Project", text)
+        out = []
+        self.assertEqual(service(FakeGh(items=items), out=out.append).next_issue(), EXIT_EMPTY)
+        self.assertIn("none in a Ready status", "\n".join(out))
+        self.assertNotIn("WARNING", "\n".join(out))
+
+    def test_a_failed_project_read_blocks_without_the_warning(self):
+        out = []
+        with self.assertRaises(WorkIssueError):
+            service(FakeGh(fail={"items"}), out=out.append).inventory()
+        self.assertEqual(out, [])
+        with tempfile.TemporaryDirectory(prefix="work-issue-diagnosis-") as state:
+            proc = subprocess.run([sys.executable, str(SCRIPT), "--repo", REPO,
+                                   "--project", "7", "inventory"],
+                                  capture_output=True, text=True, encoding="utf-8",
+                                  env=fake_gh(state, items_code=1))
+        self.assertEqual(proc.returncode, EXIT_FAILED)
+        self.assertIn("Blocked:", proc.stderr)
+        self.assertNotIn("WARNING", proc.stdout)
+        self.assertNotIn("returned no items", proc.stdout)
+
+    def test_truncated_next_still_blocks_and_still_diagnoses(self):
+        items = self.items((301, "Ready Development", "other/project"))
+        out = []
+        with self.assertRaises(WorkIssueError):
+            service(FakeGh(items=items, truncated=True), out=out.append).next_issue()
+        self.assertIn("WARNING: Project #7 (acme) contains no items for %s" % REPO,
+                      "\n".join(out))
+
+    def test_own_ready_items_add_no_notice(self):
+        out = []
+        service(FakeGh(), out=out.append).inventory()
+        text = "\n".join(out)
+        self.assertIn("INVENTORY", text)
+        self.assertNotIn("Notice:", text)
+        self.assertNotIn("WARNING", text)
+        out = []
+        self.assertEqual(service(FakeGh(), out=out.append).next_issue(), EXIT_OK)
+        self.assertNotIn("Notice:", "\n".join(out))
+
+    def test_cli_exit_codes_survive_an_empty_project(self):
+        with tempfile.TemporaryDirectory(prefix="work-issue-diagnosis-") as state:
+            env = fake_gh(state, items={"items": []})
+            inventory = subprocess.run([sys.executable, str(SCRIPT), "--repo", REPO,
+                                        "--project", "7", "inventory"],
+                                       capture_output=True, text=True, encoding="utf-8", env=env)
+            following = subprocess.run([sys.executable, str(SCRIPT), "--repo", REPO,
+                                        "--project", "7", "next", "--agent", "hermes"],
+                                       capture_output=True, text=True, encoding="utf-8", env=env)
+        self.assertEqual(inventory.returncode, EXIT_OK, inventory.stderr)
+        self.assertIn("Notice: Project #7 (acme) returned no items.", inventory.stdout)
+        self.assertEqual(following.returncode, EXIT_EMPTY, following.stderr)
+        self.assertIn("Notice: Project #7 (acme) returned no items.", following.stdout)
 
 
 class PilotCompatibilityTests(unittest.TestCase):

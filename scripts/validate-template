@@ -641,6 +641,18 @@ def validate(root):
    ('.agents/skills/roadmap/SKILL.md','Backlog'),
    ('.agents/skills/spec/SKILL.md','templates/issue.md')):
   if not satisfied(read(name),token): fail('issue-workflow',f'{name}: missing {token}')
+ # A repository's tracker is declared locally, never in the template or the protocol: a clone
+ # or a derived project must not inherit another checkout's repo/owner/Project association.
+ if 'tracker.local.yaml' not in read('specs/methodology/issue-workflow.md'):
+  fail('issue-workflow','issue-workflow.md: missing the local tracker declaration')
+ if 'tracker.local.yaml' not in read('.agents/skills/work-issue/SKILL.md'):
+  fail('issue-workflow','work-issue Skill: missing the local tracker declaration')
+ for name in ('AGENTS.md','specs/methodology/issue-workflow.md'):
+  text=read(name)
+  if 'jmartinlabs/agent-project-template' in text and re.search(r'project:\s*"?5\b|--project\s+"?5\b',text):
+   fail('issue-workflow',f'{name}: names a concrete Project for this repository')
+ if '.agents/*.local.*' not in read('.gitignore'):
+  fail('issue-workflow','.gitignore must ignore the local tracker declaration')
  # Delegation route evidence: a slot is configuration, so the verifier accepts expectations
  # from the dispatch option and stays read-only over local metadata.
  route=read('scripts/check-delegation-route')

@@ -266,6 +266,18 @@ changed, or its own writes were retracted), `3` blocked or failed write (the out
 could not be undone), `4` the agent's queue is empty. `inventory`, `next` and every `--dry-run`
 are read-only.
 
+A read that returns no work for the requested repository is diagnosed, not failed. An empty
+Project, a Project holding only another repository's Issues and a Project whose own Issues are
+all outside a Ready status share the symptom of an empty queue, so the adapter names the case it
+found — with the Project and the repository explicit — and the diagnosis never changes the exit
+code: a legitimately empty Project and a wrong one are only told apart by what the read returned,
+not by its code. A read that fails is still a blocker with `3`, never an empty queue.
+
+The Project association is local state, not template content: a checkout may declare `repo`,
+`owner` and `project` in `.agents/tracker.local.yaml`, a file that is never committed. Its values
+are the only valid pair for that checkout and are passed explicitly on every call; a clone or a
+derived project never inherits them.
+
 Limits to declare, never overclaim: markers are unauthenticated structure (a shared account can
 publish them), the receipt proves structure rather than reading, reservation has a
 read-then-write window, and continuity belongs to the active session. No bot, cron, webhook or
