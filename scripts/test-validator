@@ -805,14 +805,15 @@ class ValidationTests(unittest.TestCase):
      p.write_text(original)
  def test_resource_policy_guards(self):
   cases = (
-   ('specs/methodology/model-selection.md', '`gpt-6.1-sol` + `low`'),
+   ('specs/methodology/model-selection.md', 'No fixed model ceiling'),
    ('specs/methodology/model-selection.md', 'do not spawn'),
    ('specs/methodology/model-selection.md', 'requested versus observed'),
-   ('specs/methodology/dynamic-agents.md', '**25% or less:**'),
-   ('specs/methodology/dynamic-agents.md', '**5% or less:**'),
-   ('specs/methodology/dynamic-agents.md', '**including QA**'),
-   ('specs/methodology/dynamic-agents.md', 'after this warning'),
-   ('specs/methodology/dynamic-agents.md', 'OpenCode is not enabled'),
+   ('specs/methodology/model-selection.md', '**25% or less:**'),
+   ('specs/methodology/model-selection.md', '**5% or less:**'),
+   ('specs/methodology/model-selection.md', '**including QA**'),
+   ('specs/methodology/model-selection.md', 'after this warning'),
+   ('specs/methodology/model-selection.md', 'manual relay is only proposed when the user declared it enabled'),
+   ('specs/methodology/dynamic-agents.md', 'model-selection.md#quota-and-dispatch-gate'),
    ('templates/agent-work-packet.md', 'HANDOFF → CODEX'),
    ('.agents/skills/orchestrate/SKILL.md', 'run `$handoff`'),
    ('.agents/skills/handoff/SKILL.md', 'Reread the written checkpoint'),

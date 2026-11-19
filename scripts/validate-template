@@ -529,8 +529,8 @@ def validate(root):
    if not satisfied(read(name),token): fail('delivery-evidence',f'{name}: missing {token}')
  # Resource policy guards are structural; runtime behavior needs separate trials.
  for name,tokens in {
-  'specs/methodology/model-selection.md':('`gpt-6.1-sol` + `low`','do not spawn','requested versus observed','fork_turns="none"'),
-  'specs/methodology/dynamic-agents.md':('**25% or less:**','**5% or less:**','**including QA**','after this warning','OpenCode is not enabled','re:token accounting .{0,60}not .{0,25}quota'),
+  'specs/methodology/model-selection.md':('No fixed model ceiling','Quota and dispatch gate','do not spawn','requested versus observed','fork_turns="none"','**25% or less:**','**5% or less:**','**including QA**','after this warning','manual relay is only proposed when the user declared it enabled','re:token accounting .{0,60}not .{0,25}quota'),
+  'specs/methodology/dynamic-agents.md':('one executor','quota','model-selection.md#quota-and-dispatch-gate'),
   'templates/agent-work-packet.md':('HANDOFF → CODEX','Recommended model:','Final status','Branch, commit SHA, PR','Quota gate:'),
   '.agents/skills/orchestrate/SKILL.md':('quota dispatch gate','run `$handoff`'),
   '.agents/skills/handoff/SKILL.md':('Reread the written checkpoint','complete copyable next-chat instruction'),
