@@ -165,38 +165,41 @@ Codex and Claude Code follow this same canonical policy through their existing a
 do not make correctness depend on optional lifecycle hooks or a particular client.
 
 ## Executing the decisive suite off-host
-When the decisive suite cannot run where you are working —a native module that only loads on the
-target platform, a path the host presents differently, a runner that behaves differently under
-emulation— execute it in a container on the host's own architecture, from a copy of the checkout
-with no published ports, provisioned with the project's pinned runtimes and the packages its own
-CI manifest already declares. Record image, versions, architecture and every difference from CI.
-Emulation of a foreign architecture is not evidence for a browser-driven suite: declare the
-difference instead. Anything not executed is UNRUN with its reason, never a silent zero.
+When the suite that decides the outcome cannot run where you are working —a native module that
+only loads on the target platform, a path the host presents differently, a runner that behaves
+differently under emulation— execute it in a container on an architecture native to that target
+platform, from a copy of the checkout with no published ports, provisioned with the project's pinned
+runtimes and the packages its own CI manifest already declares. Record image, versions,
+architecture and every difference from CI. Emulation of a foreign architecture is not evidence for a
+browser-driven suite: declare the difference instead. A check that did not run is reported as
+skipped or unrun with its reason, never as an unnoticed zero.
 
-Six rules, each from a real failure:
+Rules, each learned from a failure:
 
-1. **Pack copies without host metadata.** macOS `tar` adds AppleDouble `._*` entries, so a copied
-   checkout shows as dirty and Git rejects `.git/objects/pack/._pack-*.idx`. Pack with
-   `COPYFILE_DISABLE=1 tar -czf …` or delete `._*` after extraction, and keep logs and rc files
-   outside the worktree so the checkout stays verifiably clean.
+1. **Pack copies without host metadata.** macOS `tar` can add AppleDouble `._*` entries, which reach
+   the container as extra untracked files and can land inside `.git/objects/pack/`. Pack with
+   `COPYFILE_DISABLE=1 tar -czf archive.tar.gz …` or delete `._*` after extraction, and keep logs
+   and rc files outside the worktree so the checkout stays verifiably clean.
 2. **Declare ownership of a copied tree.** A checkout copied in with a foreign uid needs
    `git config --global --add safe.directory <path>`, or `git rev-parse` fails with dubious
    ownership (exit 128) and the whole run looks like a source problem.
 3. **Capture each step's own exit status.** Never chain with `A && B; echo RC=$?`: when A fails, B
    is skipped and RC reports A's error, which reads as B's failure. Run each step as its own
    statement with its own captured rc.
-4. **Audit every binary the fixtures spawn**, not only the obvious runtime, against the package
-   manifest the CI prepare step consumes. A declared tool missing from the image kills exactly the
+4. **Audit every binary the fixtures spawn.** Do it against the package manifest the CI prepare step
+   consumes, not only the obvious runtime. A declared tool missing from the image kills exactly the
    fixtures that boot it, and the symptom —a health poll returning zero— reads as a product
    failure. Installing what the manifest declares is faithful provisioning, not a test patch.
-5. **Install the browser and its system libraries as separate steps.** `install <browser>` can
-   succeed while the first launch still dies until `install-deps <browser>` runs. Probe one launch
-   before committing to the full suite, and check whether the runner's package lives under a
-   dependency store rather than at the project root.
+5. **Install the browser and its system libraries in separate steps.** The two subcommands browser
+   drivers expose (`install <browser>` and `install-deps <browser>`) are not equivalent: the first
+   can succeed while the first launch still dies. The second usually needs package-manager
+   privileges in the image. Probe one launch before committing to the full suite, and confirm where
+   the driver package actually resolves instead of assuming the project root.
 6. **Separate contention from regression.** Small VMs starve suites run in parallel: a
    timing-sensitive assertion can fail in one run, pass in its sibling in the same round, and pass
    isolated. Re-run **only** the failing test in the same container; if it passes, record it as a
-   contention flake with both facts and the test name. Calling it a regression sends the next
+   contention-flake *candidate* with both facts and the test name —not a settled verdict— and
+   treat a second occurrence as a defect to diagnose. Calling it a regression sends the next
    reader into code that is working.
 
 ## Canonical verification entry point
