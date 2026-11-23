@@ -41,10 +41,10 @@
       "labels": ["agent:gemini"]
     },
     {
-      "content": {"number": 107, "title": "Already reserved", "body": "It has an assignee.", "url": "https://github.com/acme/widgets/issues/107"},
+      "content": {"number": 107, "title": "Routed to another agent", "body": "Its label routes it elsewhere.", "url": "https://github.com/acme/widgets/issues/107"},
       "id": "PVTI_fixture_107",
       "status": "Ready Development",
-      "assignees": ["acme-bot"],
+      "labels": ["agent:opencode"],
       "priority": "P0"
     },
     {

@@ -33,7 +33,8 @@ gates instead of inventing a second state engine.
   present unreadable state as an empty backlog and do not silently switch to the manual
   protocol. Offer read-only work and ask for the missing access.
 - `phase:analysis` / `phase:implementation` labels are informative metadata only. No label,
-  assignee or agent comment authorizes a phase.
+  assignee or agent comment authorizes a phase. The GitHub assignee is a human field that agents
+  neither read, write nor gate on; only labels route and only the claim comment reserves.
 
 ## The 12 statuses
 
@@ -64,7 +65,7 @@ options; the harness never creates or edits Project fields.
 - **Agent:** takes only work already in a `Ready {Phase}`, reserves it, moves it to that
   phase's `In Progress`, works, publishes evidence and delivers into `{Phase} In Review`. It
   may declare `Blocked` from its own `{Phase} In Progress`. Delivery repeats the ownership
-  gate: while another agent's claim or a foreign assignee exists, `move` refuses and writes
+  gate: while another agent's claim exists, `move` refuses and writes
   nothing, and it never clears that ownership.
 - **Rejected review:** the user records the observations and returns the Issue to the same
   phase's `In Progress`. The agent works only on the requested corrections; a new
@@ -88,7 +89,7 @@ When no tracker is configured for the work:
    **identifiable human authorization** for that phase (who, what, when). An agent comment is
    never that authorization.
 2. The agent publishes a start comment (identity header, phase, scope) before substantive
-   work: that comment plus the assignee is the **reservation**; announce it and re-read the
+   work: that comment is the **reservation**; announce it and re-read the
    Issue before writing.
 3. Work stays inside the authorized phase; findings, blockers and questions are recorded in
    the Issue. Dependencies and ownership are checked exactly as with a Project.
@@ -107,7 +108,7 @@ board.
 ## Taking one Issue
 
 1. **Discover.** Read the Project or the identified Issue: body, recent comments, linked SPEC
-   and PR, dependencies, assignee and real state. `work-issue` without arguments lists every
+   and PR, dependencies and real state. `work-issue` without arguments lists every
    Issue in the three `Ready` groups with a proposed distribution; `next --agent X` reduces it
    to that agent's queue.
 2. **Verify.** With a Project, require the specific `Ready` status; without one, require the
@@ -119,9 +120,9 @@ board.
    decision hierarchy (latest explicit user instruction, approved scope, real state). Publish
    a short receipt bound to a fingerprint ([context receipt](#context-receipt)); on material
    contradiction or unverifiable authorization, stop dependent work and report.
-4. **Reserve.** With a Project, re-read the Status, confirm no other assignee or claim, publish
-   the claim comment, assign and move to `{Phase} In Progress`; re-read afterwards and retract
-   the writes on drift. Without one, publish the start comment, assign the Issue and re-read it.
+4. **Reserve.** With a Project, re-read the Status, confirm no other claim, publish
+   the claim comment and move to `{Phase} In Progress`; re-read afterwards and retract
+   the writes on drift. Without one, publish the start comment and re-read it.
    Reservation is best-effort (GitHub has no compare-and-set): one reservation at a time, never
    a lock service.
 5. **Execute** the authorized phase with the Skill that owns it (`orchestrate`, `spec`, `dev`,
@@ -165,9 +166,9 @@ the visible fingerprint must agree with the marker. Publication is declared only
 comment is read back: the persisted body must be the one emitted and still bound to the
 current fingerprint, or the tool retracts its own comment and reports the failure.
 
-The fingerprint covers title, body, Status, labels, assignees and every material comment. It
+The fingerprint covers title, body, Status, labels and every material comment. It
 expires on **any** new comment — including the agent's own claim or report — and on `take`,
-which changes Status and assignee. Publish a new receipt after `take` and before the first
+which changes Status. Publish a new receipt after `take` and before the first
 `move`; a receipt from the `Ready` state authorizes nothing in `In Progress`.
 
 ## Agent routing
@@ -180,7 +181,7 @@ agent label; no agent label means any compatible agent. Two agent labels, an unk
 insufficient capability mean report and wait. A session started without naming an agent works
 the Issues without an agent label plus those labelled for the agent its client identifies
 (`claude` in Claude Code); another agent's Issues are reported and never touched. The label is routing, not authorization and not
-a reservation, and it is distinct from the GitHub assignee.
+a reservation, and agents ignore the GitHub assignee entirely.
 
 ## Session continuity
 
@@ -299,7 +300,7 @@ with a second operational state.
 
 Stop and report, without writing, when the Project or its permissions are unavailable, the
 agent identity is not in the catalogue, the routing label is ambiguous or unknown, the Issue is
-assigned or already claimed elsewhere, a dependency is open or unverifiable, the history
+already claimed by another agent, a dependency is open or unverifiable, the history
 exceeds the read limit, or the requested transition belongs to the user. Stopping one Issue
 never stops a session: record the reason, keep it out of the queue and continue with the next
 eligible Issue.
