@@ -280,7 +280,7 @@ def validate(root):
  for token in ('~:delegation preference', 'one executor per task', '~:never create artificial agents'):
   if not satisfied(dynamic,token): fail('delegation-preference',f'dynamic policy missing {token}')
  if 'specs/methodology/dynamic-agents.md' not in orchestrator: fail('dynamic-agents','orchestrator not wired to dynamic management')
- for token in ('~:Prefer a specialist for substantial','~:one executor per task','~:never invent agents'):
+ for token in ('Prefer a specialist for substantial','one executor per task','never invent agents'):
   if not satisfied(orchestrator,token): fail('delegation-preference',f'orchestrator missing {token}')
  if 'one executor per task' not in epic.lower(): fail('delegation-preference','epic scheduler missing one executor per task')
  if '(specs/methodology/dynamic-agents.md)' not in agents: fail('dynamic-agents','AGENTS.md missing dynamic management link')
