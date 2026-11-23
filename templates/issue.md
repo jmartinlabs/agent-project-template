@@ -18,6 +18,12 @@ development before the scope is authorized; a phase request is not an authorizat
 - In scope: concrete behaviour, files or surfaces.
 - Out of scope: what must not change, and the neighbouring work that stays separate.
 
+## Routing
+
+Optional: one label `agent:opencode`, `agent:hermes`, `agent:codex` or `agent:claude` (the bare
+name is an alias) to route the Issue to that agent; no label means any compatible agent. A
+label is routing, never authorization. The GitHub assignee is ignored by agents.
+
 ## Linked SPEC
 
 `specs/NN-slug-specification.md` (or `none yet: this Issue needs analysis first`). One SPEC may

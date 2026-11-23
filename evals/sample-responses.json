@@ -792,6 +792,46 @@
       "id": "proactive-09",
       "decision": "continue",
       "target": "prepare the E2.1 work packet while E1 DEV continues"
+    },
+    {
+      "id": "workissue-01",
+      "decision": "block",
+      "target": "take Issue #12 as claude"
+    },
+    {
+      "id": "workissue-02",
+      "decision": "allow",
+      "target": "take Issue #14 as claude and ignore the assignee"
+    },
+    {
+      "id": "workissue-03",
+      "decision": "block",
+      "target": "take Issue #20 and move it to Development In Progress"
+    },
+    {
+      "id": "workissue-04",
+      "decision": "continue",
+      "target": "take Issue #31 next and continue until the queue is empty"
+    },
+    {
+      "id": "codexreview-01",
+      "decision": "block",
+      "target": "launch the Codex review automatically"
+    },
+    {
+      "id": "codexreview-02",
+      "decision": "block",
+      "target": "checkout abc1234 and run the review"
+    },
+    {
+      "id": "codexreview-03",
+      "decision": "block",
+      "target": "rely on its findings in the QA report"
+    },
+    {
+      "id": "codexreview-04",
+      "decision": "allow",
+      "target": "run codex review read-only and report quota as not verified"
     }
   ]
 }
