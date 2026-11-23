@@ -74,8 +74,9 @@ their markers belong on the last line and are never quoted as evidence.
    reservation, and the agent neither invents statuses nor writes one. A Project that exists
    but cannot be read is a blocker whose `Status` remains the gate; an Issue comment never
    substitutes for `Ready {Phase}`.
-3. **Route.** Simple labels `opencode`, `hermes`, `codex`; namespaced `agent:X`/`to:X` fail
-   closed outside the catalogue; no label means any compatible agent; two labels or an unknown
+3. **Route.** Canonical label `agent:X` (bare `X` is an alias) over the catalogue `opencode`,
+   `hermes`, `codex`, `claude` (replaceable with `agents:` in `.agents/tracker.local.yaml`);
+   `agent:X` fails closed outside the catalogue; no label means any compatible agent; two labels or an unknown
    agent mean report and wait. Never change another agent's routing label.
 4. **Check.** With a Project, confirm the Issue is still `Ready`, belongs to the configured
    repository, has no other assignee and no open or unverifiable dependency (`Depends on #N`,
