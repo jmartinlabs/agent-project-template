@@ -7,7 +7,14 @@ import re
 import sys
 from urllib.parse import unquote, urlsplit
 SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'handoff', 'relay', 'work-issue', 'task', 'tweak', 'adopt-project', 'codex-review')
-REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
+# A hook prints a whole file into every session, so that file must stay small. Claude Code stores
+# hook output above ~10 KiB as a file and shows only a short preview, so the budget keeps margin.
+HOOK_PRINT_BUDGET = 8192
+# Contracts split into a core plus an on-demand part: checks read them as one contract, so a rule
+# is enforced wherever it lives, while the budget above constrains only the core that is printed.
+CONTRACT_PARTS = {'.agents/skills/orchestrate/SKILL.md': ('.agents/skills/orchestrate/reference.md',),
+ 'specs/methodology/dynamic-agents.md': ('specs/methodology/dynamic-agents-external-clients.md',)}
+REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md','.agents/skills/orchestrate/reference.md','specs/methodology/dynamic-agents-external-clients.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan','issue')),
  *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/work-issue','scripts/test-work-issue','scripts/check-delegation-route','scripts/test-delegation-route','scripts/fixtures/work-issue-project.json','scripts/agent-relay','scripts/test-agent-relay','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','specs/methodology/coordinator-communication.md','specs/methodology/issue-workflow.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/HERMES_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
@@ -116,8 +123,8 @@ def validate(root):
  root=Path(root).resolve(); errors=[]
  def fail(rule,msg): errors.append(f'{rule}: {msg}')
  def read(name):
-  p=root/name
-  return p.read_text(encoding='utf-8') if p.is_file() else ''
+  parts=[root/name,*(root/extra for extra in CONTRACT_PARTS.get(name,()))]
+  return '\n'.join(q.read_text(encoding='utf-8') for q in parts if q.is_file()) if (root/name).is_file() else ''
  for name in REQUIRED:
   if not (root/name).is_file() or not (root/name).stat().st_size: fail('structure',f'missing or empty {name}')
  opencode_agent=root/'.opencode/agents/review.md'
@@ -350,6 +357,7 @@ def validate(root):
   for event,kind,cmd in commands:
    m=safe.fullmatch(cmd)
    if kind!='command' or not m or '..' in Path(m[1]).parts or not (root/m[1]).is_file(): fail('hooks',f'{event} hook is not a read-only print of a repository file: {cmd!r}')
+   elif (root/m[1]).stat().st_size>HOOK_PRINT_BUDGET: fail('hooks',f'{m[1]} exceeds the {HOOK_PRINT_BUDGET}-byte hook print budget; move on-demand text to a reference file')
   if not any(e=='SessionStart' and '.agents/skills/orchestrate/SKILL.md' in c for e,_,c in commands):
    fail('hooks','SessionStart hook must load the orchestrate Skill')
  except (ValueError,AttributeError,TypeError):
