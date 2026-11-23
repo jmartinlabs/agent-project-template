@@ -12,7 +12,8 @@ they do not replace canonical rules.
   Do not maintain separate, conflicting policies in these files.
 - `.claude/skills/NAME/SKILL.md` enables `/orchestrate`, `/spec`, `/dev`,
   `/task`, `/tweak`, `/init-project`, `/bootstrap`, `/roadmap`, `/relay`,
-  `/adopt-project` and `/handoff`. Each wrapper **reads the corresponding canonical** file
+  `/adopt-project`, `/handoff` and the optional `/codex-review` (read-only Codex CLI review, Claude
+  Code only; see its standing authorization in `dynamic-agents.md`). Each wrapper **reads the corresponding canonical** file
   under `.agents/skills/NAME/SKILL.md`; none automatically copies its contents. The
   relay wrapper adds no hook and never reads or publishes automatically.
 - `.claude/agents/` exposes optional task-limited profiles for
