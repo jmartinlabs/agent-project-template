@@ -20,7 +20,12 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-AGENTS = ("opencode", "hermes", "codex")
+# Default agent catalogue. A checkout may replace it with `agents:` in the local, uncommitted
+# `.agents/tracker.local.yaml`. It is a list mutated in place so every default argument sees it.
+DEFAULT_AGENTS = ("opencode", "hermes", "codex", "claude")
+AGENTS = list(DEFAULT_AGENTS)
+AGENT_NAME_RE = re.compile(r"^[a-z][a-z0-9-]*$")
+TRACKER_LOCAL = Path(".agents") / "tracker.local.yaml"
 # Wire values shared with the operating pilot; they are part of the comment contract.
 ROLES = ("Coordinador funcional", "Ejecutor", "Revisor")
 
@@ -271,20 +276,42 @@ def relations(body):
 def agent_routing(labels, agents=AGENTS):
     """Return (known, unknown): routing labels and namespaced ones outside the catalogue.
 
-    Only catalogue labels route work. Namespaced labels (`agent:X`, `to:X`) are honoured
-    when X is in the catalogue and fail closed when it is not: a routing hint must never
+    Only catalogue labels route work. The canonical label is `agent:X`; the bare `X` is an
+    alias. `agent:X` is honoured when X is in the catalogue and fail closed when it is not: a routing hint must never
     be silently ignored while the item is still taken.
     """
     known, unknown = [], []
     for label in labels:
         name = label.strip().lower()
-        namespaced = re.match(r"^(?:agent|to)[:·](.+)$", name)
+        namespaced = re.match(r"^agent[:·](.+)$", name)
         if namespaced:
             value = namespaced.group(1).strip() or "<empty>"
             (known if value in agents else unknown).append(value)
         elif name in agents:
             known.append(name)
     return sorted(set(known)), sorted(set(unknown))
+
+
+def load_catalogue(root="."):
+    """Agent catalogue: `agents:` from `.agents/tracker.local.yaml`, else the default.
+
+    The value is a comma list or `[a, b]`. Anything malformed fails closed with an error
+    instead of silently falling back, so a typo can never widen the catalogue.
+    """
+    path = Path(root) / TRACKER_LOCAL
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return list(DEFAULT_AGENTS)
+    found = re.search(r"^agents:[ \t]*(.*?)[ \t]*(?:#.*)?$", text, re.MULTILINE)
+    if not found:
+        return list(DEFAULT_AGENTS)
+    names = [name.strip().strip("'\"").lower()
+             for name in found.group(1).strip("[]").split(",") if name.strip()]
+    if not names or any(not AGENT_NAME_RE.match(name) for name in names):
+        raise ValueError("`agents:` in %s must list names like claude, codex (received %r)"
+                         % (TRACKER_LOCAL, found.group(1)))
+    return sorted(set(names), key=names.index)
 
 
 def dependency_index(items):
@@ -311,7 +338,7 @@ def dependency_item(index, number, repo):
     return candidates[0] if len(candidates) == 1 else None
 
 
-def classify(item, agent=None, by_number=None, agents=AGENTS, repo=None):
+def classify(item, agent=None, by_number=None, agents=AGENTS, repo=None, unrouted_only=False):
     """Decide whether the agent may take this item, and why not when it may not."""
     by_number = by_number or {}
     decision = Decision(item=item, kind="eligible")
@@ -346,7 +373,7 @@ def classify(item, agent=None, by_number=None, agents=AGENTS, repo=None):
         decision.reason = "two agent labels: " + ", ".join(known)
         return decision
     decision.route = known[0] if known else ""
-    if agent and decision.route and decision.route != agent:
+    if decision.route and (decision.route != agent if agent else unrouted_only):
         decision.kind = "other-agent"
         decision.reason = "routed to " + decision.route
         return decision
@@ -396,10 +423,10 @@ def sort_key(decision):
     )
 
 
-def plan(items, agent=None, agents=AGENTS, repo=None):
+def plan(items, agent=None, agents=AGENTS, repo=None, unrouted_only=False):
     """Every Ready item with its routing decision, ordered by eligibility then priority."""
     by_number = dependency_index(items)
-    decisions = [classify(item, agent, by_number, agents, repo)
+    decisions = [classify(item, agent, by_number, agents, repo, unrouted_only)
                  for item in items if item.status in READY]
     return sorted(decisions, key=sort_key)
 
@@ -1064,25 +1091,27 @@ class Service:
         A truncated read cannot prove the queue complete, so it is refused.
         """
         agent = agent or self.agent
-        if not agent or agent not in AGENTS:
-            raise WorkIssueError("next requires --agent from the catalogue: %s"
-                                 % ", ".join(AGENTS))
+        if agent and agent not in AGENTS:
+            raise WorkIssueError("unknown agent: %s (catalogue: %s)"
+                                 % (agent, ", ".join(AGENTS)))
+        # Without an agent the queue is read-only and holds only Issues no agent label routes.
         items = self.github.items()
         if getattr(self.github, "truncated", False):
             self._project_diagnosis()
             raise WorkIssueError(
                 "the Project exceeds the %d-item read limit; a truncated queue cannot be "
                 "declared complete or consumed" % PROJECT_LIMIT)
-        decisions = plan(items, agent, repo=getattr(self.github, "repo", None))
+        decisions = plan(items, agent, repo=getattr(self.github, "repo", None),
+                         unrouted_only=not agent)
         for decision in decisions:
-            if self._resumable(decision, agent):
+            if agent and self._resumable(decision, agent):
                 decision.kind = "eligible"
                 decision.reason = "resumption of our own claim"
         decisions.sort(key=sort_key)
         queue = session_queue(decisions, exclude)
         if not queue:
             self.out("NO ELIGIBLE WORK for %s — the session has no other reservable Issue."
-                     % agent)
+                     % (agent or "unrouted Issues"))
             self._explain_skips(decisions, exclude)
             self._project_diagnosis()
             return EXIT_EMPTY
@@ -1090,7 +1119,8 @@ class Service:
         phase, target = READY[head.item.status]
         resumed = " · resumption" if head.reason else ""
         self.out("QUEUE %s (%d): %s" % (
-            agent, len(queue), ", ".join(plan_label(decision) for decision in queue)))
+            agent or "(no agent)", len(queue),
+            ", ".join(plan_label(decision) for decision in queue)))
         self.out("NEXT #%d — %s · phase %s · %s · %s%s" % (
             head.item.number, head.item.status, phase,
             head.item.priority or "unprioritised",
@@ -1098,7 +1128,7 @@ class Service:
             resumed))
         self.out("Action: take --issue %d --agent %s → execute the phase → "
                  "move --to \"%s\" → back to next."
-                 % (head.item.number, agent, target.replace("In Progress", "In Review")))
+                 % (head.item.number, agent or "<your agent>", target.replace("In Progress", "In Review")))
         self._explain_skips(decisions, exclude)
         return EXIT_OK
 
@@ -1826,13 +1856,18 @@ def read_summary(args):
 
 
 def main(argv=None):
+    try:
+        AGENTS[:] = load_catalogue()
+    except ValueError as error:
+        print("Not executed: %s" % error, file=sys.stderr)
+        return EXIT_REFUSED
     parser = build_parser()
     args = parser.parse_args(argv)
     agent = resolve_agent(args)
     role = resolve_option(args, "role") or ROLES[0]
     executor = resolve_option(args, "executor")
-    if args.command in ("take", "move", "next") and not agent:
-        print("Not executed: take/move/next require --agent from the catalogue (%s)"
+    if args.command in ("take", "move") and not agent:
+        print("Not executed: take/move require --agent from the catalogue (%s)"
               % ", ".join(AGENTS), file=sys.stderr)
         return EXIT_REFUSED
     if args.command == "move" and not args.to and not args.restore:

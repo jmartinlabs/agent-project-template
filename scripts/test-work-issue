@@ -26,6 +26,8 @@ MODULE = runpy.run_path(str(SCRIPT))
 normalise = MODULE["normalise"]
 plan = MODULE["plan"]
 classify = MODULE["classify"]
+load_catalogue = MODULE["load_catalogue"]
+DEFAULT_AGENTS = MODULE["DEFAULT_AGENTS"]
 render = MODULE["render"]
 Service = MODULE["Service"]
 Gh = MODULE["Gh"]
@@ -490,7 +492,7 @@ class TakeTests(unittest.TestCase):
 
     def test_take_rejects_an_agent_outside_the_catalogue(self):
         with self.assertRaises(WorkIssueError):
-            Service(FakeGh(), "claude").take(101)
+            Service(FakeGh(), "gemini").take(101)
 
 
 class MoveTests(unittest.TestCase):
@@ -790,12 +792,39 @@ class RegressionTests(unittest.TestCase):
         self.assertIn("Deps", text)
         self.assertIn("#101", text)
 
-    def test_namespaced_agent_labels_route_or_fail_closed(self):
+    def test_agent_labels_route_or_fail_closed(self):
+        item = fixture_item(102)
+        item.labels = ["agent:hermes"]
+        self.assertEqual(classify(item, "hermes").route, "hermes")
+        item.labels = ["agent:claude"]
+        self.assertEqual(classify(item, "claude").route, "claude")
+        self.assertEqual(classify(item, "hermes").kind, "other-agent")
+        item.labels = ["agent:gemini"]
+        self.assertEqual(classify(item, "hermes").kind, "unknown-agent")
+
+    def test_to_prefix_is_no_longer_a_routing_label(self):
         item = fixture_item(102)
         item.labels = ["to:hermes"]
-        self.assertEqual(classify(item, "hermes").route, "hermes")
-        item.labels = ["to:claude"]
-        self.assertEqual(classify(item, "hermes").kind, "unknown-agent")
+        self.assertEqual(classify(item, "hermes").route, "")
+
+    def test_no_agent_queue_holds_only_unrouted_issues(self):
+        items = load_items()
+        routed = [d.item.number for d in plan(items, None, unrouted_only=True)
+                  if d.kind == "other-agent"]
+        eligible = [d.item.number for d in plan(items, None, unrouted_only=True) if d.eligible]
+        self.assertTrue(routed)
+        self.assertFalse(set(routed) & set(eligible))
+
+    def test_catalogue_is_configurable_and_fails_closed(self):
+        with tempfile.TemporaryDirectory() as root:
+            self.assertEqual(load_catalogue(root), list(DEFAULT_AGENTS))
+            path = Path(root) / ".agents"
+            path.mkdir()
+            (path / "tracker.local.yaml").write_text("agents: [Claude, codex]  # mine\n")
+            self.assertEqual(load_catalogue(root), ["claude", "codex"])
+            (path / "tracker.local.yaml").write_text("agents: bad name!\n")
+            with self.assertRaises(ValueError):
+                load_catalogue(root)
 
     def test_negated_dependencies_are_ignored(self):
         self.assertEqual(MODULE["dependencies"]("No depende de #7 ni de nada."), [])
@@ -1769,9 +1798,18 @@ class SessionContinuityTests(unittest.TestCase):
         with self.assertRaises(WorkIssueError):
             self.session(FakeGh(truncated=True)).next_issue("hermes")
 
-    def test_next_requires_a_catalogue_agent(self):
+    def test_next_rejects_an_agent_outside_the_catalogue(self):
         with self.assertRaises(WorkIssueError):
-            Service(FakeGh(), None, "Coordinador funcional").next_issue(None)
+            Service(FakeGh(), None, "Coordinador funcional").next_issue("gemini")
+
+    def test_next_without_an_agent_lists_only_unrouted_issues(self):
+        lines = []
+        self.assertEqual(Service(FakeGh(), None, "Coordinador funcional",
+                                 lines.append).next_issue(None), EXIT_OK)
+        text = "\n".join(lines)
+        self.assertIn("QUEUE (no agent)", text)
+        self.assertIn("#103 not eligible: other-agent", text)
+        self.assertNotIn("NEXT #103", text)
 
     def test_a_pending_human_decision_does_not_block_the_next_issue(self):
         github = FakeGh()
@@ -2237,7 +2275,7 @@ class ParserTests(unittest.TestCase):
             MODULE["Gh"] = original
         self.assertEqual(code, 2)
 
-    def test_next_requires_an_agent_before_any_github_access(self):
+    def test_take_requires_an_agent_before_any_github_access(self):
         created = []
 
         class FakeGitHub:
@@ -2247,8 +2285,8 @@ class ParserTests(unittest.TestCase):
         original = MODULE["Gh"]
         MODULE["Gh"] = FakeGitHub
         try:
-            self.assertEqual(MODULE["main"](["--repo", REPO, "--project", "7", "next"]),
-                             EXIT_REFUSED)
+            self.assertEqual(MODULE["main"](["--repo", REPO, "--project", "7", "take",
+                                             "--issue", "101"]), EXIT_REFUSED)
             self.assertEqual(MODULE["main"](["--repo", REPO, "--project", "7", "next",
                                              "--agent", "hermes",
                                              "--exclude", "418,x"]), EXIT_REFUSED)
@@ -2293,7 +2331,7 @@ class ContractTests(unittest.TestCase):
                 self.assertIsNotNone(validate_transition(status, target), (status, target))
 
     def test_agents_catalogue_is_the_documented_one(self):
-        self.assertEqual(MODULE["AGENTS"], ("opencode", "hermes", "codex"))
+        self.assertEqual(MODULE["AGENTS"], ["opencode", "hermes", "codex", "claude"])
 
     def test_tool_has_no_project_repository_or_owner_defaults(self):
         source = SCRIPT.read_text(encoding="utf-8")
