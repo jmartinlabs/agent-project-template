@@ -163,23 +163,6 @@ class FakeGh:
             self.comments_store[number].insert(0, {"id": 500, "body": rival})
         return self.next_id
 
-    def assign(self, number):
-        if "assign" in self.fail:
-            raise WorkIssueError("assignment failed")
-        self.calls.append(("assign", number))
-        for entry in self.data:
-            if entry.number == number:
-                entry.assignees = ["acme-bot", "other-human"] if self.assign_conflict \
-                    else ["acme-bot"]
-
-    def unassign(self, number):
-        if "unassign" in self.fail:
-            raise WorkIssueError("assignee removal failed")
-        self.calls.append(("unassign", number))
-        for entry in self.data:
-            if entry.number == number:
-                entry.assignees = []
-
     def retract_comment(self, comment_id):
         if "retract" in self.fail:
             raise WorkIssueError("comment retraction failed")
@@ -318,9 +301,10 @@ class DiscoveryTests(unittest.TestCase):
         decision = [d for d in plan(load_items()) if d.item.number == 106][0]
         self.assertEqual(decision.kind, "unknown-agent")
 
-    def test_assignee_is_not_authorization_and_blocks_take(self):
-        decision = [d for d in plan(load_items()) if d.item.number == 107][0]
-        self.assertEqual(decision.kind, "taken")
+    def test_assignee_is_ignored_by_routing(self):
+        item = fixture_item(102)
+        item.assignees = ["someone"]
+        self.assertTrue(classify(item, "hermes").eligible)
 
     def test_agent_filter_keeps_own_label_and_free_items(self):
         decisions = {d.item.number: d for d in plan(load_items(), "hermes")}
@@ -404,7 +388,7 @@ class DiscoveryTests(unittest.TestCase):
     def test_take_never_writes_priority(self):
         github = FakeGh()
         self.assertEqual(service(github).take(112), EXIT_OK)      # P2, not the first eligible
-        self.assertEqual([call[0] for call in github.calls], ["comment", "assign", "status"])
+        self.assertEqual([call[0] for call in github.calls], ["comment", "status"])
         self.assertEqual(fixture_item(112, github.data).priority, "P2")
 
     def test_render_prints_inventory_and_distribution(self):
@@ -422,15 +406,15 @@ class DiscoveryTests(unittest.TestCase):
 
 
 class TakeTests(unittest.TestCase):
-    def test_take_publishes_claim_assigns_and_moves_in_order(self):
+    def test_take_publishes_claim_and_moves_without_touching_the_assignee(self):
         github = FakeGh()
         code = service(github).take(101)
         self.assertEqual(code, EXIT_OK)
-        self.assertEqual(github.calls, [("comment", 101), ("assign", 101),
+        self.assertEqual(github.calls, [("comment", 101),
                                         ("status", 101, "Development In Progress")])
         after = fixture_item(101, github.data)
         self.assertEqual(after.status, "Development In Progress")
-        self.assertEqual(after.assignees, ["acme-bot"])
+        self.assertEqual(after.assignees, [])
 
     def test_take_comment_carries_identity_header_and_marker(self):
         github = FakeGh()
@@ -461,10 +445,11 @@ class TakeTests(unittest.TestCase):
         self.assertEqual(service(github).take(106), EXIT_REFUSED)
         self.assertEqual(github.calls, [])
 
-    def test_take_refuses_item_with_assignee(self):
+    def test_take_ignores_an_existing_assignee(self):
         github = FakeGh()
-        self.assertEqual(service(github).take(107), EXIT_REFUSED)
-        self.assertEqual(github.calls, [])
+        fixture_item(101, github.data).assignees = ["someone"]
+        self.assertEqual(service(github).take(101), EXIT_OK)
+        self.assertEqual(fixture_item(101, github.data).assignees, ["someone"])
 
     def test_take_refuses_existing_claim(self):
         item = fixture_item(101)
@@ -476,11 +461,10 @@ class TakeTests(unittest.TestCase):
     def test_take_aborts_when_a_competing_claim_appears(self):
         github = FakeGh(race=True)
         self.assertEqual(service(github).take(101), EXIT_REFUSED)
-        self.assertNotIn(("assign", 101), github.calls)
         self.assertNotIn(("status", 101, "Development In Progress"), github.calls)
 
     def test_take_does_not_claim_success_when_a_write_fails(self):
-        github = FakeGh(fail={"assign"})
+        github = FakeGh(fail={"status"})
         self.assertEqual(service(github).take(101), EXIT_FAILED)
         self.assertNotIn(("status", 101, "Development In Progress"), github.calls)
         self.assertTrue([call for call in github.calls if call[0] == "retract"])
@@ -767,14 +751,11 @@ class RegressionTests(unittest.TestCase):
         with self.assertRaises(WorkIssueError):
             Service(FakeGh(items=items), None).move(120, "Development In Review")
 
-    def test_failed_status_write_rolls_back_the_claim_and_the_assignee(self):
+    def test_failed_status_write_rolls_back_the_claim(self):
         github = FakeGh(fail={"status"})
         self.assertEqual(service(github).take(101), EXIT_FAILED)
-        self.assertIn(("assign", 101), github.calls)
-        self.assertIn(("unassign", 101), github.calls)
         self.assertTrue([call for call in github.calls if call[0] == "retract"])
         self.assertEqual(claim_comments(github, 101), [])
-        self.assertEqual(fixture_item(101, github.data).assignees, [])
 
     def test_collision_retracts_our_comment_and_allows_a_retry(self):
         github = FakeGh(race=True)
@@ -1069,14 +1050,6 @@ class FourthRoundTests(unittest.TestCase):
         items = load_items()
         fixture_item(101, items).assignees = ["acme-bot"]
         fixture_item(101, items).body = "Depends on #108, open."
-        claim = claim_body("hermes", "Coordinador funcional", "development", fixture_item(101, items))
-        github = FakeGh(items=items, claims={101: [{"id": 11, "body": claim}]})
-        self.assertEqual(service(github).take(101), EXIT_REFUSED)
-        self.assertEqual(github.calls, [])
-
-    def test_resume_requires_our_own_assignee(self):
-        items = load_items()
-        fixture_item(101, items).assignees = ["someone-else"]
         claim = claim_body("hermes", "Coordinador funcional", "development", fixture_item(101, items))
         github = FakeGh(items=items, claims={101: [{"id": 11, "body": claim}]})
         self.assertEqual(service(github).take(101), EXIT_REFUSED)
@@ -1775,7 +1748,7 @@ class SessionContinuityTests(unittest.TestCase):
         text = "\n".join(lines)
         self.assertNotIn("NEXT #113", text)          # P0 routed to opencode
         self.assertIn("#113 not eligible: other-agent", text)
-        self.assertIn("#107 not eligible: taken", text)
+        self.assertIn("#107 not eligible: other-agent", text)
         self.assertIn("#108 not eligible: blocked-dependency", text)
         self.assertIn("#109 not eligible: unverified-dependency", text)
 
@@ -1879,27 +1852,9 @@ class SessionContinuityTests(unittest.TestCase):
         lines = []
         self.assertEqual(self.session(github, lines=lines).next_issue("hermes"), EXIT_OK)
         self.assertIn("NEXT #101", self.head(lines))
-        self.assertIn("resumption", self.head(lines))
         seed_receipts(github)                          # new Ready state, new receipt
         self.assertEqual(svc.take(101), EXIT_OK)       # resumes its own claim
         self.assertEqual(len(claim_comments(github, 101)), 1)
-
-    def test_a_history_over_the_read_limit_is_not_offered_as_resumable(self):
-        github = FakeGh()
-        svc = service(github)
-        self.assertEqual(svc.take(101), EXIT_OK)
-        seed_receipts(github)
-        self.assertEqual(svc.move(101, "Development In Review", note="delivered"), EXIT_OK)
-        for entry in github.data:                      # the user returns it to the phase
-            if entry.number == 101:
-                entry.status = "Ready Development"
-        limit = MODULE["COMMENT_LIMIT"]
-        github.comments_store[101] += [{"id": 9000 + n, "body": "note %d" % n}
-                                       for n in range(limit)]
-        lines = []
-        self.assertEqual(self.session(github, lines=lines).next_issue("hermes"), EXIT_OK)
-        self.assertNotIn("NEXT #101", self.head(lines))
-        self.assertIn("#101 not eligible: taken — history above the", "\n".join(lines))
 
     def test_reserved_issue_leaves_the_queue_without_a_double_claim(self):
         github = FakeGh()
@@ -1930,7 +1885,7 @@ class LateClaimGh(FakeGh):
 
 
 class OwnershipExclusivityTests(unittest.TestCase):
-    """A delivery is refused unless the agent holds the only claim and the only assignee.
+    """A delivery is refused unless the agent holds the only claim; the assignee is ignored.
 
     A historical claim of our own is not enough: a foreign assignee or a competing claim means
     the Issue is not ours to write, and the tool never takes it over or clears it.
@@ -1962,16 +1917,11 @@ class OwnershipExclusivityTests(unittest.TestCase):
         return FakeGh(items=items, claims={120: [{"id": 11, "body": claim},
                                                  {"id": 12, "body": block}]})
 
-    def test_move_refuses_a_foreign_assignee(self):
+    def test_move_ignores_a_foreign_assignee(self):
         github = self.progress(assignees=["other-human"])
-        lines = []
-        code = Service(github, "hermes", "Coordinador funcional", lines.append).move(
-            120, "Development In Review", note="QA only")
-        self.assertEqual(code, EXIT_REFUSED)
-        self.assertEqual(github.calls, [])
-        self.assertEqual(fixture_item(120, github.data).status, "Development In Progress")
+        code = service(github).move(120, "Development In Review", note="QA only")
+        self.assertEqual(code, EXIT_OK)
         self.assertEqual(fixture_item(120, github.data).assignees, ["other-human"])
-        self.assertIn("assign", "\n".join(lines).lower())
 
     def test_move_refuses_a_competing_claim_even_when_ours_is_older(self):
         github = self.progress(rival=True)
@@ -1981,16 +1931,14 @@ class OwnershipExclusivityTests(unittest.TestCase):
         self.assertEqual(fixture_item(120, github.data).status, "Development In Progress")
 
     def test_move_dry_run_applies_the_same_ownership_gate(self):
-        for github in (self.progress(assignees=["other-human"]), self.progress(rival=True)):
+        for github in (self.progress(rival=True),):
             self.assertEqual(service(github).move(120, "Development In Review", dry_run=True),
                              EXIT_REFUSED, github.item_reads)
             self.assertEqual(github.calls, [])
 
-    def test_restore_refuses_a_foreign_assignee(self):
+    def test_restore_ignores_a_foreign_assignee(self):
         github = self.blocked(assignees=["other-human"])
-        self.assertEqual(service(github).move(120, None, restore=True), EXIT_REFUSED)
-        self.assertEqual(github.calls, [])
-        self.assertEqual(fixture_item(120, github.data).status, "Blocked")
+        self.assertEqual(service(github).move(120, None, restore=True), EXIT_OK)
 
     def test_move_rechecks_the_ownership_immediately_before_writing(self):
         github = LateClaimGh(items=load_items(), claims={120: [{"id": 11, "body": claim_body(
@@ -2056,17 +2004,6 @@ class WriteConfirmationTests(unittest.TestCase):
         self.assertEqual(code, EXIT_FAILED)
         self.assertNotIn(("status", 120, "Development In Review"), github.calls)
         self.assertEqual(fixture_item(120, github.data).status, "Development In Progress")
-
-    def test_take_does_not_accept_a_foreign_assignee_after_its_write(self):
-        github = FakeGh(assign_conflict=True)
-        lines = []
-        seed_receipts(github)
-        code = Service(github, "hermes", "Coordinador funcional", lines.append).take(101)
-        self.assertEqual(code, EXIT_FAILED)
-        self.assertNotIn(("unassign", 101), github.calls)          # another identity is kept
-        self.assertEqual(fixture_item(101, github.data).assignees, ["acme-bot", "other-human"])
-        self.assertEqual(fixture_item(101, github.data).status, "Ready Development")
-        self.assertIn("pending write", "\n".join(lines))
 
     def test_take_does_not_overwrite_a_status_changed_after_its_write(self):
         github = FakeGh(drift_after_write="Backlog")
@@ -2204,23 +2141,21 @@ class FinalBoundaryTests(unittest.TestCase):
         seed_receipts(github)
         return github
 
-    def test_delivery_requires_the_assignee_even_when_the_claim_remains(self):
+    def test_delivery_does_not_depend_on_the_assignee(self):
         github = self.progress(assignees=[])
         self.assertEqual(Service(github, "hermes").move(120, "Development In Review"),
-                         EXIT_REFUSED)
-        self.assertEqual(github.calls, [])
+                         EXIT_OK)
 
     def test_unreadable_rollback_never_overwrites_unverified_state(self):
         github = self.progress()
         github.fail.add("item")
         item = fixture_item(120, github.data)
         pending = Service(github, "hermes")._rollback(
-            120, assigned=True, status_to="Ready Development", item=item,
+            120, status_to="Ready Development", item=item,
             status_written="Development In Progress")
         self.assertTrue(pending)
         self.assertEqual(github.calls, [])
         self.assertEqual(item.status, "Development In Progress")
-        self.assertEqual(item.assignees, ["acme-bot"])
 
     def test_a_receipt_from_another_phase_never_authorizes_delivery(self):
         github = self.progress()
