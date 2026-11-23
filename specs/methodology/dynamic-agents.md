@@ -173,9 +173,27 @@ Critical technical review is a capability: an independent executor or context; a
 not required for independence. Prefer a verified adequate route when one is designated. Record
 requested versus observed identity: a mismatch means the designated route failed; missing metadata
 means identity unverified, not proof of failure. An alternative competent reviewer in the same client
-or an explicit manual handoff is valid; never launch another client automatically. Without a
+or an explicit manual handoff is valid; never launch another client automatically, except the
+standing authorization below. Without a
 reviewer, continue only small, reversible, authorized, objectively checkable work and record the
 limitation; block material or unsafe work and required independent QA. Silence is never approval.
+
+#### Standing authorization: Codex CLI as read-only external reviewer
+This template grants a permanent, bounded exception to a **Claude Code coordinator only**: it may
+use the local Codex CLI as an additional, **read-only** reviewer when justified (a financial,
+security, persistence or data-integrity risk, an explicit owner request, or an Issue that
+expressly asks for it), without asking each time. It is the only automatic client launch allowed.
+It is not a reviewer slot, not independent QA and not an approval; no other client acquires it.
+Procedure: [codex-review](../../.agents/skills/codex-review/SKILL.md).
+
+- Scope: `codex review` or `codex exec`, both forced to `sandbox_mode=read-only` and
+  `approval_policy=never` and checked against the CLI header; never edits, commits, PRs, `Status`
+  moves or merges. No new hooks, plugins or dependencies, and the user's Codex configuration,
+  model and effort are left as they are.
+- The [quota gate](model-selection.md#quota-and-dispatch-gate) applies unchanged; this
+  authorization is general and does not replace a task-specific one when the gate requires it.
+- Independent QA, ownership, approvals and merge gates are unchanged. Findings are evidence to
+  verify against the code, never a verdict.
 
 ## Manual OpenCode allocation
 The user declares external availability for each execution; absent a declaration,

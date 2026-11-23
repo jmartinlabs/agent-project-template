@@ -106,7 +106,7 @@ See [document ownership](specs/README.md) and [Skills invocation](NEW_PROJECT_PR
 AGENTS.md                         concise agent entry point
 NEW_PROJECT_PROMPT.md              new-project prompt
 ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
-.agents/skills/{adopt-project,orchestrate,handoff,relay,work-issue,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
+.agents/skills/{adopt-project,orchestrate,handoff,relay,work-issue,codex-review,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
 specs/methodology/model-selection.md advisory model and reasoning recommendations

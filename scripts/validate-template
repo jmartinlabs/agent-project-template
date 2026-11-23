@@ -6,7 +6,7 @@ import json
 import re
 import sys
 from urllib.parse import unquote, urlsplit
-SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'handoff', 'relay', 'work-issue', 'task', 'tweak', 'adopt-project')
+SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'handoff', 'relay', 'work-issue', 'task', 'tweak', 'adopt-project', 'codex-review')
 REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan','issue')),
