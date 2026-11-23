@@ -45,14 +45,14 @@ decides *which* Issue an agent may take and how the session records it.
   repository, owner, Project number or priority.
 - Read access with the `project` scope when a Project is used. Without it, stop: a missing or
   unreadable Project is a blocker, never an empty backlog.
-- The Issue body, comments, assignee, labels and linked SPEC/PR: all of them are evidence, not
+- The Issue body, comments, labels and linked SPEC/PR: all of them are evidence, not
   authorization. Only the Project `Status`, or the human authorization recorded in the Issue
   when there is no Project, places work in a phase.
 
 ## Outputs
 
 An inventory of every Ready Issue with phase, routing, dependencies and next action; one
-reservation per Issue the session works (claim comment + assignee + `In Progress`), its context
+reservation per Issue the session works (claim comment + `In Progress`), its context
 receipt and the transitions each phase permits; and a short session ledger. The **tool** writes
 nothing else: no branch, no PR, no merge, no approval. Operational comments keep the protocol
 header (`Autor`, `Rol`, `Fase`, `Tipo`, optional `Ejecutor`) and the `- De:` / `- A:` record;
@@ -68,7 +68,7 @@ their markers belong on the last line and are never quoted as evidence.
    `Ready Analysis`, `Ready Specification` and `Ready Development` with a proposed distribution;
    `next --agent X` reduces that to one queue in work order. Never treat "propose" as
    "dispatch", and never consume a truncated reading.
-2. **Authorize.** `Ready {Phase}` authorizes that phase only. A comment, label or assignee is
+2. **Authorize.** `Ready {Phase}` authorizes that phase only. A comment or label is
    never an approval. **Only when no Project is configured**, use the manual protocol: the
    Issue must carry the identifiable human authorization for the requested phase before any
    reservation, and the agent neither invents statuses nor writes one. A Project that exists
@@ -79,7 +79,7 @@ their markers belong on the last line and are never quoted as evidence.
    `agent:X` fails closed outside the catalogue; no label means any compatible agent; two labels or an unknown
    agent mean report and wait. Never change another agent's routing label.
 4. **Check.** With a Project, confirm the Issue is still `Ready`, belongs to the configured
-   repository, has no other assignee and no open or unverifiable dependency (`Depends on #N`,
+   repository, has no other agent's claim and no open or unverifiable dependency (`Depends on #N`,
    `Blocked by #N`, `Depende de #N`, `Bloqueada por #N`; a negated clause does not count). The
    dependency is resolved in this repository only: a same-numbered Issue in another repository
    never satisfies it, and a qualified `owner/repo#N` reference fails closed as unverifiable.
@@ -88,19 +88,19 @@ their markers belong on the last line and are never quoted as evidence.
    recorded in the Issue.
 5. **Recover context and reserve.** With a Project, read the whole history, the linked sources
    and the decision hierarchy; publish a receipt bound to the current fingerprint ([context
-   receipt](#context-receipt)). Then `take`, which re-reads the Status, publishes the claim,
-   assigns and moves to `{Phase} In Progress`, and retracts its own writes on drift, collision
+   receipt](#context-receipt)). Then `take`, which re-reads the Status, publishes the claim
+   and moves to `{Phase} In Progress`, and retracts its own writes on drift, collision
    or failed verification. Without a Project, publish the start comment with the protocol
-   header (`Autor`, `Rol`, `Fase`, `Tipo: Inicio`, optional `Ejecutor`), assign the Issue and
-   re-read it: that comment plus the assignee is the reservation, and no CLI receipt or
+   header (`Autor`, `Rol`, `Fase`, `Tipo: Inicio`, optional `Ejecutor`), and
+   re-read it: that comment is the reservation, and no CLI receipt or
    fingerprint is required. The claim is best-effort evidence, not a lock:
    one reservation at a time, and never a lock service.
 6. **Execute.** Continue with the Skill that owns the phase (`spec`, `dev`, `task`, `tweak`) and
    deliver the branch, PR and evidence. Reserving is the start, not the deliverable.
 7. **Deliver and continue.** Publish the report or PR. With a Project, `move` into `{Phase} In
    Review`; without one, record the report and an explicit review request without writing a
-   Status. `move` re-reads the Status, the assignees and the claims before writing: while
-   another agent's claim or a foreign assignee exists it refuses and writes nothing. Then
+   Status. `move` re-reads the Status and the claims before writing: while
+   another agent's claim exists it refuses and writes nothing. Then
    return to the queue for the next eligible Issue instead of waiting for that decision. Never
    claim a session, a parallel worker or a dispatch the runtime cannot evidence.
 8. **Block and restore.** Block only from your own `{Phase} In Progress`, recording `Previous
@@ -139,7 +139,7 @@ marker, whose header starts with `Autor:` and `Tipo: Contexto`, and that carries
 material, not a receipt, and a receipt never proves the reading.
 
 The receipt expires on **any** new comment — including the agent's own claim or report — and on
-`take`, which changes Status and assignee. Publish a new receipt after `take` and before the
+`take`, which changes Status. Publish a new receipt after `take` and before the
 first `move`; a receipt from the `Ready` state authorizes nothing in `In Progress`.
 
 ## Session continuity
@@ -170,7 +170,7 @@ user authorized, with the manual protocol recording each reservation and deliver
 
 Stop and report, without writing, when the Project or its permissions are unavailable, the
 requested phase has no identifiable human authorization, the agent identity is not in the
-catalogue, the routing label is ambiguous or unknown, the Issue is assigned or claimed
+catalogue, the routing label is ambiguous or unknown, the Issue is claimed
 elsewhere, a dependency is open or unverifiable, the history exceeds the read limit, or the
 requested transition belongs to the user (`Backlog`, every `Ready*`, `Done`, and any review).
 Never force a transition, never fabricate a dispatch, never fall back to a local state and
