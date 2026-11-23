@@ -32,8 +32,13 @@ decides *which* Issue an agent may take and how the session records it.
 
 - An explicit request to take work (`work-issue`, `@work-issue opencode`, "take a Ready Issue",
   or the coordinator's equivalent), the repository (`--repo OWNER/NAME`), optionally the Project
-  (`--project N`, `--owner ORG`) and the agent identity (`opencode`, `hermes`, `codex`). Naming
+  (`--project N`, `--owner ORG`) and the agent identity (`opencode`, `hermes`, `codex`, `claude`). Naming
   the agent names the queue the session works until it is exhausted.
+- **Identity per client:** Claude Code is `claude`, Codex is `codex`, Hermes is `hermes` and
+  OpenCode is `opencode`; pass it as `--agent` on every `scripts/work-issue` call that takes or
+  moves an Issue. The identity is the client actually running, never another agent's.
+- **No agent named:** the session uses that client identity and works the Issues without an
+  agent label plus those labelled for it. Another agent's Issues are reported, never taken.
 - `$work-issue` on its own is already a complete instruction: the user does not need to pick an
   Issue, ask for the inventory or ask for a PR. Everything here is the method.
 - Configuration is explicit and **never guessed**. When the checkout declares its tracker in

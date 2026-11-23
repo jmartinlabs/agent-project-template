@@ -74,7 +74,16 @@ and after compaction). Without it, agents tend to work from the `AGENTS.md` summ
 never open the full contract unless the user types `/orchestrate`; the 2026-10-23
 benchmark saw this in all 12 runs.
 
-- **Cost:** about 1,300 tokens once per session, not per request.
+- **Cost:** the printed file is the orchestrate **core**, kept under an 8.5 KiB budget that
+  `scripts/validate-template` enforces (about 8.3 KB, roughly 1,700 to 2,100 tokens, in each
+  start, resume, clear and compaction event, not per request). The full text of delegation,
+  runtime, closure, status and communication lives in `orchestrate/reference.md` and is read on
+  demand. An earlier figure of about 1,300 tokens came from the 5 KB file of 2026-10-23; the file
+  later grew to 11 KB.
+- **Output cap:** Claude Code stores hook output above roughly 10 KiB in a file and shows the model
+  only a short preview plus the path. The file exceeded that size from 2026-11-04 until the core
+  was split, so a session could receive only its first 2 KB; the budget keeps margin. The exact
+  limit can vary by client version: re-check it when upgrading Claude Code.
 - **Why it is allowed** although v2.4.2 installed no hooks: it executes no project code,
   calls no network, changes nothing and makes no approval decision. It only prints a
   tracked Markdown file.
@@ -123,3 +132,9 @@ The separate OpenCode `review` pilot is strictly read-only. It can inspect local
 consult existing PR/CI evidence through its native `review_query` tool, backed by
 `scripts/review-read`, but it cannot run tests; see the [OpenCode adapter](OPENCODE_ADAPTER.md).
 Do not assume the Claude profile has the same permission boundary.
+
+## Issue work identity
+
+When Claude Code runs `work-issue`, it passes `--agent claude` to `scripts/work-issue` and works the
+Issues without an agent label plus those labelled `agent:claude`; see the
+[work-issue Skill](../.agents/skills/work-issue/SKILL.md). It never reserves under another agent's name.
