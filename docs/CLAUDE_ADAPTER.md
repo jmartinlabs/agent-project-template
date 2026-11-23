@@ -123,3 +123,9 @@ The separate OpenCode `review` pilot is strictly read-only. It can inspect local
 consult existing PR/CI evidence through its native `review_query` tool, backed by
 `scripts/review-read`, but it cannot run tests; see the [OpenCode adapter](OPENCODE_ADAPTER.md).
 Do not assume the Claude profile has the same permission boundary.
+
+## Issue work identity
+
+When Claude Code runs `work-issue`, it passes `--agent claude` to `scripts/work-issue` and works the
+Issues without an agent label plus those labelled `agent:claude`; see the
+[work-issue Skill](../.agents/skills/work-issue/SKILL.md). It never reserves under another agent's name.

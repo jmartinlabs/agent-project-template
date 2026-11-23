@@ -1179,6 +1179,10 @@ class ValidationTests(unittest.TestCase):
  def test_work_issue_skill_contract_headings(self):
   self.change('.agents/skills/work-issue/SKILL.md','## Procedure','## Steps')
   self.assertRule('contracts')
+ def test_agent_catalogue_drift_is_detected(self):
+  self.assertEqual(validate(self.root),[])
+  self.change('templates/issue.md','`agent:claude`','agent claude')
+  self.assertRule('issue-workflow')
  def test_work_issue_claude_bridge(self):
   self.change('.claude/skills/work-issue/SKILL.md','.agents/skills/work-issue/SKILL.md','README.md')
   self.assertRule('claude')
