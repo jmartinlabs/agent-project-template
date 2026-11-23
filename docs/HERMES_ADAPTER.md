@@ -39,13 +39,13 @@ No Skill, role, workflow, spec or other client's file was modified.
 | Harness element | Hermes surface | Evidence |
 | --- | --- | --- |
 | `AGENTS.md` as canonical entry point | Injected from the session cwd, capped at 20,000 chars (current file ≈5 KB) | [OBS] P1: the session quoted Skill names that appear only in `AGENTS.md` |
-| `.agents/skills/*/SKILL.md` (11 Skills) | Native project-skill path, highest-precedence tier, rendered as `[project]` rows | [OBS] P0 and P1: 11/11 discovered, 11/11 visible to a live session (§6) |
+| `.agents/skills/*/SKILL.md` (11 Skills at verification time) | Native project-skill path, highest-precedence tier, rendered as `[project]` rows | [OBS] P0 and P1: 11/11 discovered, 11/11 visible to a live session (§6) |
 | Skill frontmatter (`name`, `description`) | Same format; description ≤60 chars recommended, the current ones are longer | [DOC] |
 | Work packet + role contracts | Map onto `delegate_task(goal, context)` and to kanban task descriptions | [DOC] |
 | Scorer contract `{"version","responses":[...]}` | Platform-neutral, no change needed | [OBS] source read |
 | Structural validation | `./scripts/validate-template` passes with this adapter | [OBS] |
 
-`.claude/skills/` (11 thin wrappers) is **not** a Hermes candidate directory: candidates are
+`.claude/skills/` (thin wrappers, 11 at verification time) is **not** a Hermes candidate directory: candidates are
 `<project>/.hermes/skills` and `<project>/.agents/skills`. [OBS] P0 asserted the wrappers are
 never scanned, so nothing double-loads or shadows.
 
@@ -234,3 +234,9 @@ and log committed. Published for review; **not merged**.
 Still requires separate authorization: any edit to another canonical file, P2 (delegation), P4
 (eval smoke), enabling cron/kanban, and any deletion. Merges and deployments are never covered
 by this adapter.
+
+## Issue work identity
+
+When Hermes runs `work-issue`, it passes `--agent hermes` to `scripts/work-issue` and works the
+Issues without an agent label plus those labelled `agent:hermes`; see the
+[work-issue Skill](../.agents/skills/work-issue/SKILL.md). It never reserves under another agent's name.

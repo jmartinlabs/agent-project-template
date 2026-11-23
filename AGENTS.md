@@ -23,7 +23,7 @@ needs `hermes skills trust` once per checkout before project Skills load.
   - applicable [architecture](specs/guidelines/architecture.md), [UI](specs/guidelines/ui.md),
     [quality](specs/guidelines/quality.md) and [security](specs/guidelines/security.md) guidelines;
   - [epic orchestration](specs/methodology/epic-orchestration.md) for overlapping epics;
-  - [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before delegating;
+  - [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before delegating (its [external-clients part](specs/methodology/dynamic-agents-external-clients.md) only when another client is involved);
   - [model selection](specs/methodology/model-selection.md) when model advice matters;
   - [coordinator communication](specs/methodology/coordinator-communication.md) for manual client packets, returns, feedback and status.
 - Optional Agent Relay: use [relay](.agents/skills/relay/SKILL.md) only on an explicit user request; it is transport, never approval or task state.

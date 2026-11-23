@@ -110,6 +110,8 @@ ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
 specs/methodology/model-selection.md advisory model and reasoning recommendations
+.agents/skills/orchestrate/reference.md on-demand part of orchestrate (the core is printed by the hook)
+specs/methodology/dynamic-agents-external-clients.md  on-demand: other clients, OpenCode, relay
 specs/methodology/epic-orchestration.md dependency-aware epic scheduler
 specs/methodology/dynamic-agents.md dynamic specialist lifecycle
 specs/methodology/issue-workflow.md portable Issue/Project protocol, 12 statuses and phase gates

@@ -276,3 +276,9 @@ Empty files fail. Each specialized file is optional and independent of the revie
 removing all is valid, and removing the review trio while leaving specialized agents is valid.
 Live registration and the actual client tool surface remain separate checks and must not be
 claimed from file presence alone.
+
+## Issue work identity
+
+When OpenCode runs `work-issue`, it passes `--agent opencode` to `scripts/work-issue` and works the
+Issues without an agent label plus those labelled `agent:opencode`; see the
+[work-issue Skill](../.agents/skills/work-issue/SKILL.md). It never reserves under another agent's name.
