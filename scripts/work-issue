@@ -277,8 +277,8 @@ def agent_routing(labels, agents=AGENTS):
     """Return (known, unknown): routing labels and namespaced ones outside the catalogue.
 
     Only catalogue labels route work. The canonical label is `agent:X`; the bare `X` is an
-    alias. `agent:X` is honoured when X is in the catalogue and fail closed when it is not: a routing hint must never
-    be silently ignored while the item is still taken.
+    alias. `agent:X` is honoured when X is in the catalogue and fails closed when it is not:
+    a routing hint must never be silently ignored while the item is still taken.
     """
     known, unknown = [], []
     for label in labels:
@@ -292,13 +292,14 @@ def agent_routing(labels, agents=AGENTS):
     return sorted(set(known)), sorted(set(unknown))
 
 
-def load_catalogue(root="."):
+def load_catalogue(root=None):
     """Agent catalogue: `agents:` from `.agents/tracker.local.yaml`, else the default.
 
     The value is a comma list or `[a, b]`. Anything malformed fails closed with an error
     instead of silently falling back, so a typo can never widen the catalogue.
     """
-    path = Path(root) / TRACKER_LOCAL
+    # Default to the checkout that holds this script, not the caller's working directory.
+    path = Path(root or Path(__file__).resolve().parent.parent) / TRACKER_LOCAL
     try:
         text = path.read_text(encoding="utf-8")
     except OSError:
@@ -1128,7 +1129,8 @@ class Service:
             resumed))
         self.out("Action: take --issue %d --agent %s → execute the phase → "
                  "move --to \"%s\" → back to next."
-                 % (head.item.number, agent or "<your agent>", target.replace("In Progress", "In Review")))
+                 % (head.item.number, agent or "<your agent>",
+                    target.replace("In Progress", "In Review")))
         self._explain_skips(decisions, exclude)
         return EXIT_OK
 
