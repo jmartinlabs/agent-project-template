@@ -172,10 +172,14 @@ which changes Status and assignee. Publish a new receipt after `take` and before
 
 ## Agent routing
 
-Routing uses simple labels `opencode`, `hermes`, `codex`. A namespaced `agent:X` or `to:X` is
-accepted for the same catalogue and **fails closed** when X is unknown. At most one recognized
+Routing uses the canonical label `agent:X`, where X is in the agent catalogue (default
+`opencode`, `hermes`, `codex`, `claude`); the bare name (`codex`) is accepted as an alias. A
+checkout may replace the catalogue with `agents:` in its local `.agents/tracker.local.yaml`
+(`agents: claude, codex`). `agent:X` **fails closed** when X is unknown. At most one recognized
 agent label; no agent label means any compatible agent. Two agent labels, an unknown agent or
-insufficient capability mean report and wait. The label is routing, not authorization and not
+insufficient capability mean report and wait. A session started without naming an agent works
+the Issues without an agent label plus those labelled for the agent its client identifies
+(`claude` in Claude Code); another agent's Issues are reported and never touched. The label is routing, not authorization and not
 a reservation, and it is distinct from the GitHub assignee.
 
 ## Session continuity

@@ -38,7 +38,7 @@
       "content": {"number": 106, "title": "Unknown agent", "body": "Namespaced label outside the catalogue.", "url": "https://github.com/acme/widgets/issues/106"},
       "id": "PVTI_fixture_106",
       "status": "Ready Specification",
-      "labels": ["agent:claude"]
+      "labels": ["agent:gemini"]
     },
     {
       "content": {"number": 107, "title": "Already reserved", "body": "It has an assignee.", "url": "https://github.com/acme/widgets/issues/107"},
