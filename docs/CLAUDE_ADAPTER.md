@@ -74,8 +74,8 @@ and after compaction). Without it, agents tend to work from the `AGENTS.md` summ
 never open the full contract unless the user types `/orchestrate`; the 2026-10-23
 benchmark saw this in all 12 runs.
 
-- **Cost:** the printed file is the orchestrate **core**, kept under an 8 KiB budget that
-  `scripts/validate-template` enforces (about 8 KB, roughly 1,700 to 2,000 tokens, in each
+- **Cost:** the printed file is the orchestrate **core**, kept under an 8.5 KiB budget that
+  `scripts/validate-template` enforces (about 8.3 KB, roughly 1,700 to 2,100 tokens, in each
   start, resume, clear and compaction event, not per request). The full text of delegation,
   runtime, closure, status and communication lives in `orchestrate/reference.md` and is read on
   demand. An earlier figure of about 1,300 tokens came from the 5 KB file of 2026-10-23; the file

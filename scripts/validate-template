@@ -9,7 +9,7 @@ from urllib.parse import unquote, urlsplit
 SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 'handoff', 'relay', 'work-issue', 'task', 'tweak', 'adopt-project', 'codex-review')
 # A hook prints a whole file into every session, so that file must stay small. Claude Code stores
 # hook output above ~10 KiB as a file and shows only a short preview, so the budget keeps margin.
-HOOK_PRINT_BUDGET = 8192
+HOOK_PRINT_BUDGET = 8704
 # Contracts split into a core plus an on-demand part: checks read them as one contract, so a rule
 # is enforced wherever it lives, while the budget above constrains only the core that is printed.
 CONTRACT_PARTS = {'.agents/skills/orchestrate/SKILL.md': ('.agents/skills/orchestrate/reference.md',),

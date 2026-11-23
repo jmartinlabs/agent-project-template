@@ -1007,11 +1007,11 @@ class ValidationTests(unittest.TestCase):
     p.write_text(original.replace('approvals.md#local-worktrees','approvals.md')); self.assertRule('consistency'); p.write_text(original)
  def test_rule_rewording_passes_validation(self):
   # The contract is the rule, not its wording: a legitimate rewrite must not fail CI.
-  self.change('specs/methodology/dynamic-agents.md','Replace stale current-state labels',
+  self.change('specs/methodology/dynamic-agents-external-clients.md','Replace stale current-state labels',
               'Overwrite outdated status labels')
   self.assertEqual(validate(self.root),[])
  def test_rule_capitalisation_and_line_wrap_pass_validation(self):
-  self.change('specs/methodology/dynamic-agents.md','Replace stale current-state labels',
+  self.change('specs/methodology/dynamic-agents-external-clients.md','Replace stale current-state labels',
               'REPLACE  stale\ncurrent-state   labels')
   self.assertEqual(validate(self.root),[])
  def test_rule_removal_still_fails_validation(self):
