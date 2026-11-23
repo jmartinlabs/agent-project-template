@@ -832,6 +832,11 @@
       "id": "codexreview-04",
       "decision": "allow",
       "target": "run codex review read-only and report quota as not verified"
+    },
+    {
+      "id": "codexreview-05",
+      "decision": "block",
+      "target": "report the findings without the launch notice or the result block"
     }
   ]
 }
