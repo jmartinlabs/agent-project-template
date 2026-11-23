@@ -565,8 +565,8 @@ class ValidationTests(unittest.TestCase):
    ('specs/methodology/dynamic-agents.md',"Releasing the coordinator's turn"),
    ('specs/methodology/dynamic-agents.md','Promise no background persistence'),
    ('specs/methodology/dynamic-agents.md','Never claim a subagent'),
-   ('.agents/skills/orchestrate/SKILL.md','execution mode adaptively'),
-   ('.agents/skills/orchestrate/SKILL.md','coordinator availability'),
+   ('.agents/skills/orchestrate/reference.md','execution mode adaptively'),
+   ('.agents/skills/orchestrate/reference.md','coordinator availability'),
    ('.agents/skills/orchestrate/SKILL.md','background persistence'),
   )
   for name, token in cases:
@@ -778,18 +778,18 @@ class ValidationTests(unittest.TestCase):
    ('specs/methodology/dynamic-agents.md', 'fresh bounded context by default'),
    ('specs/methodology/dynamic-agents.md', 'not repeated status reminders'),
    ('specs/methodology/dynamic-agents.md', 'QA independently'),
-   ('specs/methodology/dynamic-agents.md', 'repository-local OpenCode'),
-   ('specs/methodology/dynamic-agents.md', 'explicit user authorization and supported tools'),
-   ('specs/methodology/dynamic-agents.md', 'separate checkouts/worktrees AND non-overlapping ownership'),
-   ('specs/methodology/dynamic-agents.md', 'Separate test ports, databases'),
-   ('specs/methodology/dynamic-agents.md', 'other-client usage is'),
-   ('specs/methodology/dynamic-agents.md', 'Replace stale current-state labels'),
-   ('specs/methodology/dynamic-agents.md', 'savings still need measurement'),
+   ('specs/methodology/dynamic-agents-external-clients.md', 'repository-local OpenCode'),
+   ('specs/methodology/dynamic-agents-external-clients.md', 'explicit user authorization and supported tools'),
+   ('specs/methodology/dynamic-agents-external-clients.md', 'separate checkouts/worktrees AND non-overlapping ownership'),
+   ('specs/methodology/dynamic-agents-external-clients.md', 'Separate test ports, databases'),
+   ('specs/methodology/dynamic-agents-external-clients.md', 'other-client usage is'),
+   ('specs/methodology/dynamic-agents-external-clients.md', 'Replace stale current-state labels'),
+   ('specs/methodology/dynamic-agents-external-clients.md', 'savings still need measurement'),
    ('templates/agent-work-packet.md', 'Client / version / session ID'),
    ('templates/agent-work-packet.md', 'Blocking notice'),
    ('templates/progress.md', 'append-only'),
    ('templates/testplan.md', 'Local / CI platform and owner'),
-   ('.agents/skills/orchestrate/SKILL.md', 'progressively spaced CI queries'),
+   ('.agents/skills/orchestrate/reference.md', 'progressively spaced CI queries'),
    ('.agents/skills/dev/SKILL.md', 'negative/integration cases before code'),
    ('.agents/skills/task/SKILL.md', 'execution platform and operation owners before code'),
    ('.agents/skills/handoff/SKILL.md', 'external client'),
@@ -855,7 +855,8 @@ class ValidationTests(unittest.TestCase):
  def test_communication_return_fields_required(self):
   self.change('templates/agent-work-packet.md','Decisions needed','Open questions'); self.assertRule('communication')
  def test_communication_orchestrator_link(self):
-  self.change('.agents/skills/orchestrate/SKILL.md','coordinator-communication.md','other.md'); self.assertRule('communication')
+  for name in ('.agents/skills/orchestrate/SKILL.md','.agents/skills/orchestrate/reference.md'): self.change(name,'coordinator-communication.md','other.md')
+  self.assertRule('communication')
  def test_communication_agents_link(self):
   self.change('AGENTS.md','(specs/methodology/coordinator-communication.md)','(README.md)'); self.assertRule('communication')
  def test_communication_criteria_fixtures(self):
@@ -863,9 +864,9 @@ class ValidationTests(unittest.TestCase):
  def test_delivery_evidence_contract(self):
   cases = (
    ('.agents/skills/orchestrate/SKILL.md', 'delivery-evidence-at-closure'),
-   ('.agents/skills/orchestrate/SKILL.md', 'scope conformance and deviations'),
-   ('.agents/skills/orchestrate/SKILL.md', 'verified effective identity'),
-   ('.agents/skills/orchestrate/SKILL.md', 'create no extra report'),
+   ('.agents/skills/orchestrate/reference.md', 'scope conformance and deviations'),
+   ('.agents/skills/orchestrate/reference.md', 'verified effective identity'),
+   ('.agents/skills/orchestrate/reference.md', 'create no extra report'),
    ('specs/methodology/dynamic-agents.md', '## Delivery evidence at closure'),
    ('specs/methodology/dynamic-agents.md', 'PASS / FAIL / UNRUN'),
    ('specs/methodology/dynamic-agents.md', 'pending regression'),
@@ -1014,7 +1015,7 @@ class ValidationTests(unittest.TestCase):
               'REPLACE  stale\ncurrent-state   labels')
   self.assertEqual(validate(self.root),[])
  def test_rule_removal_still_fails_validation(self):
-  self.change('specs/methodology/dynamic-agents.md','Replace stale current-state labels','')
+  self.change('specs/methodology/dynamic-agents-external-clients.md','Replace stale current-state labels','')
   self.assertRule('coordination')
  def test_publication_policy_contract(self):
   cases = (
@@ -1037,7 +1038,7 @@ class ValidationTests(unittest.TestCase):
  def test_publication_policy_links(self):
   for name in ('AGENTS.md', '.agents/skills/dev/SKILL.md', '.agents/skills/tweak/SKILL.md',
                '.agents/skills/task/SKILL.md', 'specs/methodology/workflows.md',
-               'specs/methodology/dynamic-agents.md', 'specs/guidelines/security.md'):
+               'specs/methodology/dynamic-agents-external-clients.md', 'specs/guidelines/security.md'):
    with self.subTest(name=name):
     p=self.root/name; original=p.read_text()
     self.assertIn('approvals.md#branch-and-pr-publication', original)
@@ -1179,6 +1180,16 @@ class ValidationTests(unittest.TestCase):
  def test_work_issue_skill_contract_headings(self):
   self.change('.agents/skills/work-issue/SKILL.md','## Procedure','## Steps')
   self.assertRule('contracts')
+ def test_hook_print_budget_is_enforced(self):
+  self.assertEqual(validate(self.root),[])
+  p=self.root/'.agents/skills/orchestrate/SKILL.md'; p.write_text(p.read_text()+'\n'+'x'*4000)
+  self.assertRule('hooks')
+ def test_split_contract_parts_are_required(self):
+  for name in ('.agents/skills/orchestrate/reference.md','specs/methodology/dynamic-agents-external-clients.md'):
+   with self.subTest(name=name):
+    p=self.root/name; original=p.read_text(); p.unlink()
+    try: self.assertRule('structure')
+    finally: p.write_text(original)
  def test_agent_catalogue_drift_is_detected(self):
   self.assertEqual(validate(self.root),[])
   self.change('templates/issue.md','`agent:claude`','agent claude')
