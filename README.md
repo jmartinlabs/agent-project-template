@@ -110,7 +110,7 @@ ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
 specs/methodology/dynamic-agents-external-clients.md  on-demand: Codex and OpenCode by CLI, relay
-.agents/external-agents.json       external-delegation eligibility per client and task
+.agents/harnesses/claude.json       Claude Code coordinator delegation policy (v2)
 specs/methodology/epic-orchestration.md dependency-aware epic scheduler
 specs/methodology/dynamic-agents.md dynamic specialist lifecycle
 specs/methodology/issue-workflow.md portable Issue/Project protocol, 12 statuses and phase gates
