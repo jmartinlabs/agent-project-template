@@ -163,7 +163,7 @@ flowchart TD
     M --> V
 ```
 
-La selección respeta las capacidades verificadas del cliente (véase la [referencia de orchestrate](../.agents/skills/orchestrate/reference.md#7-runtime-and-model)): no hay un techo fijo de modelo ni de esfuerzo, y los configura el usuario en cada cliente. El coordinador conserva su modelo. Si no puede garantizarse la selección solicitada, no se crea el subagente. Nunca sustituir pruebas por capacidad o razonamiento.
+La selección respeta las capacidades verificadas del cliente (véase el paso 7 de [orchestrate](../.agents/skills/orchestrate/SKILL.md#procedure)): no hay un techo fijo de modelo ni de esfuerzo, y los configura el usuario en cada cliente. El coordinador conserva su modelo. Si no puede garantizarse la selección solicitada, no se crea el subagente. Nunca sustituir pruebas por capacidad o razonamiento.
 
 ## 9. ¿Qué instala realmente esta template?
 
