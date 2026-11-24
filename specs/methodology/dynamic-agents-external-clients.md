@@ -132,6 +132,14 @@ yes). A return from one session updates only that task; tasks in other sessions 
 received handoff never authorizes merge, deployment or a scope expansion, and the model and limit rules in the orchestrate reference are
 unchanged: supervise by events and milestones, not repeated status queries.
 
+## Full status on request
+
+When the user asks for the full state, report every open task read-only from the existing summary, board
+or checkpoints: state with its provenance (verified against Git or evidence, externally reported, or
+unknown), last result and its evidence, recorded branch/SHA/PR, blockers, pending decisions, the next
+action of each executor and what the user must do (`Acción humana`), and say what was not updated.
+Reread Git or PRs only if asked or if the summary is stale. Never append a status summary to every reply.
+
 ## Example: two existing chats
 
 1. Ask each chat (for example Financial and Deployment) for a checkpoint: scope, branch/commit, decisions, tests, blockers. Keep unstaged changes.

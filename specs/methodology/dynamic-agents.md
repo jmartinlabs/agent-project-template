@@ -1,9 +1,9 @@
 # Dynamic agent management
 
 How orchestrate delegates: roles, work packets, ownership, review and the one standing client
-authorization. When to delegate, the execution mode, models and provider limits live in the
-orchestrate [reference](../../.agents/skills/orchestrate/reference.md#6-delegation); epic
-scheduling is in [epic orchestration](epic-orchestration.md) and the flow is illustrated in the
+authorization. When to delegate, the execution mode, models and provider limits are in the
+[orchestrate core](../../.agents/skills/orchestrate/SKILL.md#procedure) (steps 6–7); epic scheduling is
+in [epic orchestration](epic-orchestration.md) and the flow is illustrated in the
 [visual operating guide](../../docs/GUIA_VISUAL_ORQUESTACION.md).
 
 ## Roles are profiles, not permanent workers

@@ -75,10 +75,10 @@ never open the full contract unless the user types `/orchestrate`; the 2026-10-2
 benchmark saw this in all 12 runs.
 
 - **Cost:** the printed file is the orchestrate **core**, kept under an 8.5 KiB budget that
-  `scripts/validate-template` enforces (about 8.3 KB, roughly 1,700 to 2,100 tokens, in each
-  start, resume, clear and compaction event, not per request). The full text of delegation,
-  runtime, closure, status and communication lives in `orchestrate/reference.md` and is read on
-  demand. An earlier figure of about 1,300 tokens came from the 5 KB file of 2026-10-23; the file
+  `scripts/validate-template` enforces (about 8.7 KB, roughly 2,200 tokens, in each
+  start, resume, clear and compaction event, not per request). It holds the rules every non-trivial
+  turn needs (delegation, model and limits, closure, closing a turn); delegation policy, manual clients
+  and the full status are read on demand from `dynamic-agents*.md`. An earlier figure of about 1,300 tokens came from the 5 KB file of 2026-10-23; the file
   later grew to 11 KB.
 - **Output cap:** Claude Code stores hook output above roughly 10 KiB in a file and shows the model
   only a short preview plus the path. The file exceeded that size from 2026-11-04 until the core
