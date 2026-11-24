@@ -2,7 +2,7 @@
 
 How orchestrate delegates: roles, work packets, ownership, review and the one standing client
 authorization. When to delegate, the execution mode, models and provider limits are in the
-[orchestrate core](../../.agents/skills/orchestrate/SKILL.md#procedure) (steps 6–7); epic scheduling is
+[orchestrate core](../../.agents/skills/orchestrate/SKILL.md#procedure) (steps 3–4); epic scheduling is
 in [epic orchestration](epic-orchestration.md) and the flow is illustrated in the
 [visual operating guide](../../docs/GUIA_VISUAL_ORQUESTACION.md).
 
@@ -55,7 +55,7 @@ verification for uncertain impact, mandatory gates or financial/security risk.
 
 ## Models and background work
 
-The core states the model and limit gates (steps 6–7). Detail: model choice never replaces verification,
+The core states the model and limit gates (steps 3–4). Detail: model choice never replaces verification,
 independent QA or approvals, and unknown availability is not permission. In Codex an explicit model
 override needs fresh context (`fork_turns="none"`) while a full-history fork inherits the coordinator's
 setting; recheck this per client and version. Never compensate for a requested/observed mismatch by

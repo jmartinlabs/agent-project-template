@@ -129,7 +129,7 @@ whether the external session should wait or be closed; or states the decision ne
 alternatives and the stopped work, marking only the affected task BLOQUEADO. Every reply says explicitly
 whether the user must send something to OpenCode (`Responder a OpenCode: sí/no`, with `Tu acción:` when
 yes). A return from one session updates only that task; tasks in other sessions keep their states. A
-received handoff never authorizes merge, deployment or a scope expansion, and the model and limit rules in the orchestrate core (steps 6–7) are
+received handoff never authorizes merge, deployment or a scope expansion, and the model and limit rules in the orchestrate core (steps 3–4) are
 unchanged: supervise by events and milestones, not repeated status queries.
 
 ## Full status on request
