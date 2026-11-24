@@ -106,10 +106,11 @@ See [document ownership](specs/README.md) and [Skills invocation](NEW_PROJECT_PR
 AGENTS.md                         concise agent entry point
 NEW_PROJECT_PROMPT.md              new-project prompt
 ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
-.agents/skills/{adopt-project,orchestrate,handoff,relay,work-issue,codex-review,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
+.agents/skills/{adopt-project,orchestrate,handoff,relay,work-issue,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
-specs/methodology/dynamic-agents-external-clients.md  on-demand: other clients, OpenCode, relay
+specs/methodology/dynamic-agents-external-clients.md  on-demand: Codex and OpenCode by CLI, relay
+.agents/external-agents.json       external-delegation eligibility per client and task
 specs/methodology/epic-orchestration.md dependency-aware epic scheduler
 specs/methodology/dynamic-agents.md dynamic specialist lifecycle
 specs/methodology/issue-workflow.md portable Issue/Project protocol, 12 statuses and phase gates
