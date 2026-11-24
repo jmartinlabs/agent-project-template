@@ -53,6 +53,15 @@ cannot be supplied compactly. Evidence identifies the commit plus dirty or untra
 command, the environment and the result; after a delta repeat the affected checks, and run the full
 verification for uncertain impact, mandatory gates or financial/security risk.
 
+## Models and background work
+
+The core states the model and limit gates (steps 6–7). Detail: model choice never replaces verification,
+independent QA or approvals, and unknown availability is not permission. In Codex an explicit model
+override needs fresh context (`fork_turns="none"`) while a full-history fork inherits the coordinator's
+setting; recheck this per client and version. Never compensate for a requested/observed mismatch by
+escalating. Choose direct, foreground or background adaptively: releasing the turn does not end a
+background subagent, and nothing persists after the client closes.
+
 ## Critical technical review
 
 Critical technical review is a capability: an independent executor or context; a different model is
