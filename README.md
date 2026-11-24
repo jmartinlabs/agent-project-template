@@ -44,7 +44,7 @@ Start by describing the work, optionally in your client's planning mode, or invo
 
 ## Adaptive model selection (v2.2)
 
-The user configures models, providers and effort in each client; Skills never change them automatically. Keep the current model when adequate, compare requested with observed model/effort when the runtime exposes it ([orchestrate](.agents/skills/orchestrate/SKILL.md#procedure), step 7) and verify actual behavior through tests regardless of model.
+The user configures models, providers and effort in each client; Skills never change them automatically. Keep the current model when adequate, compare requested with observed model/effort when the runtime exposes it ([orchestrate](.agents/skills/orchestrate/SKILL.md#procedure), step 4) and verify actual behavior through tests regardless of model.
 
 ## Epic orchestration (v2.3)
 

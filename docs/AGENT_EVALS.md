@@ -92,7 +92,7 @@ Their live runs on Codex, Claude Code and OpenCode, and the OpenCode round trip,
 
 ## Delivery evidence scenarios
 
-The current fixture adds `evidence-01..08` for the [closure record](../.agents/skills/orchestrate/SKILL.md#procedure) (step 10):
+The current fixture adds `evidence-01..08` for the [closure record](../.agents/skills/orchestrate/SKILL.md#procedure) (step 6):
 author and independent reviewer separated, an author-reported PASS without independent
 validation, a changed test expectation whose legitimacy is unverified and whose required
 regression is pending, an unproven cause presented as fact, a requested or self-declared
@@ -122,7 +122,7 @@ required. Live Codex, Claude Code and OpenCode runs for these cases are UNRUN.
 ## Execution-mode scenarios
 
 The current fixture adds `execution-01..09` for the
-[execution-mode policy](../.agents/skills/orchestrate/SKILL.md#procedure) (step 6):
+[execution-mode policy](../.agents/skills/orchestrate/SKILL.md#procedure) (step 3):
 a small specification done directly, a substantial specification delegated in background, an
 independent DEV implementation in background, independent QA after a verifiable candidate, two
 isolated tasks in parallel, a dependent task that needs foreground, a client without verified

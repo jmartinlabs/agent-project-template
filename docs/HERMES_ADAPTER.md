@@ -287,7 +287,7 @@ On a client whose state is not this local store, the verifier cannot answer (exi
 route as unverified and use that client's attributable records; missing metadata is not evidence
 that a route failed and says nothing about another client's quota.
 
-The generic requested-versus-observed rule is in [orchestrate](../.agents/skills/orchestrate/SKILL.md#procedure) (step 7); this section is the Hermes-specific way to read the observed route.
+The generic requested-versus-observed rule is in [orchestrate](../.agents/skills/orchestrate/SKILL.md#procedure) (step 4); this section is the Hermes-specific way to read the observed route.
 
 ## Issue work identity
 
