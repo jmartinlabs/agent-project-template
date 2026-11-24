@@ -22,7 +22,8 @@ criteria, authorization, owned files and isolation, prohibited actions, stop con
 return schema. Delegates read their role and the packet, not every policy; one that finds a needed
 rule missing stops and asks the coordinator. Confirm the client really offers subagents before
 claiming a worker exists; otherwise run the same queue sequentially and never pretend a delegate ran.
-Chats the user opened manually are not attached workers.
+Chats the user opened manually are not attached workers. Each actor loads its own role and the phase
+Skill (QA: its role and the verification rules) before working; a packet excerpt never replaces them.
 
 ## Ownership, stopping and recovery
 
