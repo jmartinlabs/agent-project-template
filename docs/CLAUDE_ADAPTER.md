@@ -95,7 +95,7 @@ benchmark saw this in all 12 runs.
 - Typing `/orchestrate` is still fine; it just reloads the same contract.
 
 **Live check (2026-10-23, Claude Code CLI 2.1.301, Sonnet, `claude -p`, file and shell tools
-disabled):** asked for the exact label of orchestrate step 9, a session with this hook answered
+disabled):** asked for the exact label of the orchestrate gates step (step 9 at the time; step 5 since the core was consolidated, not re-measured), a session with this hook answered
 `**Gates.**` in 2/2 runs; a session on the previous `main` (no hook) answered `NOT LOADED` in 2/2.
 The client's input-token totals did not show a clear difference between the two (about 36k
 both ways), so the per-session cost above is an estimate from file size, not a measurement.
