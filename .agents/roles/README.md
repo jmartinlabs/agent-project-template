@@ -9,4 +9,4 @@ OpenCode additionally offers optional native subagents for `review`, `functional
 - [QA / Review](qa-review.md): independent acceptance and regression checks
 - [Infrastructure / DevOps](infrastructure.md): Docker, CI, data environment and bounded deployment preparation
 
-For each new instance the coordinator provides an [agent work packet](../../templates/agent-work-packet.md) with file ownership, applicable rules and expected evidence. The coordinator owns dependency scheduling and `specs/epic-board.md`. Parallel read-only preparation is safe; parallel writes need non-overlapping ownership and authorized isolation.
+Roles never run `work-issue`, claim Issues or write Project `Status` (see [AGENTS.md](../../AGENTS.md)); they act only on their packet. For each new instance the coordinator provides an [agent work packet](../../templates/agent-work-packet.md) with file ownership, applicable rules and expected evidence. The coordinator owns dependency scheduling and `specs/epic-board.md`. Parallel read-only preparation is safe; parallel writes need non-overlapping ownership and authorized isolation.

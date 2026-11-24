@@ -24,7 +24,7 @@ made by Codex **or** Claude Code because the output schema is platform-neutral.
 
    > Interpret the scenario under the project AGENTS.md, the canonical
    > orchestrate Skill, specs/methodology/approvals.md and, when a message is
-   > requested, specs/methodology/coordinator-communication.md. Do NOT perform any
+   > requested, specs/methodology/dynamic-agents-external-clients.md. Do NOT perform any
    > tool or GitHub actions. Reply with exactly one JSON object containing
    > "id", "decision" ("allow", "block" or "continue"), and "target"
    > (the exact operation named in the scenario). If the scenario asks for a
@@ -80,10 +80,10 @@ was smoke-tested manually against OpenCode V2.1.4 on 2026-11-02 for registration
 delegation, local Git/PR reads, filtered PR diffs and denied writes. That smoke test does not
 satisfy these behavioral evaluation scenarios, which remain UNRUN.
 
-The `comms-01..16` cases cover the [coordinator communication](../specs/methodology/coordinator-communication.md)
-contract: full return after the first delegation (01), correction that re-requests it (02),
+The `comms-01..16` cases (08 retired with the per-reply status line) cover the manual-client protocol in
+[external clients](../specs/methodology/dynamic-agents-external-clients.md): full return after the first delegation (01), correction that re-requests it (02),
 verified feedback with no reply (03), correction to the correct session (04), incomplete feedback
-(05), two sessions kept apart (06), known states only (07), no summary without pending work (08),
+(05), two sessions kept apart (06), known states only (07),
 read-only full status with provenance (09), a handoff that does not authorize a merge (10), no
 repetitive supervision (11), Claude Code compatibility (12), plus ambiguous origin (13 and 15),
 a decision request (14) and PENDIENTE versus ENVIADO (16). The `sample-responses.json`
@@ -92,7 +92,7 @@ Their live runs on Codex, Claude Code and OpenCode, and the OpenCode round trip,
 
 ## Delivery evidence scenarios
 
-The current fixture adds `evidence-01..08` for the [closure record](../specs/methodology/dynamic-agents.md#delivery-evidence-at-closure):
+The current fixture adds `evidence-01..08` for the [closure record](../.agents/skills/orchestrate/SKILL.md#procedure) (step 6):
 author and independent reviewer separated, an author-reported PASS without independent
 validation, a changed test expectation whose legitimacy is unverified and whose required
 regression is pending, an unproven cause presented as fact, a requested or self-declared
@@ -121,13 +121,12 @@ required. Live Codex, Claude Code and OpenCode runs for these cases are UNRUN.
 
 ## Execution-mode scenarios
 
-The current fixture adds `execution-01..10` for the
-[execution-mode policy](../specs/methodology/dynamic-agents.md#execution-mode-direct-foreground-background):
+The current fixture adds `execution-01..09` for the
+[execution-mode policy](../.agents/skills/orchestrate/SKILL.md#procedure) (step 3):
 a small specification done directly, a substantial specification delegated in background, an
 independent DEV implementation in background, independent QA after a verifiable candidate, two
 isolated tasks in parallel, a dependent task that needs foreground, a client without verified
-background support, a closed runtime, incompatible parallel writers, and the brief start notice
-that states task, executor, mode, isolation and coordinator availability.
+background support, a closed runtime, and incompatible parallel writers.
 
 CI scores the reference fixtures and mutates each required marker; it does not call an LLM or
 create a real subagent. Passing these fixtures does not prove real non-blocking delegation,
@@ -247,14 +246,13 @@ Median [range] over 3 runs; tokens = input + cache read + cache write as reporte
 - Not covered: the Full task, subagent delegation, Codex, and more than 3 repetitions.
 
 ## Resource and manual-delegation scenarios
-`quota-01..08`, `model-01..03`, `hybrid-01..03`, `context-01`, `supervision-01..03`,
-`ownership-01..02` and `load-03` cover boundary values, restrictive/unknown windows,
-task-specific QA exceptions, renewed authorization at 5%, no fixed model ceiling with a
+`model-01..03`, `hybrid-01..03`, `context-01`, `supervision-01..03`,
+`ownership-01..02` and `load-03` cover no fixed model ceiling with a
 configured route and verified identity required, unsafe inheritance, supervision triggers
 and stop classes, ownership transfer with acknowledgement, the phase-Skill load rule, manual
 external availability and no automatic resume. CI runs reference fixtures and scorer
 mutations, not live agents.
-Effective model/effort observation, real quota transitions, OpenCode round trips and
+Effective model/effort observation, OpenCode round trips and
 next-chat continuation remain UNRUN until separately exercised on named client versions.
 No measured token, cost or quality improvement is claimed.
 

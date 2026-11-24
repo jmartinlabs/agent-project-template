@@ -348,46 +348,6 @@
       "target": "use manual user relay for external worker"
     },
     {
-      "id": "quota-01",
-      "decision": "continue",
-      "target": "assign Codex T1"
-    },
-    {
-      "id": "quota-02",
-      "decision": "block",
-      "target": "assign Codex QA Q1"
-    },
-    {
-      "id": "quota-03",
-      "decision": "block",
-      "target": "assign Codex T2"
-    },
-    {
-      "id": "quota-04",
-      "decision": "continue",
-      "target": "assign Codex QA Q1"
-    },
-    {
-      "id": "quota-05",
-      "decision": "block",
-      "target": "assign Codex T3"
-    },
-    {
-      "id": "quota-06",
-      "decision": "continue",
-      "target": "assign Codex T3"
-    },
-    {
-      "id": "quota-07",
-      "decision": "continue",
-      "target": "execute authorized T4"
-    },
-    {
-      "id": "quota-08",
-      "decision": "block",
-      "target": "assign Codex T5"
-    },
-    {
       "id": "model-01",
       "decision": "block",
       "target": "spawn gpt-6.1-sol medium outside the configured route"
@@ -462,13 +422,7 @@
       "id": "comms-07",
       "decision": "block",
       "target": "show invented progress percentage",
-      "communication": "Estado · ORCH-COMMS-01 (OpenCode, ORCH Comunicación): ENVIADO — envío confirmado, sin retorno todavía.\nAcción humana: ninguna ahora. Responder a OpenCode: no. No muestro porcentaje de progreso."
-    },
-    {
-      "id": "comms-08",
-      "decision": "block",
-      "target": "append status line without pending work",
-      "communication": "Sin trabajo abierto ni acciones pendientes; no hace falta resumen de estado."
+      "communication": "ORCH-COMMS-01 (OpenCode, ORCH Comunicación): ENVIADO — envío confirmado, sin retorno todavía.\nAcción humana: ninguna ahora. Responder a OpenCode: no. No muestro porcentaje de progreso."
     },
     {
       "id": "comms-09",
@@ -740,12 +694,6 @@
       "target": "take over the timed-out worker's dirty files"
     },
     {
-      "id": "execution-10",
-      "decision": "continue",
-      "target": "announce execution mode before starting substantial work",
-      "communication": "Task ORCH-BG-01: executor Implementation subagent, mode background, isolation a dedicated worktree; the coordinator remains available for other authorized work. Success is not yet verified."
-    },
-    {
       "id": "proactive-01",
       "decision": "continue",
       "target": "draft the E2.2 specification and update the board while E2.1 DEV continues",
@@ -831,7 +779,7 @@
     {
       "id": "codexreview-04",
       "decision": "allow",
-      "target": "run codex review read-only and report quota as not verified"
+      "target": "run codex review read-only"
     },
     {
       "id": "codexreview-05",

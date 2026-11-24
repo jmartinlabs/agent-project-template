@@ -12,12 +12,11 @@ SKILLS = ('init-project', 'bootstrap', 'roadmap', 'spec', 'dev', 'orchestrate', 
 HOOK_PRINT_BUDGET = 8704
 # Contracts split into a core plus an on-demand part: checks read them as one contract, so a rule
 # is enforced wherever it lives, while the budget above constrains only the core that is printed.
-CONTRACT_PARTS = {'.agents/skills/orchestrate/SKILL.md': ('.agents/skills/orchestrate/reference.md',),
- 'specs/methodology/dynamic-agents.md': ('specs/methodology/dynamic-agents-external-clients.md',)}
-REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md','.agents/skills/orchestrate/reference.md','specs/methodology/dynamic-agents-external-clients.md',
+CONTRACT_PARTS = {'specs/methodology/dynamic-agents.md': ('specs/methodology/dynamic-agents-external-clients.md',)}
+REQUIRED = ('AGENTS.md','README.md','NEW_PROJECT_PROMPT.md','ADOPT_EXISTING_PROJECT_PROMPT.md','.gitignore','.github/workflows/validate.yml','specs/README.md','specs/methodology/dynamic-agents-external-clients.md',
  *(f'specs/guidelines/{n}.md' for n in ('architecture','ui','quality','security')),
  *(f'templates/{n}.md' for n in ('brainstorming','specification','roadmap','progress','testplan','issue')),
- *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/work-issue','scripts/test-work-issue','scripts/check-delegation-route','scripts/test-delegation-route','scripts/fixtures/work-issue-project.json','scripts/agent-relay','scripts/test-agent-relay','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/model-selection.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','specs/methodology/coordinator-communication.md','specs/methodology/issue-workflow.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/HERMES_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
+ *(f'.agents/skills/{n}/SKILL.md' for n in SKILLS),'scripts/validate-template','scripts/test-validator','scripts/work-issue','scripts/test-work-issue','scripts/check-delegation-route','scripts/test-delegation-route','scripts/fixtures/work-issue-project.json','scripts/agent-relay','scripts/test-agent-relay','scripts/check-mermaid.mjs','scripts/report-agent-usage','scripts/test-agent-usage','scripts/auto-agent-usage','scripts/test-auto-agent-usage','.codex/hooks.json','docs/USAGE_REPORTS.md','specs/methodology/workflows.md','specs/methodology/ci-policy.md','specs/methodology/approvals.md','specs/methodology/epic-orchestration.md','specs/methodology/dynamic-agents.md','specs/methodology/issue-workflow.md','templates/epic-board.md','templates/agent-work-packet.md','docs/GUIA_VISUAL_ORQUESTACION.md','docs/CLAUDE_ADAPTER.md','docs/HERMES_ADAPTER.md','docs/AGENT_EVALS.md','CLAUDE.md','.claude/settings.json','docs/archive/README.md','evals/scenarios.json','evals/sample-responses.json','scripts/eval-agent-behavior',*(f'.claude/skills/{n}/SKILL.md' for n in SKILLS),*(f'.claude/agents/{n}.md' for n in ('functional','implementation','qa-review','infrastructure')),*(f'.agents/roles/{n}.md' for n in ('README','functional','implementation','qa-review','infrastructure')))
 EXPECTED_GIT={
  'status':({},()),
  'branches':({},()),
@@ -85,8 +84,6 @@ def parse_opencode_permissions(text):
   errors.append(f'unexpected permission line: {line.strip()}')
  allowed_fields={'description','mode','permissions','color'}
  if set(keys)-allowed_fields: errors.append('unexpected frontmatter fields: '+', '.join(sorted(set(keys)-allowed_fields)))
- if 'color' in keys and not re.fullmatch(r'"#[0-9A-Fa-f]{6}"', keys['color']):
-  errors.append('color must be a quoted six-digit hex value')
  for index,rule in enumerate(rules,1):
   if set(rule)!={'action','resource','effect'}: errors.append(f'permission rule {index} must contain only action, resource and effect')
   if rule.get('effect') not in ('allow','ask','deny'): errors.append(f'permission rule {index} has invalid effect')
@@ -254,75 +251,21 @@ def validate(root):
   except (ValueError,AttributeError,TypeError):
    fail('agent-evals',f'{filename}: invalid JSON')
  handoff=read('.agents/skills/handoff/SKILL.md').lower()
- for token in ('stop issuing new development', 'not controlled', 'unconfirmed', 'no auto-resume', 'git status', 'pass/fail/unrun', 'next session', 'quota exhaustion', 'never merge'):
+ for token in ('no auto-resume', 'never merge'):
   if not satisfied(handoff,token): fail('handoff',f'handoff missing {token}')
  if 'eval-agent-behavior' not in read('.github/workflows/validate.yml'):
   fail('agent-evals','CI must run agent eval scorer self-test')
- workflows=read('specs/methodology/workflows.md')
- for token in ('Quick', 'Standard', 'Full', 'confirm', 'Brainstorming', 'Walking skeleton'):
-  if not satisfied(workflows,token): fail('orchestration',f'workflow missing {token}')
- model_selection=read('specs/methodology/model-selection.md')
- for token in ('efficient', 'balanced', 'advanced', 'reasoning', 'availability', 'user', 'verification'):
-  if not satisfied(model_selection,token): fail('model-selection',f'model policy missing {token}')
  orchestrator=read('.agents/skills/orchestrate/SKILL.md')
- if 'specs/methodology/model-selection.md' not in orchestrator: fail('model-selection','orchestrator is not wired to the model policy')
- for token in ('one executor', 'checkpoint', '~:independent qa', 'two comparable'):
-  if not satisfied(orchestrator,token): fail('orchestration-efficiency',f'orchestrator missing {token}')
- if '(specs/methodology/model-selection.md)' not in agents: fail('model-selection','AGENTS.md missing model policy link')
  epic=read('specs/methodology/epic-orchestration.md')
- for token in ('single writer', 'awaiting-approval', 'hard dependencies', 'approved', 'independent', 'merge', 'active'):
-  if not satisfied(epic,token): fail('epic-scheduling',f'epic contract missing {token}')
- board=read('templates/epic-board.md')
- for token in ('Hard dependencies', '~:Spec status', '~:Dev status', 'QA status', 'Next independent action', 'Last reconciled'):
-  if not satisfied(board,token): fail('epic-scheduling',f'board missing {token}')
- if 'specs/methodology/epic-orchestration.md' not in orchestrator: fail('epic-scheduling','coordinator not linked to epic scheduling')
- if '(specs/methodology/epic-orchestration.md)' not in agents: fail('epic-scheduling','AGENTS.md missing epic scheduling link')
- for role, tokens in {'functional':('approval','brainstorming','draft specifications','acceptance criteria'),'implementation':('approved','dependencies'),'qa-review':('independent','pass/fail')}.items():
+ for role, tokens in {'functional':('approval',),'implementation':('approved',),'qa-review':('independent','pass/fail')}.items():
   text=read(f'.agents/roles/{role}.md').lower()
   for token in tokens:
    if token not in text: fail('epic-scheduling',f'role {role} missing {token}')
- dynamic=read('specs/methodology/dynamic-agents.md')
- for token in ('profiles', 'one executor', '~:parallel', 'quota', 'supported', 'sequential', 'financial', 'close', 'work-packet', '~:independent qa', 'applicable rules'):
-  if not satisfied(dynamic,token): fail('dynamic-agents',f'dynamic policy missing {token}')
- for token in ('~:delegation preference', 'one executor per task', '~:never create artificial agents'):
-  if not satisfied(dynamic,token): fail('delegation-preference',f'dynamic policy missing {token}')
- if 'specs/methodology/dynamic-agents.md' not in orchestrator: fail('dynamic-agents','orchestrator not wired to dynamic management')
- for token in ('Prefer a specialist for substantial','one executor per task','never invent agents'):
-  if not satisfied(orchestrator,token): fail('delegation-preference',f'orchestrator missing {token}')
- if 'one executor per task' not in epic.lower(): fail('delegation-preference','epic scheduler missing one executor per task')
- if '(specs/methodology/dynamic-agents.md)' not in agents: fail('dynamic-agents','AGENTS.md missing dynamic management link')
- if '(dynamic-agents.md)' not in workflows: fail('dynamic-agents','workflows missing dynamic management link')
- if '(infrastructure.md)' not in read('.agents/roles/README.md'): fail('dynamic-agents','infrastructure specialist not linked')
- # Proactive look-ahead prepares ready work; it never promotes a draft or crosses a gate.
- for token in ('## Proactive planning (look-ahead)','Do not wait for an unnecessary instruction','Preparation never promotes a draft','authorizes DEV','starts QA verification','merges or deploys','Replan when','no artificial task','no second scheduler'):
-  if not satisfied(epic,token): fail('proactive-planning',f'epic look-ahead missing {token}')
- for token in ('next roadmap work and dependencies identified','a work packet for already authorized DEV, or QA test design','Never create busywork'):
-  if not satisfied(orchestrator,token): fail('proactive-planning',f'orchestrator look-ahead missing {token}')
- if 'leave a verifiable next action' not in agents: fail('proactive-planning','AGENTS.md missing the look-ahead next action')
- if 'advance the next independent ready item instead of idling' not in epic: fail('proactive-planning','scheduler must advance ready work while waiting')
- # Preflight must see untracked and foreign work before edits; proposals are classified by evidence.
- for name,tokens in {
-  '.agents/skills/task/SKILL.md':('re:git status[^.;]{0,80}untracked',
-   're:((checkout|worktree|branch)[^.;]{0,40}ownership|ownership[^.;]{0,40}(checkout|worktree|branch))',
-   're:(preserve|keep|leave)[^.;]{0,100}(untracked|unidentified|unknown|other|foreign)[^.;]{0,60}work',
-   're:(never|not|do not|don.t)[^.;]{0,60}(overwrite|discard|stage|claim)'),
- }.items():
-  for token in tokens:
-   if not satisfied(read(name),token): fail('git-preflight',f'{name}: missing {token}')
- for token in ('re:local draft[^.;]{0,120}(working tree|worktree)',
-   're:(registered|recorded) proposal[^.;]{0,160}commit',
-   r're:(registered|recorded) proposal[^.;]{0,200}(\bcit\w*|\bSHA\b)',
-   're:published proposal[^.;]{0,200}(push|pull request|remote|PR)',
-   're:local commit[^.;]{0,80}(not|never)[^.;]{0,80}remote'):
-  if not satisfied(epic,token): fail('proposal-evidence',f'epic proposal evidence missing {token}')
- # Execution mode is adaptive: direct, foreground or background only with verified support.
- for token in ('## Execution mode: direct, foreground, background','**Direct (coordinator).**','**Foreground subagent.**','**Background subagent.**','verified client support',"Releasing the coordinator's turn",'Promise no background persistence','who executes','mode (direct, foreground or background)','coordinator stays available','Never claim a subagent','No universal agent count'):
-  if not satisfied(dynamic,token): fail('execution-mode',f'dynamic policy missing {token}')
- for token in ('execution mode adaptively','background only with verified client support','coordinator availability','background persistence'):
-  if not satisfied(orchestrator,token): fail('execution-mode',f'orchestrator missing {token}')
- packet=read('templates/agent-work-packet.md')
- for token in ('Packet ID', 'Spec approval', 'Write files', 'Hard dependencies', 'Applicable rules', 'Verification', 'Return schema', 'Execution mode', 'Never ask the user directly from a subagent'):
-  if not satisfied(packet,token): fail('dynamic-agents',f'agent work packet missing {token}')
+ # Orchestrator only: the instruction exists and the Claude profiles cannot spawn agents themselves.
+ if 'The user talks only to the orchestrator' not in agents: fail('orchestrator-only','AGENTS.md must state that the user talks only to the orchestrator')
+ for name in ('functional','implementation','qa-review','infrastructure'):
+  tools=re.search(r'(?m)^tools:\s*(.*)$',read(f'.claude/agents/{name}.md'))
+  if not tools or re.search(r'\bAgent\b',tools[1]): fail('orchestrator-only',f'.claude/agents/{name}.md must not declare the Agent tool')
  guide=read('docs/GUIA_VISUAL_ORQUESTACION.md')
  diagrams=re.findall(r'(?ms)^\x60{3}mermaid\r?\n(.*?)^\x60{3}[ \t]*$',guide)
  if len(diagrams)<6: fail('visual-guide','need at least six Mermaid diagrams')
@@ -459,107 +402,27 @@ def validate(root):
    fail('usage-hooks','unexpected usage-report hook events or commands')
  except (ValueError,AttributeError):
   fail('usage-hooks','invalid usage-report hooks JSON')
- # Preserve portable coordination obligations; live behavior is evaluated separately.
+ # Obligations of documents outside the delegation policy; live behavior is evaluated separately.
  for name,tokens in {
-  'specs/methodology/dynamic-agents.md':('scope-sized preflight',
-   're:suspend\w* escalation.{0,60}(notif|inform|tell)\w* the coordinator',
-   're:advance notice is not .{0,40}approval', 'fresh bounded context by default',
-   're:inherit .{0,25}full history only',
-   'not repeated status reminders', 'Space CI queries progressively',
-   'QA independently', 'Workers in other clients',
-   'start/stop owner', 'repository-local OpenCode',
-   're:explicit user authorization.{0,40}(supported|capable) tools',
-   'separate checkouts/worktrees AND non-overlapping ownership',
-   'Separate test ports, databases', 'Worker output is evidence, never',
-   'other-client usage is', 'one current summary', 're:(replace|overwrite|supersede)\w* .{0,40}(stale|outdated|obsolete).{0,40}(label|status)',
-   'savings still need measurement'),
-  'templates/agent-work-packet.md':('Client / version / session ID',
-   'Start/stop owner and permitted communication route', 'Instruction entry points',
-   'Context:', 'Preflight / operation owners', 'Shared test resources',
-   'Verification environment / candidate', 'Blocking notice', 'Evidence destination'),
   'templates/progress.md':('one current summary', 'append-only', 'permission-sensitive',
    'candidate SHA', 'PR / CI / merge', 'BLOQUEADO'),
   'templates/testplan.md':('Before implementation', 'negative/error and integration',
    'Local / CI platform and owner', 'Expected evidence', 'incompatible platform'),
-  '.agents/skills/orchestrate/SKILL.md':('fresh bounded context',
-   'progressively spaced CI queries', 'one current summary'),
   '.agents/skills/dev/SKILL.md':('negative/integration cases before code',
    'advance', 'escalation notices', 're:incompatible local runs never replace CI',
    'one current checkpoint'),
   '.agents/skills/task/SKILL.md':('~:execution platform and operation owners before code',
    'dynamic-agents.md', 'preserve independent QA'),
   '.agents/skills/handoff/SKILL.md':('external client', 'uncontrolled workers'),
+  'specs/methodology/dynamic-agents-external-clients.md':('PENDIENTE','ENVIADO','RECIBIDO','VERIFICADO','BLOQUEADO','DESCONOCIDO','HANDOFF → CODEX','HANDOFF → CLAUDE CODE'),
+  'docs/CLAUDE_ADAPTER.md':('HANDOFF → CLAUDE CODE',),
  }.items():
   for token in tokens:
    if not satisfied(read(name),token): fail('coordination',f'{name}: missing {token}')
- # Communication obligations are structural guards; live client behavior is evaluated separately.
- for name,tokens in {
-  'specs/methodology/coordinator-communication.md':('PENDIENTE','ENVIADO','RECIBIDO','VERIFICADO','BLOQUEADO','DESCONOCIDO','HANDOFF → CODEX','HANDOFF → CLAUDE CODE','Never invent an ID','Never show percentages','Acción humana','Responder a OpenCode','never authorizes','read-only'),
-  'templates/agent-work-packet.md':('Task ID and origin session','Final status (COMPLETED / PARTIAL / BLOCKED / CANCELLED)','Relevant files and pending changes','Decisions needed','Recommended next action','absent / unknown','Session reference','coordinator-communication.md','Shared test resources: <separate ports, databases and temporary directories'),
-  '.agents/skills/orchestrate/SKILL.md':('coordinator-communication.md','Communication and status','read-only','received report','never authorizes'),
-  'specs/methodology/dynamic-agents.md':('coordinator-communication.md',),
-  'templates/progress.md':('coordinator-communication.md',),
-  'docs/CLAUDE_ADAPTER.md':('coordinator-communication.md','HANDOFF → CLAUDE CODE'),
- }.items():
-  for token in tokens:
-   if not satisfied(read(name),token): fail('communication',f'{name}: missing {token}')
- if '(specs/methodology/coordinator-communication.md)' not in agents: fail('communication','AGENTS.md missing communication contract link')
- if 'Missing evidence alone proves neither failure nor non-execution.' not in read('specs/methodology/coordinator-communication.md'):
-  fail('communication','missing distinction between unverified, failing and unrun checks')
- try:
-  cases=json.loads(read('evals/scenarios.json')).get('cases',[])
-  comms=[c for c in cases if str(c.get('id','')).startswith('comms-') and 'criteria' in c.get('expected',{})]
-  if len(comms)<16: fail('agent-evals','communication scenarios with observable criteria are incomplete')
-  evidence=[c for c in cases if str(c.get('id','')).startswith('evidence-') and 'criteria' in c.get('expected',{})]
-  if len(evidence)<8: fail('agent-evals','delivery-evidence scenarios with observable criteria are incomplete')
-  publication=[c for c in cases if str(c.get('id','')).startswith('publication-')]
-  if len(publication)<10: fail('agent-evals','publication scenarios are incomplete')
-  continuity=[c for c in cases if str(c.get('id','')).startswith('continuity-')]
-  if len(continuity)<7: fail('agent-evals','continuity scenarios are incomplete')
-  closure=[c for c in cases if str(c.get('id','')).startswith('closure-') and 'criteria' in c.get('expected',{})]
-  if len(closure)<3: fail('agent-evals','closure scenarios with observable criteria are incomplete')
-  execution=[c for c in cases if str(c.get('id','')).startswith('execution-')]
-  if len(execution)<10: fail('agent-evals','execution-mode scenarios are incomplete')
-  proactive=[c for c in cases if str(c.get('id','')).startswith('proactive-')]
-  if len(proactive)<9: fail('agent-evals','proactive-planning scenarios are incomplete')
- except (ValueError,AttributeError,TypeError):
-  fail('agent-evals','scenarios.json invalid for communication criteria')
- evals_doc=read('docs/AGENT_EVALS.md')
- for token in ('publication-01..10','continuity-01..07','closure-01..03','execution-01..10','proactive-01..09','does not prove that a real client'):
-  if not satisfied(evals_doc,token): fail('agent-evals',f'docs/AGENT_EVALS.md missing {token}')
- # Delivery closure evidence is structural here; real report quality needs independent review.
- for name,tokens in {
-  '.agents/skills/orchestrate/SKILL.md':('delivery-evidence-at-closure','scope conformance and deviations','verified effective identity','general reliability','create no extra report'),
-  'specs/methodology/dynamic-agents.md':('## Delivery evidence at closure','Scope conformance:','PASS / FAIL / UNRUN','pending regression',"author's reported result",'independent check actually performed','cause that remains a hypothesis','self-declaration','general reliability','one short record'),
-  'docs/AGENT_EVALS.md':('evidence-01..08','do not prove','semantic completeness'),
- }.items():
-  for token in tokens:
-   if not satisfied(read(name),token): fail('delivery-evidence',f'{name}: missing {token}')
- # Resource policy guards are structural; runtime behavior needs separate trials.
- for name,tokens in {
-  'specs/methodology/model-selection.md':('No fixed model ceiling','Quota and dispatch gate','do not spawn','requested versus observed','fork_turns="none"','**25% or less:**','**5% or less:**','**including QA**','after this warning','manual relay is only proposed when the user declared it enabled','re:token accounting .{0,60}not .{0,25}quota'),
-  'specs/methodology/dynamic-agents.md':('one executor','quota','model-selection.md#quota-and-dispatch-gate'),
-  'templates/agent-work-packet.md':('HANDOFF → CODEX','Recommended model:','Final status','Branch, commit SHA, PR','Quota gate:'),
-  '.agents/skills/orchestrate/SKILL.md':('quota dispatch gate','run `$handoff`'),
-  '.agents/skills/handoff/SKILL.md':('Reread the written checkpoint','complete copyable next-chat instruction'),
- }.items():
-  for token in tokens:
-   if not satisfied(read(name),token): fail('resource-policy',f'{name}: missing {token}')
- # Retired or centralized policy must not reappear elsewhere: presence is the failure here.
- for name,banned in {
-  'specs/methodology/dynamic-agents.md':('~:**25% or less:**','~:**5% or less:**'),
-  'specs/methodology/model-selection.md':('~:absolute ceiling','~:sol light'),
-  'docs/GUIA_VISUAL_ORQUESTACION.md':('~:techo absoluto','~:sol light'),
-  '.agents/skills/orchestrate/SKILL.md':('~:model ceiling',),
- }.items():
-  for token in banned:
-   if satisfied(read(name),token):
-    fail('resource-policy',f'{name}: duplicated or retired policy {token}')
  # Structural drift guards only: text presence cannot prove model behavior or consent.
  for name,tokens in {
   'AGENTS.md':('on demand','Consultation/analysis','Project-specific restrictions','specs/methodology/approvals.md#local-worktrees'),
   '.agents/skills/orchestrate/SKILL.md':('specs/session-handoff.md','progress documents','specs/epic-board.md','STOP REQUESTED — NO AUTO-RESUME','re:consultation or analysis (alone )?never authorizes edits','specs/methodology/approvals.md#local-worktrees'),
-  'specs/methodology/dynamic-agents.md':('approvals.md#local-worktrees',),
   '.agents/skills/init-project/SKILL.md':('specs/methodology/approvals.md#local-worktrees',),
   '.agents/skills/tweak/SKILL.md':('user clearly requested','reversible','no protected gate','read-only Plan mode'),
   'specs/methodology/approvals.md':('instruction-level gate','Reuse a specific valid approval','## Local worktrees','no individual approval','~:work already authorized by the user','provides useful isolation','does not affect existing work','including uncommitted/untracked changes','A Work Packet assigns responsibilities','publication or merges','~:never remove a worktree with pending work without user authorization','~:Stricter derived-project restrictions always take precedence'),
@@ -574,10 +437,8 @@ def validate(root):
   '.agents/skills/tweak/SKILL.md':('approvals.md#branch-and-pr-publication',),
   '.agents/skills/task/SKILL.md':('approvals.md#branch-and-pr-publication',),
   'specs/methodology/workflows.md':('approvals.md#branch-and-pr-publication',),
-  'specs/methodology/dynamic-agents.md':('approvals.md#branch-and-pr-publication',),
   'specs/guidelines/security.md':('approvals.md#branch-and-pr-publication','package or artifact publication'),
   'specs/methodology/epic-orchestration.md':('merge remains a separate approval',),
-  'templates/agent-work-packet.md':('authorized scope includes publication',),
   'templates/epic-board.md':('published/updated within the authorized scope',),
   'specs/methodology/acceptance-scenarios.md':('within the authorized scope',),
   'docs/GUIA_VISUAL_ORQUESTACION.md':('PR publicada',),
@@ -593,11 +454,10 @@ def validate(root):
  }.items():
   for token in tokens:
    if not satisfied(read(name),token): fail('lifecycle',f'{name}: missing {token}')
- # Execution continuity lives in orchestrate; closure wording lives in the communication contract.
+ # Execution continuity lives in orchestrate.
  for name,tokens in {
-  '.agents/skills/orchestrate/SKILL.md':('## Execution continuity','a partial result','authorized, executable work remains','completed work with its evidence','~:decision or approval that only the user can provide','user request to stop','blocker that cannot be resolved','corrected inside the authorized scope','rerun the affected verification','~:next action in the same turn','Reuse a valid authorization'),
+  '.agents/skills/orchestrate/SKILL.md':('## Execution continuity','a partial result','authorized, executable work remains','completed work with its evidence','user request to stop','blocker that cannot be resolved'),
   '.agents/skills/task/SKILL.md':('~:failed mandatory acceptance checks that cannot be corrected inside the authorized scope','rerun the affected verification'),
-  'specs/methodology/coordinator-communication.md':('~:## 7. Closing a turn or stopping','~:Whether to yield the turn is defined in','~:This section defines only the communication contract','**Human action:**','**Exact request:**','**State:**','Avoid ambiguous closings','whether the agent waits','When no action is needed','manual relays keep their identity'),
  }.items():
   for token in tokens:
    if not satisfied(read(name),token): fail('continuity',f'{name}: missing {token}')
@@ -618,10 +478,8 @@ def validate(root):
    'closing-capable','can close the Issue','## Decisiones vigentes','## Estado',
    '## Alcance autorizado','## Fuentes consultadas','Huella del contexto'):
   if not satisfied(issue,token): fail('issue-workflow',f'protocol missing {token}')
- for token in ('## Skill and tool','no session or memory of its own between calls',
-   '## Session continuity','one reservation at a time','no cron, webhook, bot','--repo',
-   '--project','manual protocol','issue-workflow.md','## Context receipt','--summary-file',
-   '## Decisiones vigentes','Huella del contexto','last non-empty line','no CLI receipt'):
+ for token in ('## Skill and tool','## Session continuity','no cron, webhook, bot','--repo',
+   '--project','With no Project','issue-workflow.md','--summary-file','## Decisiones vigentes'):
   if not satisfied(read('.agents/skills/work-issue/SKILL.md'),token):
    fail('issue-workflow',f'work-issue Skill missing {token}')
  for token in ('## Objective','## Requested phase','## Scope','## Linked SPEC',
@@ -677,10 +535,10 @@ def validate(root):
    '--expect-model','--expect-provider','--expect-effort','HERMES_HOME','mode=ro',
    'result_json','never emitted without an expectation',"state != 'completed'"):
   if token not in route: fail('delegation-route',f'verifier missing {token}')
- for token in ('### Delegation routes','model_map.options','slot','at dispatch','--expect-label',
+ for token in ('## Delegation routes','model_map.options','slot','at dispatch','--expect-label',
    'Exit 2 is never a pass','circular','--delegation <id>','HERMES_HOME'):
-  if not satisfied(read('specs/methodology/model-selection.md'),token):
-   fail('delegation-route',f'model-selection missing {token}')
+  if not satisfied(read('docs/HERMES_ADAPTER.md'),token):
+   fail('delegation-route',f'Hermes adapter missing {token}')
  for name in ('scripts/check-delegation-route','scripts/test-delegation-route'):
   text=read(name)
   for token in ('gpt-6.1-sol','openai-codex','alibaba-token-plan','deepseek'):

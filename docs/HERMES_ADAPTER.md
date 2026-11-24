@@ -76,7 +76,7 @@ approvals touches none of them.
 | I1 | **Background delegation is turn-bounded.** A child's result re-enters only as a new turn, so a coordinator cannot observe it inside the same turn. | background `delegate_task` | [DOC] | Foreground delegation only. If background is later wanted, add a clause here, not to `orchestrate`. |
 | I2 | **`delegate_task` is not durable.** | work must outlive the process | [DOC] process-local | Never use it for durable work. `cronjob`/`kanban` are durable but contradict the current "no background continuation" wording, so they stay disabled. |
 | I3 | **Children cannot ask the user** (no `clarify`, `delegate_task`, `memory`, `cronjob`). | any delegated work | [DOC] tool contract | The work packet already carries stop conditions; the child returns the decision instead. |
-| I4 | **No effective-model metadata per subagent.** | model-selection evidence is required | [DOC] not exposed | Mark those eval cases **N/A for Hermes**, not failed. |
+| I4 | **No effective-model metadata per subagent.** | requested-versus-observed model evidence is required | [DOC] not exposed | Mark those eval cases **N/A for Hermes**, not failed. |
 | I5 | **Approvals are semantic here, shell-shaped there.** Hermes gates shell commands and never prompts for file writes; the one-shot runtime bypasses approvals entirely. | any runner or merge path | [OBS] `run_oneshot` sets `HERMES_YOLO_MODE=1` unconditionally (`hermes_cli/oneshot.py:276`) | Keep `approvals.md` as the single semantic gate; never read a Hermes command approval as consent; never run with `--yolo`. |
 
 ## 5. Operational risks
@@ -234,6 +234,60 @@ and log committed. Published for review; **not merged**.
 Still requires separate authorization: any edit to another canonical file, P2 (delegation), P4
 (eval smoke), enabling cron/kanban, and any deletion. Merges and deployments are never covered
 by this adapter.
+
+## Delegation routes (effective-model check)
+
+A delegation route is a **slot**, not a fixed model: a named entry in the client's
+`delegation.backends.model_map.options` that maps a label to a provider, a model and an optional
+reasoning effort. `worker`, `advisor` or any other name may change provider, model or effort
+without touching the verifier, its tests or this document. Treat the values as configuration the
+user owns; portable guidance never hardcodes a provider, model or effort.
+
+A per-task route parameter can fail to reach the tool: the call arrives without it, no error is
+raised, and the task runs on the backend's `default` route — for example, a review requested on a
+review slot silently executed on the default worker. The failure is silent, so the result alone
+never proves which route ran. As a mitigation, keep `goal` short and carry the payload in
+`context`; the runtime copies the arguments it receives verbatim, and an argument lost before
+dispatch cannot be recovered downstream. That reduces the risk; it never replaces verification.
+
+Read the effective route from attributable metadata. While a delegation runs, a client that
+exposes per-child state may report each child's model; afterwards,
+`scripts/check-delegation-route` reads the profile's `state.db`:
+
+```sh
+scripts/check-delegation-route --profile <profile> --delegation <id> \
+    --expect-label <option> [--expect-provider <provider>] \
+    [--expect-model <model>] [--expect-effort <effort>]
+```
+
+It is read-only (`mode=ro`), makes no network or model calls and changes no configuration. It
+respects the active profile: `--state-db` wins, then `--profile`, then `HERMES_HOME`. It emits
+PASS only when the delegation and every task finished `completed` and every requested
+expectation matched.
+
+- `0`: the delegation completed and every task finished on every requested expectation.
+- `1`: a task did not finish, did not match, or the delegation has no results or did not complete.
+- `2`: no verdict is possible here — no expectation, a missing or unreadable `state.db`, an
+  unknown delegation, or unreadable or malformed metadata. Exit 2 is never a pass.
+
+Where the expectations come from:
+
+- **Recovered per task**: route `label`, `provider`, `model`, `reasoning_effort` and task `status`.
+- **Not recovered**: the option name requested at dispatch. The runtime persists the resolved
+  route and `task_json.model` (the model resolved at dispatch, blank when a batch mixed routes),
+  not the requested `option`, provider or effort.
+- Supply expectations from the `options` entry actually used **at dispatch** — never from
+  configuration read afterwards and never from an observed value, which would make the check
+  circular. Configuration can change between dispatch and check, so a model configured now is
+  not the one expected then.
+- Prefer `--delegation <id>` over `--latest`: with concurrent sessions the newest row may belong
+  to another delegation.
+
+On a client whose state is not this local store, the verifier cannot answer (exit 2). Report the
+route as unverified and use that client's attributable records; missing metadata is not evidence
+that a route failed and says nothing about another client's quota.
+
+The generic requested-versus-observed rule is in [orchestrate](../.agents/skills/orchestrate/SKILL.md#procedure) (step 4); this section is the Hermes-specific way to read the observed route.
 
 ## Issue work identity
 
