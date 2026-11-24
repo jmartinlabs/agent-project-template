@@ -23,12 +23,11 @@ needs `hermes skills trust` once per checkout before project Skills load.
   - applicable [architecture](specs/guidelines/architecture.md), [UI](specs/guidelines/ui.md),
     [quality](specs/guidelines/quality.md) and [security](specs/guidelines/security.md) guidelines;
   - [epic orchestration](specs/methodology/epic-orchestration.md) for overlapping epics;
-  - [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before delegating (its [external-clients part](specs/methodology/dynamic-agents-external-clients.md) only when another client is involved);
-  - [model selection](specs/methodology/model-selection.md) when model advice matters;
-  - [coordinator communication](specs/methodology/coordinator-communication.md) for manual client packets, returns, feedback and status.
+  - [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before delegating (its [external-clients part](specs/methodology/dynamic-agents-external-clients.md), with the manual packet, return and status protocol, only when another client is involved).
 - Optional Agent Relay: use [relay](.agents/skills/relay/SKILL.md) only on an explicit user request; it is transport, never approval or task state.
 - Project-specific restrictions take precedence over generic shortcuts.
 - Keep one executor per task; delegate substantial autonomous work, prefer background when it advances independent authorized work, and keep required independent QA.
+- The user talks only to the orchestrator. Roles and auxiliary workers act solely on a coordinator's work packet: they never run `work-issue`, claim Issues, write Project `Status` or delegate further. This is an instruction, and a technical control only where a client enforces it, never a guarantee.
 
 ## Approvals and safety
 - Protected actions need an explicit, identifiable approval per [approvals](specs/methodology/approvals.md). Generic assent never counts; QA, CI or development approval never implies merge.

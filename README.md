@@ -44,7 +44,7 @@ Start by describing the work, optionally in your client's planning mode, or invo
 
 ## Adaptive model selection (v2.2)
 
-`$orchestrate` optionally suggests a **model capability tier and reasoning effort** alongside workflow classification when useful, normally Standard / Full. See [model-selection guidelines](specs/methodology/model-selection.md). Default preference is **balanced**; the user can prioritize **efficiency** or **quality**. Exact names/effort settings depend on the available client and model, and Skills do **not** change models automatically. Keep the current model when adequate and verify actual behavior through tests regardless of model.
+The user configures models, providers and effort in each client; Skills never change them automatically. Keep the current model when adequate, compare requested with observed model/effort when the runtime exposes it ([orchestrate reference](.agents/skills/orchestrate/reference.md#7-runtime-and-model)) and verify actual behavior through tests regardless of model.
 
 ## Epic orchestration (v2.3)
 
@@ -109,7 +109,6 @@ ADOPT_EXISTING_PROJECT_PROMPT.md   copyable existing-project adoption prompt
 .agents/skills/{adopt-project,orchestrate,handoff,relay,work-issue,codex-review,task,tweak,init-project,bootstrap,roadmap,spec,dev}/SKILL.md
 .github/workflows/validate.yml     template validation on push/PR
 specs/README.md                    document ownership and naming
-specs/methodology/model-selection.md advisory model and reasoning recommendations
 .agents/skills/orchestrate/reference.md on-demand part of orchestrate (the core is printed by the hook)
 specs/methodology/dynamic-agents-external-clients.md  on-demand: other clients, OpenCode, relay
 specs/methodology/epic-orchestration.md dependency-aware epic scheduler

@@ -2,7 +2,7 @@
 
 > **Objetivo:** trabajar con un único coordinador de desarrollo, que distribuye tareas independientes según el estado real del proyecto. No significa que un Skill cree agentes automáticamente ni que los agentes sigan activos fuera de una ejecución del cliente.
 
-**Cómo empezar:** [README](../README.md) · [Política de agentes dinámicos](../specs/methodology/dynamic-agents.md) · [Coordinación de épicas](../specs/methodology/epic-orchestration.md) · [Modelos](../specs/methodology/model-selection.md) · [Tablero](../templates/epic-board.md).
+**Cómo empezar:** [README](../README.md) · [Política de agentes dinámicos](../specs/methodology/dynamic-agents.md) · [Coordinación de épicas](../specs/methodology/epic-orchestration.md) · [Tablero](../templates/epic-board.md).
 
 ## 1. La arquitectura: un coordinador, agentes bajo demanda
 
@@ -163,7 +163,7 @@ flowchart TD
     M --> V
 ```
 
-La selección respeta la [política canónica de modelos](../specs/methodology/model-selection.md) y las capacidades verificadas del cliente: no hay un techo fijo de modelo ni de esfuerzo, y los configura el usuario en cada cliente. El coordinador conserva su modelo. Si no puede garantizarse la selección solicitada, no se crea el subagente. Nunca sustituir pruebas por capacidad o razonamiento.
+La selección respeta las capacidades verificadas del cliente (véase la [referencia de orchestrate](../.agents/skills/orchestrate/reference.md#7-runtime-and-model)): no hay un techo fijo de modelo ni de esfuerzo, y los configura el usuario en cada cliente. El coordinador conserva su modelo. Si no puede garantizarse la selección solicitada, no se crea el subagente. Nunca sustituir pruebas por capacidad o razonamiento.
 
 ## 9. ¿Qué instala realmente esta template?
 
