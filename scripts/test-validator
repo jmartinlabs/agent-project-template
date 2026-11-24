@@ -892,6 +892,10 @@ class ValidationTests(unittest.TestCase):
   self.assertEqual(validate(self.root),[])
   p=self.root/'.agents/skills/orchestrate/SKILL.md'; p.write_text(p.read_text()+'\n'+'x'*4000)
   self.assertRule('hooks')
+ def test_orchestrator_only_is_required(self):
+  self.change('AGENTS.md','The user talks only to the orchestrator','Anyone may talk to any role'); self.assertRule('orchestrator-only')
+ def test_claude_profiles_cannot_declare_the_agent_tool(self):
+  p=self.root/'.claude/agents/implementation.md'; p.write_text(p.read_text().replace('tools: Read, Glob, Grep, Bash, Edit, Write','tools: Read, Glob, Grep, Bash, Edit, Write, Agent',1)); self.assertRule('orchestrator-only')
  def test_split_contract_parts_are_required(self):
   for name in ('.agents/skills/orchestrate/reference.md','specs/methodology/dynamic-agents-external-clients.md'):
    with self.subTest(name=name):

@@ -66,7 +66,7 @@ as evidence.
    then publish a receipt (`context --publish --summary-file`) with exactly the headings
    `## Decisiones vigentes`, `## Estado`, `## Alcance autorizado` and `## Fuentes consultadas`. Then
    `take`. A receipt expires on any new comment (including your own) and on `take`, so publish a new one
-   after `take` and before the first `move`. The claim is best-effort evidence, not a lock.
+   after `take` and before the first `move`. A comment that merely quotes a marker is material, not a receipt, and a receipt proves structure, not reading. The claim is best-effort evidence, not a lock.
 5. **Execute** with the Skill that owns the phase (`spec`, `dev`, `task`, `tweak`) and deliver the branch,
    PR and evidence. Reserving is the start, not the deliverable.
 6. **Deliver and continue.** Publish the report or PR and `move` into `{Phase} In Review` (with no Project,

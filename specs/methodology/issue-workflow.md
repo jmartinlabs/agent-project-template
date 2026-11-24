@@ -250,7 +250,7 @@ for acceptance.
 
 ## Tool adapter
 
-`scripts/work-issue` (`--help` lists its subcommands, flags and exit codes) implements this protocol
+`scripts/work-issue` (`--help` lists its subcommands and flags; exit codes: `0` ok, `2` refused by the protocol with nothing changed or its own writes retracted, `3` blocked or failed write, `4` the agent's queue is empty) implements this protocol
 for GitHub; another tracker adapts the same states without a new state engine. Configuration is explicit
 and its flags precede the subcommand: `--repo` is required, `--owner` overrides an organization-owned
 Project and `--project` is **never guessed**; without it the adapter fails closed, writes nothing and

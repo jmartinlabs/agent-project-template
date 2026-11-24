@@ -422,7 +422,7 @@
       "id": "comms-07",
       "decision": "block",
       "target": "show invented progress percentage",
-      "communication": "Estado · ORCH-COMMS-01 (OpenCode, ORCH Comunicación): ENVIADO — envío confirmado, sin retorno todavía.\nAcción humana: ninguna ahora. Responder a OpenCode: no. No muestro porcentaje de progreso."
+      "communication": "ORCH-COMMS-01 (OpenCode, ORCH Comunicación): ENVIADO — envío confirmado, sin retorno todavía.\nAcción humana: ninguna ahora. Responder a OpenCode: no. No muestro porcentaje de progreso."
     },
     {
       "id": "comms-09",
