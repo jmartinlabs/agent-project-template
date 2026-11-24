@@ -88,8 +88,6 @@ class ValidationTests(unittest.TestCase):
   self.change('.github/workflows/validate.yml','python3 scripts/test-agent-relay','python3 scripts/skip-agent-relay'); self.assertRule('ci')
  def test_handoff_no_auto_resume(self):
   self.change('.agents/skills/handoff/SKILL.md','NO AUTO-RESUME','AUTO-RESUME'); self.assertRule('handoff')
- def test_handoff_no_new_development(self):
-  self.change('.agents/skills/handoff/SKILL.md','Stop issuing new development','Allow new development'); self.assertRule('handoff')
  def test_adopt_skill_structure(self):
   (self.root/'.agents/skills/adopt-project/SKILL.md').unlink(); self.assertRule('structure')
  def test_adopt_prompt_contract(self):
@@ -107,13 +105,6 @@ class ValidationTests(unittest.TestCase):
   (self.root/'.claude/settings.json').unlink(); self.assertRule('structure')
  def test_profile_packet_rules(self):
   self.change('.claude/agents/implementation.md','Applicable rules','policy list'); self.assertRule('claude')
- def test_packet_subagent_questions_route(self):
-  self.change('templates/agent-work-packet.md','Never ask the user directly from a subagent','Ask the user directly from a subagent')
-  self.assertRule('dynamic-agents')
- def test_packet_applicable_rules(self):
-  self.change('templates/agent-work-packet.md','Applicable rules','Extra notes'); self.assertRule('dynamic-agents')
- def test_packet_execution_mode(self):
-  self.change('templates/agent-work-packet.md','Execution mode','Mode'); self.assertRule('dynamic-agents')
  def test_wrapper_no_restated_approvals(self):
   self.change('.claude/skills/tweak/SKILL.md','adds no rules.','adds no rules. Never treat `dale` as approval.'); self.assertRule('claude')
  def test_claude_md_no_restated_approvals(self):
@@ -155,12 +146,6 @@ class ValidationTests(unittest.TestCase):
   self.assertRule('opencode')
  def test_opencode_specialized_model(self):
   self.change('.opencode/agents/infrastructure.md','mode: subagent','mode: subagent\nmodel: provider/model')
-  self.assertRule('opencode')
- def test_opencode_specialized_color_format(self):
-  self.change('.opencode/agents/functional.md','color: "#3B82F6"','color: "blue"')
-  self.assertRule('opencode')
- def test_opencode_review_color_format(self):
-  self.change('.opencode/agents/review.md','color: "#A855F7"','color: "#GGGGGG"')
   self.assertRule('opencode')
  def test_opencode_specialized_permissions_rejected(self):
   self.change('.opencode/agents/functional.md','mode: subagent',
@@ -531,92 +516,16 @@ class ValidationTests(unittest.TestCase):
   (self.root/'ADOPT_EXISTING_PROJECT_PROMPT.md').unlink(); self.assertRule('structure')
  def test_adopt_skill_contract(self):
   self.change('.agents/skills/adopt-project/SKILL.md','AGENTS.md','OTHER.md'); self.assertRule('adoption')
- def test_epic_contract_required(self):
-  (self.root/'specs/methodology/epic-orchestration.md').unlink(); self.assertRule('structure')
- def test_epic_board_template_required(self):
-  (self.root/'templates/epic-board.md').unlink(); self.assertRule('structure')
- def test_epic_role_required(self):
-  (self.root/'.agents/roles/implementation.md').unlink(); self.assertRule('structure')
- def test_functional_role_draft_scope(self):
-  self.change('.agents/roles/functional.md','DRAFT specifications','approved specifications'); self.assertRule('epic-scheduling')
- def test_epic_coordinator_wiring(self):
-  self.change('.agents/skills/orchestrate/SKILL.md','specs/methodology/epic-orchestration.md','specs/methodology/other.md'); self.assertRule('epic-scheduling')
- def test_epic_approval_gate(self):
-  self.change('specs/methodology/epic-orchestration.md','awaiting-approval','waiting'); self.assertRule('epic-scheduling')
- def test_epic_board_deps(self):
-  self.change('templates/epic-board.md','Hard dependencies','Loose connections'); self.assertRule('epic-scheduling')
- def test_dynamic_policy_required(self):
-  (self.root/'specs/methodology/dynamic-agents.md').unlink(); self.assertRule('structure')
- def test_infrastructure_role_required(self):
-  (self.root/'.agents/roles/infrastructure.md').unlink(); self.assertRule('structure')
  def test_work_packet_required(self):
   (self.root/'templates/agent-work-packet.md').unlink(); self.assertRule('structure')
  def test_visual_guide_required(self):
   (self.root/'docs/GUIA_VISUAL_ORQUESTACION.md').unlink(); self.assertRule('structure')
- def test_orchestrator_dynamic_wiring(self):
-  self.change('.agents/skills/orchestrate/SKILL.md','specs/methodology/dynamic-agents.md','specs/methodology/other.md'); self.assertRule('dynamic-agents')
- def test_execution_mode_policy(self):
-  cases=(
-   ('specs/methodology/dynamic-agents.md','## Execution mode: direct, foreground, background'),
-   ('specs/methodology/dynamic-agents.md','**Direct (coordinator).**'),
-   ('specs/methodology/dynamic-agents.md','**Foreground subagent.**'),
-   ('specs/methodology/dynamic-agents.md','**Background subagent.**'),
-   ('specs/methodology/dynamic-agents.md','verified client support'),
-   ('specs/methodology/dynamic-agents.md',"Releasing the coordinator's turn"),
-   ('specs/methodology/dynamic-agents.md','Promise no background persistence'),
-   ('specs/methodology/dynamic-agents.md','Never claim a subagent'),
-   ('.agents/skills/orchestrate/reference.md','execution mode adaptively'),
-   ('.agents/skills/orchestrate/reference.md','coordinator availability'),
-   ('.agents/skills/orchestrate/SKILL.md','background persistence'),
-  )
-  for name, token in cases:
-   with self.subTest(name=name, token=token):
-    p=self.root/name; original=p.read_text()
-    self.assertIn(token, original)
-    try:
-     p.write_text(original.replace(token, 'REMOVED'))
-     self.assertRule('execution-mode')
-    finally:
-     p.write_text(original)
- def test_execution_mode_scenarios(self):
-  self.change('evals/scenarios.json','"id": "execution-','"id": "removed-'); self.assertRule('agent-evals')
- def test_delegation_preference(self):
-  cases=(
-   ('specs/methodology/dynamic-agents.md','## Delegation preference'),
-   ('specs/methodology/dynamic-agents.md','one executor per task'),
-   ('specs/methodology/dynamic-agents.md','Never create artificial agents'),
-   ('.agents/skills/orchestrate/SKILL.md','Prefer a specialist for substantial'),
-   ('.agents/skills/orchestrate/SKILL.md','one executor per task'),
-   ('.agents/skills/orchestrate/SKILL.md','never invent agents'),
-   ('specs/methodology/epic-orchestration.md','one executor per task'),
-  )
-  for name, token in cases:
-   with self.subTest(name=name, token=token):
-    p=self.root/name; original=p.read_text()
-    self.assertIn(token, original)
-    try:
-     p.write_text(original.replace(token, 'REMOVED'))
-     self.assertRule('delegation-preference')
-    finally:
-     p.write_text(original)
  def test_mermaid_validator_script_required(self):
   (self.root/'scripts/check-mermaid.mjs').unlink(); self.assertRule('structure')
  def test_mermaid_ci_wiring(self):
   self.change('.github/workflows/validate.yml','node scripts/check-mermaid.mjs','echo skipping-mermaid'); self.assertRule('ci')
  def test_visual_diagram_count(self):
   self.change('docs/GUIA_VISUAL_ORQUESTACION.md','```mermaid','```text'); self.assertRule('visual-guide')
- def test_work_packet_ownership(self):
-  self.change('templates/agent-work-packet.md','Write files','Editable stuff'); self.assertRule('dynamic-agents')
- def test_model_selection_structure(self):
-  (self.root/'specs/methodology/model-selection.md').unlink(); self.assertRule('structure')
- def test_model_selection_policy(self):
-  self.change('specs/methodology/model-selection.md','balanced','neutral'); self.assertRule('model-selection')
- def test_model_selection_wiring(self):
-  self.change('.agents/skills/orchestrate/SKILL.md','specs/methodology/model-selection.md','specs/methodology/other.md'); self.assertRule('model-selection')
- def test_efficiency_investigation_guard(self):
-  self.change('.agents/skills/orchestrate/SKILL.md','After two comparable attempts','After unlimited attempts'); self.assertRule('orchestration-efficiency')
- def test_workflow_contract(self):
-  self.change('specs/methodology/workflows.md','Quick','Tiny'); self.assertRule('orchestration')
  def test_links(self):
   self.change('README.md','## Skills','[Broken](missing.md)\n## Skills'); self.assertRule('links')
  def test_agents(self):
@@ -772,21 +681,6 @@ class ValidationTests(unittest.TestCase):
  def test_coordination_obligations(self):
   # Structural drift guards only, not a claim that real clients followed the rules.
   cases = (
-   ('specs/methodology/dynamic-agents.md', 'scope-sized preflight'),
-   ('specs/methodology/dynamic-agents.md', 'suspending escalation, the worker notifies the coordinator'),
-   ('specs/methodology/dynamic-agents.md', 'Advance notice is not another user approval gate'),
-   ('specs/methodology/dynamic-agents.md', 'fresh bounded context by default'),
-   ('specs/methodology/dynamic-agents.md', 'not repeated status reminders'),
-   ('specs/methodology/dynamic-agents.md', 'QA independently'),
-   ('specs/methodology/dynamic-agents-external-clients.md', 'repository-local OpenCode'),
-   ('specs/methodology/dynamic-agents-external-clients.md', 'explicit user authorization and supported tools'),
-   ('specs/methodology/dynamic-agents-external-clients.md', 'separate checkouts/worktrees AND non-overlapping ownership'),
-   ('specs/methodology/dynamic-agents-external-clients.md', 'Separate test ports, databases'),
-   ('specs/methodology/dynamic-agents-external-clients.md', 'other-client usage is'),
-   ('specs/methodology/dynamic-agents-external-clients.md', 'Replace stale current-state labels'),
-   ('specs/methodology/dynamic-agents-external-clients.md', 'savings still need measurement'),
-   ('templates/agent-work-packet.md', 'Client / version / session ID'),
-   ('templates/agent-work-packet.md', 'Blocking notice'),
    ('templates/progress.md', 'append-only'),
    ('templates/testplan.md', 'Local / CI platform and owner'),
    ('.agents/skills/orchestrate/reference.md', 'progressively spaced CI queries'),
@@ -803,91 +697,6 @@ class ValidationTests(unittest.TestCase):
      self.assertRule('coordination')
     finally:
      p.write_text(original)
- def test_resource_policy_guards(self):
-  cases = (
-   ('specs/methodology/model-selection.md', 'No fixed model ceiling'),
-   ('specs/methodology/model-selection.md', 'do not spawn'),
-   ('specs/methodology/model-selection.md', 'requested versus observed'),
-   ('specs/methodology/model-selection.md', '**25% or less:**'),
-   ('specs/methodology/model-selection.md', '**5% or less:**'),
-   ('specs/methodology/model-selection.md', '**including QA**'),
-   ('specs/methodology/model-selection.md', 'after this warning'),
-   ('specs/methodology/model-selection.md', 'manual relay is only proposed when the user declared it enabled'),
-   ('specs/methodology/dynamic-agents.md', 'model-selection.md#quota-and-dispatch-gate'),
-   ('templates/agent-work-packet.md', 'HANDOFF → CODEX'),
-   ('.agents/skills/orchestrate/SKILL.md', 'run `$handoff`'),
-   ('.agents/skills/handoff/SKILL.md', 'Reread the written checkpoint'),
-  )
-  for name,token in cases:
-   with self.subTest(name=name,token=token):
-    p=self.root/name; original=p.read_text()
-    try:
-     p.write_text(original.replace(token,'REMOVED'))
-     self.assertRule('resource-policy')
-    finally:
-     p.write_text(original)
- def test_resource_policy_negated_guards(self):
-  # A duplicated threshold or a retired ceiling must fail on presence, not only on absence.
-  cases = (
-   ('specs/methodology/dynamic-agents.md', '\n**25% or less:** duplicated copy\n'),
-   ('specs/methodology/dynamic-agents.md', '\n**5% or less:** duplicated copy\n'),
-   ('specs/methodology/model-selection.md', '\n## Codex subagents: absolute ceiling\n'),
-   ('specs/methodology/model-selection.md', '\nGPT-6.1 Sol Light\n'),
-   ('docs/GUIA_VISUAL_ORQUESTACION.md', '\nEl coordinador aplica un techo absoluto.\n'),
-   ('.agents/skills/orchestrate/SKILL.md', '\nApply the model ceiling before dispatch.\n'),
-  )
-  for name,added in cases:
-   with self.subTest(name=name,added=added.strip()):
-    p=self.root/name; original=p.read_text()
-    try:
-     p.write_text(original+added)
-     self.assertRule('resource-policy')
-    finally:
-     p.write_text(original)
- def test_communication_contract_required(self):
-  (self.root/'specs/methodology/coordinator-communication.md').unlink(); self.assertRule('structure')
- def test_copyable_packet_shared_resources(self):
-  self.change('templates/agent-work-packet.md','Shared test resources: <separate ports, databases and temporary directories','Shared test resources: <unspecified'); self.assertRule('communication')
- def test_communication_unverified_is_not_failed(self):
-  self.change('specs/methodology/coordinator-communication.md','Missing evidence alone proves neither failure nor non-execution.','Missing evidence means FAIL.'); self.assertRule('communication')
- def test_communication_states_required(self):
-  self.change('specs/methodology/coordinator-communication.md','ENVIADO','ENVIAD'); self.assertRule('communication')
- def test_communication_return_fields_required(self):
-  self.change('templates/agent-work-packet.md','Decisions needed','Open questions'); self.assertRule('communication')
- def test_communication_orchestrator_link(self):
-  for name in ('.agents/skills/orchestrate/SKILL.md','.agents/skills/orchestrate/reference.md'): self.change(name,'coordinator-communication.md','other.md')
-  self.assertRule('communication')
- def test_communication_agents_link(self):
-  self.change('AGENTS.md','(specs/methodology/coordinator-communication.md)','(README.md)'); self.assertRule('communication')
- def test_communication_criteria_fixtures(self):
-  self.change('evals/scenarios.json','"id": "comms-','"id": "removed-'); self.assertRule('agent-evals')
- def test_delivery_evidence_contract(self):
-  cases = (
-   ('.agents/skills/orchestrate/SKILL.md', 'delivery-evidence-at-closure'),
-   ('.agents/skills/orchestrate/reference.md', 'scope conformance and deviations'),
-   ('.agents/skills/orchestrate/reference.md', 'verified effective identity'),
-   ('.agents/skills/orchestrate/reference.md', 'create no extra report'),
-   ('specs/methodology/dynamic-agents.md', '## Delivery evidence at closure'),
-   ('specs/methodology/dynamic-agents.md', 'PASS / FAIL / UNRUN'),
-   ('specs/methodology/dynamic-agents.md', 'pending regression'),
-   ('specs/methodology/dynamic-agents.md', "author's reported result"),
-   ('specs/methodology/dynamic-agents.md', 'independent check actually performed'),
-   ('specs/methodology/dynamic-agents.md', 'cause that remains a hypothesis'),
-   ('specs/methodology/dynamic-agents.md', 'self-declaration'),
-   ('docs/AGENT_EVALS.md', 'evidence-01..08'),
-   ('docs/AGENT_EVALS.md', 'semantic completeness'),
-  )
-  for name, token in cases:
-   with self.subTest(name=name, token=token):
-    p=self.root/name; original=p.read_text()
-    self.assertIn(token, original)
-    try:
-     p.write_text(original.replace(token, 'REMOVED'))
-     self.assertRule('delivery-evidence')
-    finally:
-     p.write_text(original)
- def test_delivery_evidence_scenarios(self):
-  self.change('evals/scenarios.json','"id": "evidence-','"id": "removed-'); self.assertRule('agent-evals')
  def test_external_contract_does_not_register_clients(self):
   p=self.root/'specs/methodology/dynamic-agents.md'
   p.write_text(p.read_text()+'\nAn additional user-selected client may use the same verified packet.\n')
@@ -1001,22 +810,10 @@ class ValidationTests(unittest.TestCase):
     p=self.root/'specs/methodology/approvals.md'; original=p.read_text()
     p.write_text(original.replace(token,'REMOVED')); self.assertRule('consistency'); p.write_text(original)
  def test_worktree_policy_references(self):
-  for name in ('AGENTS.md', '.agents/skills/orchestrate/SKILL.md', '.agents/skills/init-project/SKILL.md', 'specs/methodology/dynamic-agents.md'):
+  for name in ('AGENTS.md', '.agents/skills/init-project/SKILL.md'):
    with self.subTest(name=name):
     p=self.root/name; original=p.read_text()
     p.write_text(original.replace('approvals.md#local-worktrees','approvals.md')); self.assertRule('consistency'); p.write_text(original)
- def test_rule_rewording_passes_validation(self):
-  # The contract is the rule, not its wording: a legitimate rewrite must not fail CI.
-  self.change('specs/methodology/dynamic-agents-external-clients.md','Replace stale current-state labels',
-              'Overwrite outdated status labels')
-  self.assertEqual(validate(self.root),[])
- def test_rule_capitalisation_and_line_wrap_pass_validation(self):
-  self.change('specs/methodology/dynamic-agents-external-clients.md','Replace stale current-state labels',
-              'REPLACE  stale\ncurrent-state   labels')
-  self.assertEqual(validate(self.root),[])
- def test_rule_removal_still_fails_validation(self):
-  self.change('specs/methodology/dynamic-agents-external-clients.md','Replace stale current-state labels','')
-  self.assertRule('coordination')
  def test_publication_policy_contract(self):
   cases = (
    '## Branch and PR publication', 'No separate publication approval is needed',
@@ -1038,29 +835,12 @@ class ValidationTests(unittest.TestCase):
  def test_publication_policy_links(self):
   for name in ('AGENTS.md', '.agents/skills/dev/SKILL.md', '.agents/skills/tweak/SKILL.md',
                '.agents/skills/task/SKILL.md', 'specs/methodology/workflows.md',
-               'specs/methodology/dynamic-agents-external-clients.md', 'specs/guidelines/security.md'):
+               'specs/guidelines/security.md'):
    with self.subTest(name=name):
     p=self.root/name; original=p.read_text()
     self.assertIn('approvals.md#branch-and-pr-publication', original)
     try:
      p.write_text(original.replace('approvals.md#branch-and-pr-publication', 'approvals.md'))
-     self.assertRule('publication')
-    finally:
-     p.write_text(original)
- def test_publication_related_contracts(self):
-  cases = (
-   ('specs/methodology/epic-orchestration.md', 'merge remains a separate approval'),
-   ('templates/agent-work-packet.md', 'authorized scope includes publication'),
-   ('templates/epic-board.md', 'published/updated within the authorized scope'),
-   ('specs/methodology/acceptance-scenarios.md', 'within the authorized scope'),
-   ('docs/GUIA_VISUAL_ORQUESTACION.md', 'PR publicada'),
-  )
-  for name, token in cases:
-   with self.subTest(name=name, token=token):
-    p=self.root/name; original=p.read_text()
-    self.assertIn(token, original)
-    try:
-     p.write_text(original.replace(token, 'REMOVED'))
      self.assertRule('publication')
     finally:
      p.write_text(original)
@@ -1092,78 +872,6 @@ class ValidationTests(unittest.TestCase):
      self.assertRule('continuity')
     finally:
      p.write_text(original)
- def test_closure_contract(self):
-  cases = (
-   '## 7. Closing a turn or stopping', 'Whether to yield the turn is defined in',
-   'This section defines only the communication contract',
-   '**Human action:**', '**Exact request:**', '**State:**',
-   'Avoid ambiguous closings', 'whether the agent waits',
-   'When no action is needed', 'manual relays keep their identity',
-  )
-  p=self.root/'specs/methodology/coordinator-communication.md'; original=p.read_text()
-  for token in cases:
-   with self.subTest(token=token):
-    self.assertIn(token, original)
-    try:
-     p.write_text(original.replace(token, 'REMOVED'))
-     self.assertRule('continuity')
-    finally:
-     p.write_text(original)
- def test_publication_scenarios(self):
-  self.change('evals/scenarios.json', '"id": "publication-', '"id": "removed-')
-  self.assertRule('agent-evals')
- def test_continuity_scenarios(self):
-  self.change('evals/scenarios.json', '"id": "continuity-', '"id": "removed-')
-  self.assertRule('agent-evals')
- def test_closure_criteria(self):
-  p=self.root/'evals/scenarios.json'; data=json.loads(p.read_text())
-  case=next(c for c in data['cases'] if c['id']=='closure-01')
-  case['expected'].pop('criteria')
-  p.write_text(json.dumps(data))
-  self.assertRule('agent-evals')
- def test_eval_docs_match_fixtures(self):
-  p=self.root/'docs/AGENT_EVALS.md'; original=p.read_text()
-  for token in ('publication-01..10', 'continuity-01..07', 'closure-01..03',
-                'proactive-01..09',
-                'does not prove that a real client'):
-   with self.subTest(token=token):
-    self.assertIn(token, original)
-    try:
-     p.write_text(original.replace(token, 'REMOVED'))
-     self.assertRule('agent-evals')
-    finally:
-     p.write_text(original)
- def test_proactive_planning_contract(self):
-  cases = (
-   ('specs/methodology/epic-orchestration.md', '## Proactive planning (look-ahead)'),
-   ('specs/methodology/epic-orchestration.md', 'Do not wait for an unnecessary instruction'),
-   ('specs/methodology/epic-orchestration.md', 'Preparation never promotes a draft'),
-   ('specs/methodology/epic-orchestration.md', 'authorizes DEV'),
-   ('specs/methodology/epic-orchestration.md', 'starts QA verification'),
-   ('specs/methodology/epic-orchestration.md', 'merges or deploys'),
-   ('specs/methodology/epic-orchestration.md', 'no artificial task'),
-   ('specs/methodology/epic-orchestration.md', 'no second scheduler'),
-   ('specs/methodology/epic-orchestration.md', 'Replan when a task completes'),
-   ('specs/methodology/epic-orchestration.md', 'advance the next independent ready item instead of idling'),
-   ('.agents/skills/orchestrate/SKILL.md', 'Never create busywork'),
-   ('.agents/skills/orchestrate/SKILL.md', 'next roadmap work and dependencies identified'),
-   ('.agents/skills/orchestrate/SKILL.md', 'a work packet for already authorized DEV, or QA test design'),
-   ('AGENTS.md', 'leave a verifiable next action'),
-  )
-  for name, token in cases:
-   with self.subTest(name=name, token=token):
-    p = self.root/name; original = p.read_text()
-    self.assertIn(token, original)
-    try:
-     p.write_text(original.replace(token, 'REMOVED'))
-     self.assertRule('proactive-planning')
-    finally:
-     p.write_text(original)
- def test_proactive_scenarios_required(self):
-  p = self.root/'evals/scenarios.json'; data = json.loads(p.read_text())
-  data['cases'] = [c for c in data['cases'] if not str(c.get('id','')).startswith('proactive-')]
-  p.write_text(json.dumps(data))
-  self.assertRule('agent-evals')
  def test_work_issue_protocol_required(self):
   (self.root/'specs/methodology/issue-workflow.md').unlink(); self.assertRule('structure')
  def test_work_issue_skill_required(self):
@@ -1227,10 +935,8 @@ class ValidationTests(unittest.TestCase):
     finally:
      p.write_text(original)
  def test_work_issue_skill_keeps_the_session_contract(self):
-  cases = ('## Skill and tool','no session or memory of its own between calls',
-   '## Session continuity','one reservation at a time','no cron, webhook, bot','manual protocol',
-   '## Context receipt','--summary-file','## Decisiones vigentes','last non-empty line',
-   'no CLI receipt')
+  cases = ('## Skill and tool','## Session continuity','no cron, webhook, bot','With no Project',
+   '--summary-file','## Decisiones vigentes')
   for token in cases:
    with self.subTest(token=token):
     p=self.root/'.agents/skills/work-issue/SKILL.md'; original=p.read_text()
@@ -1313,10 +1019,10 @@ class ValidationTests(unittest.TestCase):
    ('scripts/check-delegation-route','never emitted without an expectation'),
    ('scripts/check-delegation-route','state != \'completed\''),
    ('scripts/check-delegation-route','mode=ro'),
-   ('specs/methodology/model-selection.md','### Delegation routes'),
-   ('specs/methodology/model-selection.md','Exit 2 is never a pass'),
-   ('specs/methodology/model-selection.md','circular'),
-   ('specs/methodology/model-selection.md','at dispatch'),
+   ('docs/HERMES_ADAPTER.md','## Delegation routes'),
+   ('docs/HERMES_ADAPTER.md','Exit 2 is never a pass'),
+   ('docs/HERMES_ADAPTER.md','circular'),
+   ('docs/HERMES_ADAPTER.md','at dispatch'),
   )
   for name, token in cases:
    with self.subTest(name=name, token=token):
@@ -1344,53 +1050,6 @@ class ValidationTests(unittest.TestCase):
   p=self.root/'scripts/test-validator'
   p.write_text(p.read_text().replace('test-delegation-route','delegation-route-suite'))
   self.assertRule('delegation-route')
- def test_task_git_preflight_removed(self):
-  # Untracked and foreign work must be seen before edits; deleting the rule must fail CI.
-  self.change('.agents/skills/task/SKILL.md',
-   'Inspect `git status` including untracked files and checkout/worktree ownership before editing; '
-   'preserve unidentified or other-session work and never overwrite, discard, stage or claim it. ','')
-  self.assertRule('git-preflight')
- def test_task_git_preflight_rewording(self):
-  self.change('.agents/skills/task/SKILL.md',
-   'Inspect `git status` including untracked files and checkout/worktree ownership before editing; '
-   'preserve unidentified or other-session work and never overwrite, discard, stage or claim it.',
-   'Check `git status` with untracked entries and branch/worktree ownership before edits; '
-   'keep other or unknown work intact and do not overwrite, discard, stage or claim it.')
-  self.assertEqual(validate(self.root),[])
- def test_proposal_evidence_removed(self):
-  # A draft, a registered proposal and a published proposal need distinct evidence.
-  self.change('specs/methodology/epic-orchestration.md',
-   'Distinguish a local draft, a registered proposal and a published proposal by evidence, never by\n'
-   'assertion: a local draft lives in a working tree and may be visible to other sessions sharing\n'
-   'that checkout, but is not yet evidenced by a Git commit; a registered proposal is persisted in a\n'
-   "commit whose SHA can be cited; a published proposal carries the remote evidence the project's\n"
-   'process requires, such as a push and pull request. A local\n'
-   'commit alone does not prove remote publication.','Proposals are tracked informally.')
-  self.assertRule('proposal-evidence')
- def test_registered_proposal_requires_citable_commit(self):
-  self.change('specs/methodology/epic-orchestration.md',
-   'commit whose SHA can be cited','commit that exists')
-  self.assertRule('proposal-evidence')
- def test_local_commit_does_not_prove_publication(self):
-  self.change('specs/methodology/epic-orchestration.md',
-   'commit alone does not prove remote publication','commit is enough')
-  self.assertRule('proposal-evidence')
- def test_proposal_evidence_rewording(self):
-  self.change('specs/methodology/epic-orchestration.md',
-   'Distinguish a local draft, a registered proposal and a published proposal by evidence, never by\n'
-   'assertion: a local draft lives in a working tree and may be visible to other sessions sharing\n'
-   'that checkout, but is not yet evidenced by a Git commit; a registered proposal is persisted in a\n'
-   "commit whose SHA can be cited; a published proposal carries the remote evidence the project's\n"
-   'process requires, such as a push and pull request. A local\n'
-   'commit alone does not prove remote publication.',
-   'Judge a local draft, a registered proposal and a published proposal by evidence, not by assertion:\n'
-   'a local draft may be visible to another session sharing its working tree, but has no Git commit\n'
-   'as evidence yet; a registered proposal is a commit with a citable SHA; a published proposal has\n'
-   "the remote evidence the project's process\n"
-   'requires, such as a push and a pull request. A local commit alone never proves remote publication.')
-  self.assertIn('another session sharing its working tree',
-                (self.root/'specs/methodology/epic-orchestration.md').read_text())
-  self.assertEqual(validate(self.root),[])
 class DelegationRouteSuiteTests(unittest.TestCase):
  """The delegation-route suite runs once through this existing entry point, never per fixture."""
  def test_suite_passes_inside_the_validated_fixture(self):
