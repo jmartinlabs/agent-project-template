@@ -26,7 +26,7 @@ they do not replace canonical rules.
   its packet; it never approves its own spec, implements code or edits the
   shared board.
 - Manual client communication (identity, states, full return block and status) is the same
-  [coordinator communication](../specs/methodology/coordinator-communication.md) contract for Claude Code.
+  [external clients](../specs/methodology/dynamic-agents-external-clients.md) protocol for Claude Code.
   Only the client name changes: `HANDOFF → CLAUDE CODE`. Nothing is sent to OpenCode automatically.
 - Call `/orchestrate` with a concrete task and let it choose Quick, Standard,
   or Full according to the already agreed scope. Native Claude Plan mode is
@@ -39,7 +39,7 @@ All `.claude/agents/` profiles keep `model: inherit` on purpose:
 | Profile | Model | Why |
 |---|---|---|
 | implementation | inherit | routine approved work is fine on the session model (balanced tier) |
-| qa-review | inherit | independent critical review is the **advanced** tier in [model selection](../specs/methodology/model-selection.md); a cheaper fixed model would weaken QA |
+| qa-review | inherit | independent critical review should not be silently downgraded; a cheaper fixed model needs evidence first |
 | functional | inherit | specs carry ambiguity and approval questions |
 | infrastructure | inherit | operational risk; keep the user's chosen model |
 

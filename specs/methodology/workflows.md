@@ -27,7 +27,6 @@ deletion, security and incompatible contracts may need Full or extra approval ev
 - **Walking skeleton** is a real, minimal, end-to-end executable slice, not an interview. Use bootstrap only for a new project or a meaningful new architectural path.
 
 ## Model advice
-With the classification, [model selection](model-selection.md) may suggest a capability tier and reasoning effort. It is advice, not an approval step or automatic switch, and never replaces tests, review or workflow confirmation. Skip it for straightforward Quick work.
 
 ## Approval gates
 Confirm with the user: the initial classification (except the authorized Quick case or an existing explicit authorization), material product or architecture choices, a new or materially changed roadmap, Full specifications, and any significant rise in risk or scope. Ordinary code and tests inside the authorized scope need no approval; publication follows [approvals](approvals.md#branch-and-pr-publication). Approved specs stay authoritative. Protected actions follow [approvals](approvals.md).
