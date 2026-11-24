@@ -12,4 +12,4 @@
 - **Return:** packet ID; status COMPLETED / PARTIAL / BLOCKED / CANCELLED; candidate and changed files; each check PASS / FAIL / UNRUN with command, environment and evidence; risks, decisions needed and next action. Questions and approvals go to the coordinator, never directly to the user.
 - **Only if it applies:** requested model/effort and, afterwards, the observed values or `unverified`; inherited context and its reason; client, version and session for an external client; shared test resources (separate ports, databases, temporary directories); who owns an operation that may need a permission; review milestones.
 
-Manual or external clients use the copyable prompt and `HANDOFF` return in [external clients](../specs/methodology/dynamic-agents-external-clients.md). The coordinator updates `specs/epic-board.md` only after verifying the returned evidence.
+External clients (Codex, OpenCode) are launched by CLI under [external delegation](../specs/methodology/dynamic-agents-external-clients.md). The coordinator updates `specs/epic-board.md` only after verifying the returned evidence.

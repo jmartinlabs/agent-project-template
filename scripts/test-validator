@@ -898,6 +898,30 @@ class ValidationTests(unittest.TestCase):
     p=self.root/name; original=p.read_text(); p.unlink()
     try: self.assertRule('structure')
     finally: p.write_text(original)
+ def external_config(self): return json.loads((self.root/'.agents/external-agents.json').read_text())
+ def write_external_config(self,cfg): (self.root/'.agents/external-agents.json').write_text(json.dumps(cfg))
+ def test_external_agents_file_is_required_in_the_template(self):
+  (self.root/'.agents/external-agents.json').unlink(); self.assertRule('structure')
+ def test_external_agents_rejects_invalid_values(self):
+  def broken(mutate):
+   cfg=self.external_config(); mutate(cfg); self.write_external_config(cfg); self.assertRule('external-agents')
+  broken(lambda c: c.update(version=2))
+  broken(lambda c: c['agents']['codex'].update(transport='mcp'))
+  broken(lambda c: c['agents']['codex']['tasks'].update(investigate='automatic'))
+  broken(lambda c: c['agents']['codex']['tasks'].update(develop='automatic'))
+  broken(lambda c: c['agents']['codex']['tasks'].update(review='sometimes'))
+  broken(lambda c: c['agents']['codex']['tasks'].update(refactor='on_request'))
+  broken(lambda c: c['agents']['codex'].update(model=''))
+  broken(lambda c: c['agents']['codex'].update(provider='openai'))
+  (self.root/'.agents/external-agents.json').write_text('{not json'); self.assertRule('external-agents')
+ def test_external_agents_has_no_closed_client_list(self):
+  cfg=self.external_config(); cfg['agents']['newclient']={'enabled':False,'transport':'cli','model':None,'effort':None,'tasks':{'review':'on_request'}}
+  self.write_external_config(cfg); self.assertEqual(validate(self.root),[])
+ def test_shipped_defaults_keep_the_automatic_codex_review(self):
+  cfg=json.loads((ROOT/'.agents/external-agents.json').read_text()); codex=cfg['agents']['codex']
+  self.assertTrue(codex['enabled']); self.assertEqual(codex['tasks']['review'],'automatic')
+  self.assertIsNone(codex['model']); self.assertEqual(cfg['agents']['opencode']['tasks']['develop'],'disabled')
+  self.assertEqual(codex['tasks']['develop'],'disabled')
  def test_agent_catalogue_drift_is_detected(self):
   self.assertEqual(validate(self.root),[])
   self.change('templates/issue.md','`agent:claude`','agent claude')

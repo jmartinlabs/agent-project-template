@@ -23,7 +23,7 @@ needs `hermes skills trust` once per checkout before project Skills load.
   - applicable [architecture](specs/guidelines/architecture.md), [UI](specs/guidelines/ui.md),
     [quality](specs/guidelines/quality.md) and [security](specs/guidelines/security.md) guidelines;
   - [epic orchestration](specs/methodology/epic-orchestration.md) for overlapping epics;
-  - [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before delegating (its [external-clients part](specs/methodology/dynamic-agents-external-clients.md), with the manual packet, return and status protocol, only when another client is involved).
+  - [dynamic agent management](specs/methodology/dynamic-agents.md) and role contracts before delegating (its [external delegation part](specs/methodology/dynamic-agents-external-clients.md), with the Codex and OpenCode CLI procedures, only when another client is involved).
 - Optional Agent Relay: use [relay](.agents/skills/relay/SKILL.md) only on an explicit user request; it is transport, never approval or task state.
 - Project-specific restrictions take precedence over generic shortcuts.
 - Keep one executor per task; delegate substantial autonomous work, prefer background when it advances independent authorized work, and keep required independent QA.
