@@ -58,7 +58,9 @@ files. Delegates never use `work-issue`, claim Issues, write Project `Status`, d
 - The brief states it acts read-only, names the risks and paths and carries no conversation.
 - Before relying on the run, check that `git rev-parse HEAD` equals the candidate SHA and that the CLI
   header shows `sandbox: read-only` and `approval: never`; otherwise the run did not meet the
-  authorization. The header also prints `model`, `provider` and `reasoning effort` (step 5).
+  authorization. The header also prints `model`, `provider` and `reasoning effort` (step 5). If HEAD
+  differs, stop: never switch branch or checkout in a tree that may hold other agents' work. If the tree
+  holds unrelated changes, review the committed state (`--base` or `--commit`), never `--uncommitted`.
 - Report each finding as VERIFIED, NOT VERIFIED or UNRUN after checking it against the code. A review is
   extra evidence: it does not approve and never replaces independent QA.
 - If a usage limit is reached, report it and stop; never switch to paid API, credits, another plan or
@@ -78,5 +80,5 @@ files. Delegates never use `work-issue`, claim Issues, write Project `Status`, d
 ## Observability
 
 Run `<command> 2>&1 | tee artifacts/external/<task>.log` (ignored by Git), follow it with `tail -f` and
-read the real exit code from `${PIPESTATUS[0]}`. No JSONL, dashboards or services; show only what the
+read the real exit code from `${PIPESTATUS[0]}` in bash (`${pipestatus[1]}` in zsh). No JSONL, dashboards or services; show only what the
 client really emits.
