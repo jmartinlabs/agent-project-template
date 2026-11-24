@@ -12,8 +12,7 @@ they do not replace canonical rules.
   Do not maintain separate, conflicting policies in these files.
 - `.claude/skills/NAME/SKILL.md` enables `/orchestrate`, `/spec`, `/dev`,
   `/task`, `/tweak`, `/init-project`, `/bootstrap`, `/roadmap`, `/relay`,
-  `/adopt-project`, `/handoff` and the optional `/codex-review` (read-only Codex CLI review, Claude
-  Code only; see its standing authorization in `dynamic-agents.md`). Each wrapper **reads the corresponding canonical** file
+  `/adopt-project` and `/handoff`. Each wrapper **reads the corresponding canonical** file
   under `.agents/skills/NAME/SKILL.md`; none automatically copies its contents. The
   relay wrapper adds no hook and never reads or publishes automatically.
 - `.claude/agents/` exposes optional task-limited profiles for
@@ -25,9 +24,10 @@ they do not replace canonical rules.
   brainstorming, DRAFT specification and acceptance-criteria files assigned by
   its packet; it never approves its own spec, implements code or edits the
   shared board.
-- Manual client communication (identity, states, full return block and status) is the same
-  [external clients](../specs/methodology/dynamic-agents-external-clients.md) protocol for Claude Code.
-  Only the client name changes: `HANDOFF → CLAUDE CODE`. Nothing is sent to OpenCode automatically.
+- External clients (Codex, OpenCode) are launched by CLI under
+  [external delegation](../specs/methodology/dynamic-agents-external-clients.md), per
+  `.agents/external-agents.json`; the automatic Codex review is the standing authorization in
+  `dynamic-agents.md`.
 - Call `/orchestrate` with a concrete task and let it choose Quick, Standard,
   or Full according to the already agreed scope. Native Claude Plan mode is
   separate from a Skill. Command names do not give approval or change models.
