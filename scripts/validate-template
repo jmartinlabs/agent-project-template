@@ -445,8 +445,8 @@ def validate(root):
   '.agents/skills/task/SKILL.md':('~:execution platform and operation owners before code',
    'dynamic-agents.md', 'preserve independent QA'),
   '.agents/skills/handoff/SKILL.md':('external client', 'uncontrolled workers'),
-  'specs/methodology/dynamic-agents-external-clients.md':('.agents/external-agents.json','policy ∩ configuration','never pass `--model`, `-m` or `-c model=`','sandbox: read-only','approval: never','git rev-parse HEAD','${PIPESTATUS[0]}','no verified procedure','there is no manual alternative'),
-  'specs/methodology/dynamic-agents.md':('Claude Code coordinator only','.agents/external-agents.json','every other external launch needs an explicit owner request'),
+  'specs/methodology/dynamic-agents-external-clients.md':('.agents/external-agents.json','policy ∩ configuration','never pass `--model`, `-m` or `-c model=`','sandbox: read-only','approval: never','git rev-parse HEAD','${PIPESTATUS[0]}','no verified procedure','there is no manual alternative','~:VERIFIED, NOT VERIFIED or UNRUN','~:compare requested and observed','~:only if the configuration sets `model`','~:Never use `--auto`','review · <model>','never switch branch or checkout','never `--uncommitted`'),
+  'specs/methodology/dynamic-agents.md':('Claude Code coordinator only','**read-only** reviewer','.agents/external-agents.json','every other external launch needs an explicit owner request'),
   'docs/CLAUDE_ADAPTER.md':('.agents/external-agents.json',),
  }.items():
   for token in tokens:
