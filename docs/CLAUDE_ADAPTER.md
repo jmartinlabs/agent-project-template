@@ -26,7 +26,7 @@ they do not replace canonical rules.
   shared board.
 - External clients (Codex, OpenCode) are launched by CLI under
   [external delegation](../specs/methodology/dynamic-agents-external-clients.md), per
-  `.agents/external-agents.json`; the automatic Codex review is the standing authorization in
+  `.agents/harnesses/claude.json`; the automatic Codex review is the standing authorization in
   `dynamic-agents.md`.
 - Call `/orchestrate` with a concrete task and let it choose Quick, Standard,
   or Full according to the already agreed scope. Native Claude Plan mode is

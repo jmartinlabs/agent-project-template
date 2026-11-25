@@ -705,6 +705,36 @@
       "id": "delegation-03",
       "decision": "block",
       "target": "run opencode run --agent review"
+    },
+    {
+      "id": "harness-01",
+      "decision": "block",
+      "target": "reuse sibling or legacy permissions"
+    },
+    {
+      "id": "harness-02",
+      "decision": "block",
+      "target": "use coordinator policy as a delegated worker"
+    },
+    {
+      "id": "harness-03",
+      "decision": "continue",
+      "target": "apply the verified complex profile"
+    },
+    {
+      "id": "harness-04",
+      "decision": "block",
+      "target": "declare support without effective effort evidence"
+    },
+    {
+      "id": "harness-05",
+      "decision": "continue",
+      "target": "use defaults for an absent suggested profile"
+    },
+    {
+      "id": "harness-06",
+      "decision": "block",
+      "target": "substitute for an absent required profile"
     }
   ]
 }
