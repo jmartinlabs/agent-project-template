@@ -24,7 +24,7 @@
       "source": {
         "source": "github",
         "repo": "jmartinlabs/agentic-harness-plugin",
-        "ref": "38f5462b1648ab4dd2069f42bfc7752535cb2531"
+        "ref": "v1.0.0"
       }
     }
   }
