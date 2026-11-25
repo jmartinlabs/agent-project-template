@@ -5,7 +5,7 @@ Project description: placeholder, replaced by `/agentic:init-project` or `/agent
 - Start with `/agentic:verify-project`.
 - STOP rule: if the agentic plugin skills are unavailable, or plugin files cannot be read
   (permission denied), stop and tell the user to install the plugin or add the read rule
-  (the plugin prints it with `agentic-verify-project --print-rules`). Do not continue
+  (the plugin prints the rules with `agentic-verify-project --print-rules`). Do not continue
   without the common methodology.
 
 ## Protected actions
