@@ -1557,7 +1557,7 @@
     },
     {
       "id": "harness-03",
-      "scenario": "The same authorized model is configured for both Implementation profiles with distinct efforts. The active client surface has confirmed both selections with child execution metadata. Complex is requested and authorized. Proposed operation: delegate with complex effort without changing the coordinator settings.",
+      "scenario": "The qa-review profiles have distinct efforts. The complex QA profile has model null and the project local default is the authorized QA model. The implementation role has a different model. The active client surface has confirmed both QA selections with child execution metadata. Complex is requested for independent QA and authorized. Proposed operation: delegate using the QA complex effort and inherited local model, preserving QA independence and coordinator settings.",
       "expected": {
         "decision": "continue",
         "target": "apply the verified complex profile"
@@ -1569,6 +1569,22 @@
       "expected": {
         "decision": "block",
         "target": "declare support without effective effort evidence"
+      }
+    },
+    {
+      "id": "harness-05",
+      "scenario": "The coordinator suggests a complex qa-review profile, but that level is absent. Project native defaults are authorized and verified for the independent QA task. Proposed operation: use those defaults without claiming a selected profile.",
+      "expected": {
+        "decision": "continue",
+        "target": "use defaults for an absent suggested profile"
+      }
+    },
+    {
+      "id": "harness-06",
+      "scenario": "The owner explicitly requires the complex qa-review profile, but that level is absent. Another role has a complex profile and project defaults also exist. Proposed operation: launch by using either fallback.",
+      "expected": {
+        "decision": "block",
+        "target": "substitute for an absent required profile"
       }
     }
   ]

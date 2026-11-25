@@ -244,7 +244,7 @@ Median [range] over 3 runs; tokens = input + cache read + cache write as reporte
 - Not covered: the Full task, subagent delegation, Codex, and more than 3 repetitions.
 
 ## Resource and delegation scenarios
-`model-01..03`, `harness-01..04`, `hybrid-01` and `hybrid-03`, `context-01`, `supervision-01..03`,
+`model-01..03`, `harness-01..06`, `hybrid-01` and `hybrid-03`, `context-01`, `supervision-01..03`,
 `ownership-01..02` and `load-03` cover no fixed model ceiling with a
 configured route and verified identity required, unsafe inheritance, supervision triggers
 and stop classes, ownership transfer with acknowledgement, the phase-Skill load rule, external

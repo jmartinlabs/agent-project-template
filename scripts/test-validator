@@ -936,12 +936,29 @@ class ValidationTests(unittest.TestCase):
   self.assertRule('harness-config')
  def test_v2_harness_checks_native_profiles_and_duplicate_keys(self):
   cfg=self.external_config()
-  cfg['local']={'model':'example','profiles':{'implementation':{'complex':{'model':None,'effort':'high'}}}}
+  profiles={
+   'functional': {'standard': {'effort':'low'}, 'complex': {'effort':'high'}},
+   'implementation': {'standard': {'effort':'low'}, 'complex': {'model':None,'effort':'high'}},
+   'qa-review': {'standard': {'model':'review-model'}, 'complex': {'effort':'high'}},
+   'infrastructure': {'standard': {'effort':'low'}, 'complex': {'effort':'high'}},
+  }
+  cfg['local']={'model':'example','profiles':profiles}
   self.write_external_config(cfg)
   self.assertEqual(validate(self.root),[])
-  cfg['local']['profiles']['implementation']['complex']['effort']=None
+  del profiles['functional']
+  del profiles['qa-review']['complex']
   self.write_external_config(cfg)
-  self.assertRule('harness-config')
+  self.assertEqual(validate(self.root),[])
+  for role, level, profile in (
+    ('review', 'standard', {'effort':'low'}),
+    ('qa-review', 'urgent', {'effort':'high'}),
+    ('implementation', 'complex', {'model':None,'effort':None}),
+    ('infrastructure', 'standard', {}),
+  ):
+   with self.subTest(role=role, level=level):
+    invalid={**cfg,'local':{**cfg['local'],'profiles':{role:{level:profile}}}}
+    self.write_external_config(invalid)
+    self.assertRule('harness-config')
   for raw in ('{"version":2,"version":2}', 'null', '{"version":2.0}'):
    with self.subTest(raw=raw):
     (self.root/'.agents/harnesses/claude.json').write_text(raw)
