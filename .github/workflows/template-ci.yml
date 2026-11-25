@@ -27,7 +27,6 @@ jobs:
         with:
           python-version: "3.12"
       - name: Check scaffold file set and limits
-        id: scaffold
         run: |
           python3 -I - <<'PY'
           import json, os, re, subprocess, sys
@@ -48,21 +47,13 @@ jobs:
                   errors.append(f"AGENTS.md has {n} lines (max 25)")
           if os.path.isfile("CLAUDE.md") and "@AGENTS.md" not in open("CLAUDE.md", encoding="utf-8").read():
               errors.append("CLAUDE.md does not contain @AGENTS.md")
-          tag = ""
           try:
               s = json.load(open(".claude/settings.json", encoding="utf-8"))
               ask = s.get("permissions", {}).get("ask", [])
               if not isinstance(ask, list) or len(ask) != 12:
                   errors.append(f"settings.json needs 12 ask rules, found {len(ask) if isinstance(ask, list) else ask!r}")
-              if s.get("enabledPlugins", {}).get("agentic@agentic-harness") is not True:
-                  errors.append("enabledPlugins lacks agentic@agentic-harness")
-              source = s.get("extraKnownMarketplaces", {}).get("agentic-harness", {}).get("source", {})
-              if source.get("source") != "github" or source.get("repo") != "jmartinlabs/agentic-harness-plugin":
-                  errors.append("marketplace source must be github jmartinlabs/agentic-harness-plugin")
-              tag = source.get("ref", "")
-              if not isinstance(tag, str) or not re.fullmatch(r"v\d+\.\d+\.\d+", tag):
-                  errors.append(f"marketplace ref is not a vX.Y.Z tag: {tag!r}")
-                  tag = ""
+              if {"enabledPlugins", "extraKnownMarketplaces"} & s.keys():
+                  errors.append("plugin distribution belongs to user settings")
           except Exception as e:
               errors.append(f"settings.json invalid: {e}")
           try:
@@ -88,15 +79,13 @@ jobs:
           if errors:
               print("\n".join("FAIL: " + e for e in errors))
               sys.exit(1)
-          with open(os.environ.get("GITHUB_OUTPUT", os.devnull), "a") as out:
-              out.write(f"tag={tag}\n")
-          print("scaffold checks passed; pinned tag", tag)
+          print("scaffold checks passed")
           PY
-      - name: Check out the plugin at the pinned tag
+      - name: Check out the stable plugin
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           repository: jmartinlabs/agentic-harness-plugin
-          ref: ${{ steps.scaffold.outputs.tag }}
+          ref: stable
           path: plugin
           persist-credentials: false
       - name: Validate the project against the plugin

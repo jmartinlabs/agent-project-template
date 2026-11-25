@@ -15,17 +15,5 @@
       "Bash(gh repo delete *)",
       "Bash(gh release create *)"
     ]
-  },
-  "enabledPlugins": {
-    "agentic@agentic-harness": true
-  },
-  "extraKnownMarketplaces": {
-    "agentic-harness": {
-      "source": {
-        "source": "github",
-        "repo": "jmartinlabs/agentic-harness-plugin",
-        "ref": "v1.0.0"
-      }
-    }
   }
 }

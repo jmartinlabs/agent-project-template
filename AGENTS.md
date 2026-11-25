@@ -2,11 +2,10 @@
 Project description: placeholder, replaced by `/agentic:init-project` or `/agentic:adopt-project`.
 
 ## Start
-- Start with `/agentic:verify-project`.
+- Start with the agentic plugin's `verify-project` skill.
 - STOP rule: if the agentic plugin skills are unavailable, or plugin files cannot be read
-  (permission denied), stop and tell the user to install the plugin (`claude plugin marketplace add`, then `install`) or add the read rule
-  (the plugin prints the rules with `agentic-verify-project --print-rules`). Do not continue
-  without the common methodology.
+  (permission denied), stop and direct the user to the plugin Quick start linked in README.md
+  for user-level installation or permission setup.
 
 ## Protected actions
 Require explicit, identifiable user approval: merge of any PR, releases, production
