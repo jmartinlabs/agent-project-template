@@ -15,4 +15,5 @@ decisions. Follow the plugin's approvals policy; it is not restated here.
 
 ## Project rules
 - Local rules live in `specs/project-rules.md`; context in `specs/project.md` and `specs/guidelines/`.
+- An inherited `LICENSE` or `.github/workflows/template-ci.yml` belongs to the template; the owner decides this project's licence.
 - This file does not define the common contract; the plugin does.
