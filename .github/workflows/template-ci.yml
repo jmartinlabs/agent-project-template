@@ -29,7 +29,7 @@ jobs:
       - name: Check scaffold file set and limits
         id: scaffold
         run: |
-          python3 - <<'PY'
+          python3 -I - <<'PY'
           import json, os, re, subprocess, sys
           errors = []
           files = [
@@ -56,7 +56,10 @@ jobs:
                   errors.append(f"settings.json needs 12 ask rules, found {len(ask) if isinstance(ask, list) else ask!r}")
               if s.get("enabledPlugins", {}).get("agentic@agentic-harness") is not True:
                   errors.append("enabledPlugins lacks agentic@agentic-harness")
-              tag = s.get("extraKnownMarketplaces", {}).get("agentic-harness", {}).get("source", {}).get("ref", "")
+              source = s.get("extraKnownMarketplaces", {}).get("agentic-harness", {}).get("source", {})
+              if source.get("source") != "github" or source.get("repo") != "jmartinlabs/agentic-harness-plugin":
+                  errors.append("marketplace source must be github jmartinlabs/agentic-harness-plugin")
+              tag = source.get("ref", "")
               if not isinstance(tag, str) or not re.fullmatch(r"v\d+\.\d+\.\d+", tag):
                   errors.append(f"marketplace ref is not a vX.Y.Z tag: {tag!r}")
                   tag = ""
