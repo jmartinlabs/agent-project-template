@@ -70,22 +70,26 @@ CI checks all files separately. Reject paths outside the checkout.
 There is no v1 reader or fallback. `external` is covered by the
 [external procedure](dynamic-agents-external-clients.md).
 
-### Native Implementation profiles
+### Native role profiles
 
-`local.model` and `local.effort` are defaults for delegates. Only
-`local.profiles.implementation.standard` and `complex` are defined. Each configured profile sets
-at least one of `model` and `effort`. Resolve each field separately: an authorized explicit owner
-selection for the task, a concrete profile value, a concrete local default, then native inheritance.
-An omitted or null value passes through to the next level. A suggested profile that is absent uses
-the defaults without a profile label. An explicitly required profile that is absent, invalid or
+`local.model` and `local.effort` are defaults for delegates. Under `local.profiles.<role>`,
+`standard` and `complex` are optional for `functional`, `implementation`, `qa-review` and
+`infrastructure`. Use the canonical role assigned in the packet, never a client-specific alias.
+Each configured profile sets at least one of `model` and `effort`. Resolve each field
+separately: an authorized explicit owner selection for the task, a concrete profile value, a concrete local default, then native inheritance.
+An omitted or null value passes through to the next source. Never borrow a value from another
+role. A suggested profile that is absent uses the defaults without a profile label. An explicitly required profile that is absent, invalid or
 unsupported stops dispatch. Use the existing complexity analysis: standard suits bounded work
 with known contracts, while complex can fit interacting state, high uncertainty or significant
-risk. Record a short reason only when selecting a profile. Neither profile changes the coordinator's settings or grants permission.
+risk. Record a short reason only when selecting a profile. The selected level preserves the
+coordinator's settings, the role's permissions and QA independence.
 
 Native v2 selections are **unsupported** until the corresponding client surface and version pass a
 functional check. Verify both profiles on the same model with distinct efforts, and both on distinct
-models if that capability is claimed. Correlate each child with its actual model and effort in
-host evidence and record the requested values before dispatch. An accepted argument, worker text or
+models if that capability is claimed. Reuse evidence across roles only when they share the same
+verified dispatch path and guarantees and role-to-profile selection is checked separately.
+Correlate each child with its actual model and effort in host evidence and record the requested
+values before dispatch. An accepted argument, worker text or
 fixture score cannot establish effective selection. Unobservable or mismatched selections do not
 qualify. Existing native inheritance remains available under its current rules when no explicit
 selection is required. Never silently discard a configured or explicitly selected value.

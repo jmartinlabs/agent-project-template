@@ -725,6 +725,16 @@
       "id": "harness-04",
       "decision": "block",
       "target": "declare support without effective effort evidence"
+    },
+    {
+      "id": "harness-05",
+      "decision": "continue",
+      "target": "use defaults for an absent suggested profile"
+    },
+    {
+      "id": "harness-06",
+      "decision": "block",
+      "target": "substitute for an absent required profile"
     }
   ]
 }
