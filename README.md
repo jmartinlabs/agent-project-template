@@ -3,7 +3,7 @@
 One-sentence description of this project (replace).
 
 ## Files inherited from the template
-A repository created with "Use this template" may include `LICENSE` (MIT, holder `jmartinlabs`) and `.github/workflows/template-ci.yml`. The licence is the template's, not a choice made for your project: replace or delete it. The workflow only runs in the template repository (it is skipped elsewhere): delete it.
+A repository created with "Use this template" includes `.github/workflows/template-ci.yml`. The workflow only runs in the template repository (it is skipped elsewhere): delete it.
 
 ## Getting started
 Follow the [agentic plugin Quick start](https://github.com/jmartinlabs/agentic-harness-plugin#quick-start) to install or update the stable plugin for your user in Claude Code or Codex. Each client uses its installed version across projects.
