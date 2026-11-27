@@ -3,6 +3,8 @@ Project description: placeholder, replaced by `/agentic:init-project` or `/agent
 
 ## Start
 - Start with the agentic plugin's `verify-project` skill.
+- Before coordinating or delegating, load the plugin's `orchestrate` skill and apply the
+  active coordinator configuration (`.agents/harnesses/`).
 - STOP rule: if the agentic plugin skills are unavailable, or plugin files cannot be read
   (permission denied), stop and direct the user to the plugin Quick start linked in README.md
   for user-level installation or permission setup.
